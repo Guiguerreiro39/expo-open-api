@@ -60,6 +60,14 @@ _Avoid_: Debouncing, optimistic pause, mutation lock
 An unexpected runtime or contract failure (`5xx` server responses, `UnknownError` transport failures, `SchemaDecodeError` contract drift, or uncaught React render/native errors) reported to `ObservabilityPort` as an actionable alert, distinct from expected `4xx` domain errors handled in UI flows.
 _Avoid_: Exception, bug, domain error
 
+**Breadcrumb**:
+An informational telemetry trail of user actions, lifecycle events, and expected domain outcomes (HTTP 4xx responses) enriched with sanitized metadata and recorded without triggering defect alerts.
+_Avoid_: Log event, audit log, minor error
+
+**Trace Correlation**:
+The cross-tier propagation of standardized distributed tracing headers (`traceparent` and `X-Request-Id`) across mobile network requests and backend middleware to link frontend user transactions and server-side operations under a unified trace ID.
+_Avoid_: Request tagging, span linkage, tracking ID
+
 **Design Token**:
 A semantic color or layout property defined in `src/shared/ui/theme.ts` and bound to NativeWind via custom utility classes so components express visual role rather than literal style values.
 _Avoid_: Hardcoded hex, magic value, arbitrary color utility
