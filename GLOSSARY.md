@@ -75,3 +75,20 @@ _Avoid_: Interceptor, HTTP middleware, request transformer
 **Match Effect**:
 A pattern-matching helper (`matchEffect`) that unpacks an Effect query result into discrete React render states (`onPending`, `onFailure`, `onSuccess`) without uncaught exceptions.
 _Avoid_: Error boundary matcher, switch case, render prop wrapper
+
+**Auth Session Bridge**:
+A driver-agnostic adapter interface in `src/shared/lib/` registered at the `Composition Root` that exposes the current authentication session and user roles to shared UI primitives (`<Can />`) and mutators without creating an illegal upward dependency on `src/features/auth/`.
+_Avoid_: Auth context hook, session singleton, auth helper
+
+**In-Memory Token Cache**:
+A synchronous in-memory variable (`cachedBearerToken`) hydrated once from `Credential Tier` during `App Bootstrap` and updated on login/logout, allowing zero-latency `Authorization: Bearer` injection without asynchronous Keychain/KeyStore IPC on every request.
+_Avoid_: Token store, volatile JWT, session variable
+
+**Layout Guard**:
+A declarative route redirection rule implemented at the root of a pathless Expo Router route group (`app/(auth)/_layout.tsx`, `app/(app)/_layout.tsx`, `app/(public)/_layout.tsx`) that enforces authentication and authorization state transitions before mounting child screens.
+_Avoid_: Route middleware, navigation interceptor, protected route wrapper
+
+**RBAC Matrix**:
+A pure TypeScript role-and-permission definition (`src/shared/lib/rbac.ts`) that maps system roles (`admin`, `member`, `viewer`) to domain actions and scopes (`own` vs `all`) identically to the backend authorization policy.
+_Avoid_: Permission list, role table, access list
+
