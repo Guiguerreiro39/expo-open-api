@@ -52,6 +52,10 @@ _Avoid_: DTO, endpoint wrapper, service method
 A TanStack Query cache entry synchronized with a mobile server-sent event (`SSE`) stream that hydrates and updates via Effect-validated `init` and `update` snapshots rather than polling.
 _Avoid_: Subscription, polling query, websocket channel
 
+**Mutation Buffering**:
+A concurrency synchronization mechanism in `useLiveQuery` that holds incoming SSE snapshots in an in-memory buffer while optimistic mutations are in flight, flushing the latest server state in a microtask after mutation settlement to eliminate UI flicker and ID collisions.
+_Avoid_: Debouncing, optimistic pause, mutation lock
+
 **Defect**:
 An unexpected runtime or contract failure (`5xx` server responses, `UnknownError` transport failures, `SchemaDecodeError` contract drift, or uncaught React render/native errors) reported to `ObservabilityPort` as an actionable alert, distinct from expected `4xx` domain errors handled in UI flows.
 _Avoid_: Exception, bug, domain error
