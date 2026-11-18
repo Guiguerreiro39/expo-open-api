@@ -63,3 +63,15 @@ _Avoid_: Hardcoded hex, magic value, arbitrary color utility
 **Test Harness**:
 The boundary-interception test assembly in `src/test/` (`renderWithProviders`, MSW `msw-server`, `MockEventSource`, `MockXMLHttpRequest`, and `SpyObservabilityAdapter`) that mounts the real `Composition Root` and replaces external I/O without internal `vi.mock()` calls.
 _Avoid_: Mock wrapper, shallow renderer, module mock suite
+
+**Tagged Error**:
+A typed error class instantiated via Effect's `Data.TaggedError` representing a distinct HTTP response code or transport anomaly with a unique discriminator tag for pattern matching.
+_Avoid_: Custom exception, error code, status error
+
+**Fetch Mutator**:
+The client-level HTTP mutator (`customFetch`) injected into Orval-generated endpoints that handles base URL resolution, bearer authentication headers, W3C trace propagation, and mobile multipart uploads.
+_Avoid_: Interceptor, HTTP middleware, request transformer
+
+**Match Effect**:
+A pattern-matching helper (`matchEffect`) that unpacks an Effect query result into discrete React render states (`onPending`, `onFailure`, `onSuccess`) without uncaught exceptions.
+_Avoid_: Error boundary matcher, switch case, render prop wrapper
