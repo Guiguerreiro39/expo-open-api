@@ -176,6 +176,19 @@ _Avoid_: Native build check, prebuild run, gradle test
 The automated agent verification procedure (`verify-expo-open-api`) executing the 5-phase loop (`Launch`, `Doctor`, `Drive`, `Evidence`, `Cleanup`) to guarantee end-to-end runtime health before PR submission.
 _Avoid_: Integration test script, smoke runner, QA workflow
 
+**Metro Static Export**:
+The multi-platform bundle compilation process (`expo export --platform all`) generating optimized production bundles for iOS, Android, and web in CI to detect bundle-level syntax or module resolution failures without running native compilers.
+_Avoid_: Metro build, web export, bundle check
+
+**Release-Please Automation**:
+The automated release workflow (`release-please-action@v4`) triggered on `main` that generates semantic version bumps, updates `CHANGELOG.md`, tags the repository, and creates GitHub releases derived from Conventional Commits.
+_Avoid_: Semantic release, auto tagger, version bot
+
+**Lefthook Git Hooks**:
+The local Git hook manager (`lefthook.yml`) enforcing pre-commit Biome checks, commit-msg Commitlint validation, and pre-push branch protections prior to pushing to remote repositories.
+_Avoid_: Husky hooks, git scripts, commit interceptor
+
+
 
 
 
