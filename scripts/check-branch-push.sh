@@ -31,23 +31,31 @@ block_push() {
   exit 1
 }
 
+had_stdin_refs=0
+
 # 1. Check if invoked by git pre-push hook with stdin stream
 # Standard pre-push sends lines: <local ref> <local sha1> <remote ref> <remote sha1>
 if [ ! -t 0 ]; then
-  while read -r local_ref _local_oid remote_ref _remote_oid; do
-    if [ -n "$remote_ref" ] && is_protected_branch "$remote_ref"; then
+  while read -r local_ref _local_oid remote_ref _remote_oid || [ -n "${local_ref:-}" ]; do
+    if [ -z "${local_ref:-}" ] && [ -z "${remote_ref:-}" ]; then
+      continue
+    fi
+    had_stdin_refs=1
+    if [ -n "${remote_ref:-}" ] && is_protected_branch "$remote_ref"; then
       block_push "$remote_ref"
     fi
-    if [ -n "$local_ref" ] && is_protected_branch "$local_ref"; then
+    if [ -n "${local_ref:-}" ] && is_protected_branch "$local_ref"; then
       block_push "$local_ref"
     fi
   done
 fi
 
-# 2. Check current branch name (via GIT_BRANCH environment variable or git symbolic-ref)
-current_branch="${GIT_BRANCH:-$(git symbolic-ref --short HEAD 2>/dev/null || echo "")}"
-if is_protected_branch "$current_branch"; then
-  block_push "$current_branch"
+# 2. Fallback to current branch name only when no ref lines were supplied on stdin
+if [ "$had_stdin_refs" -eq 0 ]; then
+  current_branch="${GIT_BRANCH:-$(git symbolic-ref --short HEAD 2>/dev/null || echo "")}"
+  if is_protected_branch "$current_branch"; then
+    block_push "$current_branch"
+  fi
 fi
 
 exit 0
