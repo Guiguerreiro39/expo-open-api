@@ -68,6 +68,23 @@ export default defineConfig({
         __dirname,
         "src/test/mocks/adapters/mock-expo-splash-screen.ts",
       ),
+      "expo-file-system": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-file-system.ts",
+      ),
+      "expo-document-picker": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-document-picker.ts",
+      ),
+      "expo-image-picker": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-image-picker.ts",
+      ),
+      "expo-sharing": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-sharing.ts"),
+      "expo-web-browser": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-web-browser.ts",
+      ),
       "expo-router": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-router.tsx"),
       "react-native-svg": path.resolve(
         __dirname,
@@ -77,6 +94,15 @@ export default defineConfig({
         __dirname,
         "src/test/mocks/adapters/mock-lucide-react-native.tsx",
       ),
+      "react-native-mmkv": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-react-native-mmkv.ts",
+      ),
+      "@react-native-community/netinfo": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-netinfo.ts",
+      ),
+      "expo/fetch": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-fetch.ts"),
     },
   },
   test: {

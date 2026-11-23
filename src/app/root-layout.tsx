@@ -12,6 +12,7 @@ import { AuthBootstrapContext } from "@/shared/lib/auth-session-bridge";
 import { ObservabilityContext } from "@/shared/observability/observability-context";
 import { createSecureStoreCredentialStore } from "@/shared/storage/credential-store";
 import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
+import { createMmkvKvStore } from "@/shared/storage/kv-store";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
 import { ToastProvider } from "@/shared/ui/toast";
 
@@ -21,6 +22,7 @@ export function RootLayout() {
   const [composition] = useState(() =>
     createAppComposition({
       credentialStore: createSecureStoreCredentialStore(),
+      kvStore: createMmkvKvStore(),
     }),
   );
   const { isBootstrapping } = useAppBootstrap(composition);
