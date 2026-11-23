@@ -14,6 +14,7 @@ import { createSecureStoreCredentialStore } from "@/shared/storage/credential-st
 import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { createMmkvKvStore } from "@/shared/storage/kv-store";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
+import { ToastProvider } from "@/shared/ui/toast";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -40,14 +41,16 @@ export function RootLayout() {
             <CredentialStoreContext.Provider value={composition.credentialStore}>
               <AuthBootstrapContext.Provider value={isBootstrapping}>
                 <ThemeProvider storage={composition.kvStore}>
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                    <Stack.Screen
-                      name="+not-found"
-                      options={{ headerShown: true, title: "Not Found" }}
-                    />
-                  </Stack>
+                  <ToastProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                      <Stack.Screen
+                        name="+not-found"
+                        options={{ headerShown: true, title: "Not Found" }}
+                      />
+                    </Stack>
+                  </ToastProvider>
                   <PortalHost />
                 </ThemeProvider>
               </AuthBootstrapContext.Provider>
