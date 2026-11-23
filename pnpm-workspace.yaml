@@ -1,0 +1,9 @@
+nodeLinker: hoisted
+
+allowBuilds:
+  lefthook: true
+
+packageExtensions:
+  expo-router:
+    dependencies:
+      query-string: "^7.1.3"

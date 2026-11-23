@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Expo & Metro
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# Continuous Native Generation (CNG) outputs
+ios/
+android/
+.kotlin/
+
+# Native signing & debug artifacts
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.log*
+
+# TypeScript & Coverage
+*.tsbuildinfo
+coverage/
+
+# Environment
+.env
+.env*.local
+
+# macOS
+.DS_Store
