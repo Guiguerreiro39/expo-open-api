@@ -204,4 +204,12 @@ _Avoid_: Slice generator, boilerplate steps, feature guide
 The specialized host machine IP address (`10.0.2.2`) used within the Android Emulator to route network traffic to local server processes running on `http://localhost`.
 _Avoid_: Localhost bridge, emulator network, host alias
 
+**Tracer Bullet**:
+A vertical, production-grade slice of functionality spanning from native configuration to UI that is permanently integrated and verified via tests, contrasting with disposable prototypes.
+_Avoid_: Prototype, spike, proof of concept
+
+**Just-In-Time Spike**:
+A strictly scoped, disposable spike branch (`prototype/<topic>`) created only when an unanticipated native runtime incompatibility is encountered during ticket implementation.
+_Avoid_: Upfront prototype, experimental branch, sandbox test
+
 
