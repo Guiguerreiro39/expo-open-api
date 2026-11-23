@@ -1,0 +1,24 @@
+# Lefthook Git Hooks Configuration (evilmartians/lefthook)
+# Refer to: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    biome-check:
+      glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css,yml,yaml}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  commands:
+    prevent-direct-main-push:
+      # Override Lefthook's default push-file diff check so the guard always runs
+      # even when HEAD is even with @{push} (e.g., pushing another ref or deleting main)
+      files: echo scripts/check-branch-push.sh
+      use_stdin: true
+      run: bash {files}

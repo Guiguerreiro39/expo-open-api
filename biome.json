@@ -1,0 +1,180 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!!dist",
+      "!!web-build",
+      "!!ios",
+      "!!android",
+      "!!.expo",
+      "!!coverage",
+      "!!expo-env.d.ts",
+      "!!src/shared/api/generated",
+      "!!openapi.json",
+      "!!tsconfig.tsbuildinfo",
+      "!!**/*.md"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    },
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "warn",
+        "useHookAtTopLevel": "error"
+      },
+      "style": {
+        "noProcessEnv": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "filenameCases": ["kebab-case"]
+          }
+        }
+      },
+      "nursery": {
+        "useTailwindSortedClasses": "warn"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "src/shared/config/env.ts",
+        "app.config.ts",
+        "app.config.js",
+        "babel.config.js",
+        "metro.config.js",
+        "vitest.config.ts",
+        "src/test/setup.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noProcessEnv": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["app/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/shared/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/features",
+                      "@/features/**",
+                      "@/app",
+                      "@/app/**",
+                      "src/features",
+                      "src/features/**",
+                      "src/app",
+                      "src/app/**",
+                      "../features",
+                      "../features/**",
+                      "../**/features",
+                      "../**/features/**",
+                      "../app",
+                      "../app/**",
+                      "../**/app",
+                      "../**/app/**"
+                    ],
+                    "message": "Shared layer must not depend on Features or App layers."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/app",
+                      "@/app/**",
+                      "src/app",
+                      "src/app/**",
+                      "../app",
+                      "../app/**",
+                      "../**/app",
+                      "../**/app/**"
+                    ],
+                    "message": "Feature Slices must not import from App."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint & Format
+        run: pnpm biome ci .
+
+      - name: CNG Prebuild Validation
+        run: npx expo prebuild --clean --no-install
+
+      - name: Metro Multi-Platform Export
+        run: npx expo export --platform all
+
+      - name: Upload Sentry source maps
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && env.SENTRY_AUTH_TOKEN != ''
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          echo "Sentry auth token detected; uploading hidden source maps..."
+
+      - name: Upload Datadog source maps
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && env.DATADOG_API_KEY != ''
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+        run: |
+          echo "Datadog API key detected; uploading hidden source maps..."
