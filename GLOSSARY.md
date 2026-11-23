@@ -188,8 +188,20 @@ _Avoid_: Semantic release, auto tagger, version bot
 The local Git hook manager (`lefthook.yml`) enforcing pre-commit Biome checks, commit-msg Commitlint validation, and pre-push branch protections prior to pushing to remote repositories.
 _Avoid_: Husky hooks, git scripts, commit interceptor
 
+**Starter Documentation Suite**:
+The canonical 7-file documentation architecture (`README.md`, `docs/architecture.md`, `docs/development.md`, `AGENTS.md`, `GLOSSARY.md`, `DESIGN.md`, `docs/adr/`) governing onboarding, architectural boundaries, and AI agent instructions.
+_Avoid_: Doc folder, project docs, wiki
 
+**Template Onboarding Playbook**:
+The standardized developer workflow in `docs/development.md` for cloning the repository, rebranding Expo `app.json` properties (`name`, `slug`, `scheme`, bundle IDs), configuring local backend network addresses, and scaffolding or pruning feature slices.
+_Avoid_: Getting started guide, setup instructions, quickstart
 
+**Feature Scaffolding Checklist**:
+The 7-step repeatable protocol for adding a new mobile feature slice (`api/`, `model/`, `ui/`, Orval contracts, TanStack Form, and Route Façade) without violating layer boundaries or introducing circular dependencies.
+_Avoid_: Slice generator, boilerplate steps, feature guide
 
+**Emulator Loopback**:
+The specialized host machine IP address (`10.0.2.2`) used within the Android Emulator to route network traffic to local server processes running on `http://localhost`.
+_Avoid_: Localhost bridge, emulator network, host alias
 
 
