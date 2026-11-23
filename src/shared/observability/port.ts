@@ -146,11 +146,45 @@ export function sanitizeBreadcrumbData(
   return sanitizeValue(data) as Record<string, unknown>;
 }
 
+const reportedErrorsByService = new WeakMap<ObservabilityService, WeakSet<object>>();
+
+function collectErrorChainObjects(error: unknown): object[] {
+  const objects: object[] = [];
+  let current: unknown = error;
+  let depth = 0;
+  while (typeof current === "object" && current !== null && depth < 5) {
+    if (objects.includes(current)) {
+      break;
+    }
+    objects.push(current);
+    current = (current as { cause?: unknown }).cause;
+    depth += 1;
+  }
+  return objects;
+}
+
 export function recordErrorOrDefect(
   observability: ObservabilityService,
   error: unknown,
   context?: DefectContext,
 ): void {
+  const chain = collectErrorChainObjects(error);
+  if (chain.length > 0) {
+    let seen = reportedErrorsByService.get(observability);
+    if (!seen) {
+      seen = new WeakSet<object>();
+      reportedErrorsByService.set(observability, seen);
+    }
+    for (const candidate of chain) {
+      if (seen.has(candidate)) {
+        return;
+      }
+    }
+    for (const candidate of chain) {
+      seen.add(candidate);
+    }
+  }
+
   if (isDefect(error)) {
     observability.captureDefect(error, {
       ...extractDefectContext(error),

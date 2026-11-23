@@ -3,6 +3,8 @@ import { decodeApiError } from "@/shared/api/contracts";
 import {
   BEARER_TOKEN_STORAGE_KEY,
   onAuthUnauthorized,
+  purgePersistedQueryCaches,
+  registerCachePurge,
   registerQueryClient,
   resetAuthSessionCache,
 } from "@/shared/lib/auth-session-bridge";
@@ -13,6 +15,7 @@ import {
   createInMemoryCredentialStore,
 } from "@/shared/storage/credential-store";
 import { createInMemoryKvStore, type KeyValueStorePort } from "@/shared/storage/kv-store";
+import { QUERY_CACHE_STORAGE_KEY } from "@/shared/storage/query-persister";
 import { type AppRuntime, createAppRuntime } from "./runtime";
 
 export interface AppCompositionOptions {
@@ -58,6 +61,7 @@ function createManagedQueryClient(
       void credentialStore.deleteItem(BEARER_TOKEN_STORAGE_KEY);
       observability.clearUserContext();
       clientRef?.clear();
+      purgePersistedQueryCaches();
     }
   };
 
@@ -110,6 +114,9 @@ export function createAppComposition(options: AppCompositionOptions = {}): AppCo
 
   const runtime = createAppRuntime(undefined, { observability });
   const unregisterQueryClient = registerQueryClient(queryClient);
+  const unregisterCachePurge = registerCachePurge(() => {
+    kvStore.delete(QUERY_CACHE_STORAGE_KEY);
+  });
   const unregisterUnauthorized = onAuthUnauthorized(() => {
     void credentialStore.deleteItem(BEARER_TOKEN_STORAGE_KEY);
     observability.clearUserContext();
@@ -117,6 +124,7 @@ export function createAppComposition(options: AppCompositionOptions = {}): AppCo
 
   const dispose = async () => {
     unregisterUnauthorized();
+    unregisterCachePurge();
     unregisterQueryClient();
     queryClient.clear();
     await runtime.dispose();

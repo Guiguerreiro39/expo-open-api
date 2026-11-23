@@ -30,13 +30,15 @@ export interface AuthSessionQueryOptions {
 }
 
 export type UnauthorizedListener = () => void;
+export type CachePurgeListener = () => void;
 
 export const defaultSessionQueryFn = async (): Promise<SessionData | null> => null;
 
 let cachedBearerToken: string | null = null;
 let sessionQueryOptions: AuthSessionQueryOptions | null = null;
-const activeQueryClients = new Set<QueryClient>();
+const activeQueryClients = new Map<QueryClient, number>();
 const unauthorizedListeners = new Set<UnauthorizedListener>();
+const cachePurgeListeners = new Set<CachePurgeListener>();
 
 export function getCachedBearerToken(): string | null {
   return cachedBearerToken;
@@ -59,9 +61,20 @@ export function getAuthSessionQueryOptions(): AuthSessionQueryOptions | null {
 }
 
 export function registerQueryClient(client: QueryClient): () => void {
-  activeQueryClients.add(client);
+  activeQueryClients.set(client, (activeQueryClients.get(client) ?? 0) + 1);
+  let unregistered = false;
+
   return () => {
-    activeQueryClients.delete(client);
+    if (unregistered) {
+      return;
+    }
+    unregistered = true;
+    const nextCount = (activeQueryClients.get(client) ?? 1) - 1;
+    if (nextCount <= 0) {
+      activeQueryClients.delete(client);
+    } else {
+      activeQueryClients.set(client, nextCount);
+    }
   };
 }
 
@@ -72,12 +85,31 @@ export function onAuthUnauthorized(listener: UnauthorizedListener): () => void {
   };
 }
 
+export function registerCachePurge(listener: CachePurgeListener): () => void {
+  cachePurgeListeners.add(listener);
+  return () => {
+    cachePurgeListeners.delete(listener);
+  };
+}
+
+export function purgePersistedQueryCaches(): void {
+  for (const listener of cachePurgeListeners) {
+    try {
+      listener();
+    } catch {
+      // Isolate storage purge errors during session cleanup
+    }
+  }
+}
+
 export function resetAuthSessionCache(): void {
   cachedBearerToken = null;
 
-  for (const client of activeQueryClients) {
+  for (const client of activeQueryClients.keys()) {
     client.setQueryData(AUTH_QUERY_KEYS.session(), null);
   }
+
+  purgePersistedQueryCaches();
 
   for (const listener of unauthorizedListeners) {
     try {

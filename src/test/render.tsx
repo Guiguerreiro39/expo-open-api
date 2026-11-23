@@ -94,8 +94,10 @@ function TestProviders({
                   initialPreset={initialPreset}
                   initialColorScheme={initialColorScheme}
                 >
-                  <ToastProvider>{children}</ToastProvider>
-                  <PortalHost />
+                  <ToastProvider>
+                    {children}
+                    <PortalHost />
+                  </ToastProvider>
                 </ThemeProvider>
               </AuthBootstrapContext.Provider>
             </CredentialStoreContext.Provider>

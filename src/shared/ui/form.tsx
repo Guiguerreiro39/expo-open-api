@@ -19,8 +19,15 @@ const { useAppForm: baseUseAppForm, withForm } = createFormHook({
 
 export { withForm };
 
+const originalHandleSubmitByForm = new WeakMap<
+  object,
+  (submitMeta?: unknown) => Promise<unknown>
+>();
+
 export const useAppForm: typeof baseUseAppForm = ((opts?: Record<string, unknown>) => {
   const observability = useObservability();
+  const observabilityRef = React.useRef(observability);
+  observabilityRef.current = observability;
   const isSubmittingRef = React.useRef(false);
   const userOnSubmit = (
     opts as { onSubmit?: (params: unknown) => Promise<void> | void } | undefined
@@ -37,29 +44,48 @@ export const useAppForm: typeof baseUseAppForm = ((opts?: Record<string, unknown
             try {
               await userOnSubmit(params);
             } catch (error) {
-              recordErrorOrDefect(observability, error, {
+              recordErrorOrDefect(observabilityRef.current, error, {
                 source: "useAppForm.onSubmit",
               });
+              throw error;
             } finally {
               isSubmittingRef.current = false;
             }
           }
         : undefined,
     };
-  }, [observability, opts, userOnSubmit]);
+  }, [opts, userOnSubmit]);
 
   const form = baseUseAppForm(wrappedOptions as never);
 
-  const originalHandleSubmit = form.handleSubmit;
-  form.handleSubmit = React.useCallback(
+  let originalHandleSubmit = originalHandleSubmitByForm.get(form);
+  if (!originalHandleSubmit) {
+    originalHandleSubmit = form.handleSubmit as unknown as (
+      submitMeta?: unknown,
+    ) => Promise<unknown>;
+    originalHandleSubmitByForm.set(form, originalHandleSubmit);
+  }
+
+  const stableHandleSubmit = React.useCallback(
     async (submitMeta?: unknown) => {
       if (isSubmittingRef.current || form.state.isSubmitting) {
         return;
       }
-      return originalHandleSubmit.call(form, submitMeta);
+      try {
+        return await originalHandleSubmit.call(form, submitMeta);
+      } catch (error) {
+        // Already captured in wrappedOptions.onSubmit (deduplicated by recordErrorOrDefect).
+        // Catch here so button handlers (`onPress={() => void form.handleSubmit()}`) never
+        // trigger unhandled Promise rejections while TanStack Form keeps isSubmitSuccessful=false.
+        recordErrorOrDefect(observabilityRef.current, error, {
+          source: "useAppForm.onSubmit",
+        });
+      }
     },
     [form, originalHandleSubmit],
-  ) as unknown as typeof form.handleSubmit;
+  );
+
+  form.handleSubmit = stableHandleSubmit as unknown as typeof form.handleSubmit;
 
   return form;
 }) as unknown as typeof baseUseAppForm;

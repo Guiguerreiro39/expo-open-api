@@ -10,11 +10,16 @@ export interface CheckboxProps extends CheckboxPrimitive.RootProps {
 }
 
 export const Checkbox = forwardRef<CheckboxPrimitive.RootRef, CheckboxProps>(
-  ({ className, indicatorClassName, checked, disabled, ...props }, ref) => (
+  ({ className, indicatorClassName, checked, disabled, accessibilityState, ...props }, ref) => (
     <CheckboxPrimitive.Root
       ref={ref}
       checked={checked}
       disabled={disabled}
+      accessibilityState={{
+        ...accessibilityState,
+        checked: accessibilityState?.checked ?? checked,
+        disabled: accessibilityState?.disabled ?? Boolean(disabled),
+      }}
       className={cn(
         "border-outline bg-surface-container-lowest h-6 w-6 shrink-0 items-center justify-center rounded-md border",
         checked && "border-primary bg-primary",

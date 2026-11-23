@@ -1,4 +1,11 @@
+import {
+  persistQueryClientSave,
+  persistQueryClientSubscribe,
+} from "@tanstack/react-query-persist-client";
+import { act, waitFor } from "@testing-library/react-native";
 import { HttpResponse, http } from "msw";
+import { createElement } from "react";
+import { Text } from "react-native";
 import { describe, expect, it } from "vitest";
 import { createMobileAuthClient } from "@/features/auth/api/client";
 import {
@@ -7,15 +14,36 @@ import {
   signInWithEmail,
   signOut,
   signUpWithEmail,
+  useAuthSession,
 } from "@/features/auth/api/session";
 import { customFetch } from "@/shared/api/fetch";
 import { AUTH_QUERY_KEYS, TASKS_QUERY_KEYS } from "@/shared/api/query-keys";
 import { BEARER_TOKEN_STORAGE_KEY, getCachedBearerToken } from "@/shared/lib/auth-session-bridge";
 import { createSpyObservability } from "@/shared/observability/spy-adapter";
 import { createInMemoryCredentialStore } from "@/shared/storage/credential-store";
+import { createInMemoryKvStore } from "@/shared/storage/kv-store";
+import {
+  createQueryPersister,
+  QUERY_CACHE_STORAGE_KEY,
+  shouldDehydrateAppQuery,
+} from "@/shared/storage/query-persister";
 import { buildTestSessionPayload } from "@/test/mocks/handlers/auth";
 import { honoErrorResponse, server, TEST_API_BASE } from "@/test/msw-server";
-import { createTestComposition } from "@/test/render";
+import { createTestComposition, renderWithProviders } from "@/test/render";
+
+function SessionProbe({
+  onRefetchReady,
+}: {
+  onRefetchReady: (refetch: () => Promise<unknown>) => void;
+}) {
+  const { isAuthenticated, user, refetch } = useAuthSession();
+  onRefetchReady(refetch);
+  return createElement(
+    Text,
+    { testID: "session-status" },
+    isAuthenticated ? `authenticated:${user?.id}` : "unauthenticated",
+  );
+}
 
 describe("mobile auth client, bearer cache, and session lifecycle", () => {
   it("creates a Better Auth mobile client backed by an injected CredentialStorePort", () => {
@@ -156,10 +184,11 @@ describe("mobile auth client, bearer cache, and session lifecycle", () => {
     }
   });
 
-  it("wipes cachedBearerToken, CredentialStorePort, and QueryClient on HTTP 401", async () => {
+  it("wipes cachedBearerToken, CredentialStorePort, persisted kvStore, and QueryClient on HTTP 401", async () => {
     const observability = createSpyObservability();
     const credentialStore = createInMemoryCredentialStore();
-    const composition = createTestComposition({ observability, credentialStore });
+    const kvStore = createInMemoryKvStore();
+    const composition = createTestComposition({ observability, credentialStore, kvStore });
 
     try {
       await signInWithEmail(
@@ -171,6 +200,7 @@ describe("mobile auth client, bearer cache, and session lifecycle", () => {
         },
       );
       composition.queryClient.setQueryData(TASKS_QUERY_KEYS.lists(), [{ id: "task-1" }]);
+      kvStore.set(QUERY_CACHE_STORAGE_KEY, JSON.stringify({ cached: "user-a-data" }));
 
       server.use(
         http.get(`${TEST_API_BASE}/api/v1/tasks`, () =>
@@ -188,6 +218,7 @@ describe("mobile auth client, bearer cache, and session lifecycle", () => {
       expect(getCachedBearerToken()).toBeNull();
       expect(await credentialStore.getItem(BEARER_TOKEN_STORAGE_KEY)).toBeNull();
       expect(composition.queryClient.getQueryData(TASKS_QUERY_KEYS.lists())).toBeUndefined();
+      expect(kvStore.getString(QUERY_CACHE_STORAGE_KEY)).toBeUndefined();
       expect(observability.currentUser).toBeNull();
     } finally {
       await composition.dispose();
@@ -244,6 +275,97 @@ describe("mobile auth client, bearer cache, and session lifecycle", () => {
       expect(session?.user.role).toBe("admin");
       expect(getCachedBearerToken()).toBe("token-user-42");
     } finally {
+      await composition.dispose();
+    }
+  });
+
+  it("preserves authenticated session and captures 5xx defect when session refetch returns 503", async () => {
+    let triggerRefetch: (() => Promise<unknown>) | undefined;
+
+    const { getByTestId, observability, composition } = renderWithProviders(
+      createElement(SessionProbe, {
+        onRefetchReady: (refetch) => {
+          triggerRefetch = refetch;
+        },
+      }),
+      {
+        user: { id: "user-503", name: "Ada", email: "ada@example.com", role: "member" },
+      },
+    );
+
+    try {
+      expect(getByTestId("session-status").props.children).toBe("authenticated:user-503");
+
+      server.use(
+        http.get(`${TEST_API_BASE}/api/auth/get-session`, () =>
+          honoErrorResponse(503, "SERVICE_UNAVAILABLE", "Auth database temporarily unavailable"),
+        ),
+      );
+
+      await act(async () => {
+        await triggerRefetch?.();
+      });
+
+      await waitFor(() => {
+        expect(observability.defects).toHaveLength(1);
+      });
+      expect(getByTestId("session-status").props.children).toBe("authenticated:user-503");
+    } finally {
+      await composition.dispose();
+    }
+  });
+
+  it("synchronously purges persisted MMKV query cache on signOut within throttle window", async () => {
+    const observability = createSpyObservability();
+    const credentialStore = createInMemoryCredentialStore();
+    const kvStore = createInMemoryKvStore();
+    const composition = createTestComposition({ observability, credentialStore, kvStore });
+
+    const immediatePersister = createQueryPersister(kvStore, { throttleTime: 0 });
+    const throttledPersister = createQueryPersister(kvStore, { throttleTime: 1000 });
+    const unsubscribePersist = persistQueryClientSubscribe({
+      queryClient: composition.queryClient,
+      persister: throttledPersister,
+      dehydrateOptions: {
+        shouldDehydrateQuery: shouldDehydrateAppQuery,
+      },
+    });
+
+    try {
+      await signInWithEmail(
+        { email: "ada@example.com", password: "password123" },
+        {
+          credentialStore,
+          queryClient: composition.queryClient,
+          observability,
+        },
+      );
+
+      // Hydrate User A tasks into queryClient and persist to kvStore
+      composition.queryClient.setQueryData(TASKS_QUERY_KEYS.lists(), [
+        { id: "task-secret-a", name: "User A confidential task", done: false },
+      ]);
+
+      await persistQueryClientSave({
+        queryClient: composition.queryClient,
+        persister: immediatePersister,
+        dehydrateOptions: {
+          shouldDehydrateQuery: shouldDehydrateAppQuery,
+        },
+      });
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(kvStore.getString(QUERY_CACHE_STORAGE_KEY)).toContain("User A confidential task");
+
+      // Sign out immediately within the 1000ms throttle window
+      await signOut({
+        credentialStore,
+        queryClient: composition.queryClient,
+        observability,
+      });
+
+      expect(kvStore.getString(QUERY_CACHE_STORAGE_KEY)).toBeUndefined();
+    } finally {
+      unsubscribePersist();
       await composition.dispose();
     }
   });

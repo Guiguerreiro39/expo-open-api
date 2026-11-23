@@ -174,6 +174,53 @@ describe("mobile download, sharing, and 409 FILE_PENDING retry", () => {
     expect(obs.defects).toHaveLength(1);
   });
 
+  it("does not retry HTTP 409 conflicts whose error code is not FILE_PENDING", async () => {
+    let previewCalls = 0;
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files/:id/url`, () => {
+        previewCalls += 1;
+        return honoErrorResponse(409, "CONFLICT", "Quarantined");
+      }),
+    );
+
+    const port = createInMemoryFileTransferPort();
+    const obs = createSpyObservability();
+
+    await expect(
+      openFilePreviewUrl("file-quarantined", {
+        backoffMs: 1,
+        transferPort: port,
+        observability: obs,
+      }),
+    ).rejects.toMatchObject({ status: 409, code: "CONFLICT", message: "Quarantined" });
+
+    expect(previewCalls).toBe(1);
+
+    let downloadCalls = 0;
+    const failingDownloadPort = createInMemoryFileTransferPort({
+      downloadToCache: async () => {
+        downloadCalls += 1;
+        throw new FetchError({
+          status: 409,
+          code: "CONFLICT",
+          message: "Quarantined",
+        });
+      },
+    });
+
+    await expect(
+      downloadFileDirect("file-quarantined", {
+        originalName: "bad.pdf",
+        backoffMs: 1,
+        transferPort: failingDownloadPort,
+        observability: obs,
+      }),
+    ).rejects.toMatchObject({ status: 409, code: "CONFLICT" });
+
+    expect(downloadCalls).toBe(1);
+    obs.assertNoDefects();
+  });
+
   it("prunes expired transfer cache files and captures storage failures as defects", async () => {
     const port = createInMemoryFileTransferPort();
     const obs = createSpyObservability();

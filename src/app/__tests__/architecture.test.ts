@@ -38,9 +38,19 @@ function extractImportSpecifiers(content: string): string[] {
   return specifiers;
 }
 
+function toPosix(value: string): string {
+  return value.split(path.sep).join("/");
+}
+
 function resolveImportTarget(filePath: string, specifier: string): string | null {
   if (specifier.startsWith("@/")) {
     return path.join(SRC_DIR, specifier.slice(2));
+  }
+  if (specifier === "src" || specifier.startsWith("src/")) {
+    return path.join(ROOT, specifier);
+  }
+  if (specifier === "app" || specifier.startsWith("app/")) {
+    return path.join(ROOT, specifier);
   }
   if (specifier.startsWith(".")) {
     return path.resolve(path.dirname(filePath), specifier);
@@ -48,8 +58,50 @@ function resolveImportTarget(filePath: string, specifier: string): string | null
   return null;
 }
 
+function checkSharedImportViolation(filePath: string, specifier: string): string | null {
+  const resolved = resolveImportTarget(filePath, specifier);
+  if (!resolved) return null;
+  const relFromRoot = toPosix(path.relative(ROOT, resolved));
+  if (
+    relFromRoot === "app" ||
+    relFromRoot.startsWith("app/") ||
+    relFromRoot === "src/app" ||
+    relFromRoot.startsWith("src/app/") ||
+    relFromRoot === "src/features" ||
+    relFromRoot.startsWith("src/features/")
+  ) {
+    return `${toPosix(path.relative(ROOT, filePath))} -> ${specifier}`;
+  }
+  return null;
+}
+
+function checkFeatureImportViolation(filePath: string, specifier: string): string | null {
+  const resolved = resolveImportTarget(filePath, specifier);
+  if (!resolved) return null;
+  const relFromFeatures = toPosix(path.relative(path.join(SRC_DIR, "features"), filePath));
+  const ownSlice = relFromFeatures.split("/")[0];
+  const relFromRoot = toPosix(path.relative(ROOT, resolved));
+
+  if (
+    relFromRoot === "app" ||
+    relFromRoot.startsWith("app/") ||
+    relFromRoot === "src/app" ||
+    relFromRoot.startsWith("src/app/")
+  ) {
+    return `${toPosix(path.relative(ROOT, filePath))} -> ${specifier} (imports app layer)`;
+  }
+
+  if (relFromRoot === "src/features" || relFromRoot.startsWith("src/features/")) {
+    const targetSlice = relFromRoot.split("/")[2];
+    if (targetSlice && targetSlice !== ownSlice) {
+      return `${toPosix(path.relative(ROOT, filePath))} -> ${specifier} (cross-feature import: ${ownSlice} -> ${targetSlice})`;
+    }
+  }
+  return null;
+}
+
 describe("FSD architecture and zero-mock invariants", () => {
-  it("prevents src/shared from importing from src/features or src/app", () => {
+  it("prevents src/shared from importing from src/features, src/app, or app/", () => {
     const sharedDir = path.join(SRC_DIR, "shared");
     const files = collectSourceFiles(sharedDir);
     const violations: string[] = [];
@@ -57,11 +109,9 @@ describe("FSD architecture and zero-mock invariants", () => {
     for (const file of files) {
       const content = fs.readFileSync(file, "utf8");
       for (const specifier of extractImportSpecifiers(content)) {
-        const resolved = resolveImportTarget(file, specifier);
-        if (!resolved) continue;
-        const rel = path.relative(SRC_DIR, resolved);
-        if (rel.startsWith("features") || rel.startsWith("app")) {
-          violations.push(`${path.relative(ROOT, file)} -> ${specifier}`);
+        const violation = checkSharedImportViolation(file, specifier);
+        if (violation) {
+          violations.push(violation);
         }
       }
     }
@@ -69,33 +119,17 @@ describe("FSD architecture and zero-mock invariants", () => {
     expect(violations).toEqual([]);
   });
 
-  it("prevents src/features slices from importing from src/app or other feature slices", () => {
+  it("prevents src/features slices from importing from src/app, app/, or other feature slices", () => {
     const featuresDir = path.join(SRC_DIR, "features");
     const files = collectSourceFiles(featuresDir);
     const violations: string[] = [];
 
     for (const file of files) {
-      const relFromFeatures = path.relative(featuresDir, file);
-      const ownSlice = relFromFeatures.split(path.sep)[0];
       const content = fs.readFileSync(file, "utf8");
-
       for (const specifier of extractImportSpecifiers(content)) {
-        const resolved = resolveImportTarget(file, specifier);
-        if (!resolved) continue;
-        const relFromSrc = path.relative(SRC_DIR, resolved);
-
-        if (relFromSrc.startsWith("app")) {
-          violations.push(`${path.relative(ROOT, file)} -> ${specifier} (imports app layer)`);
-          continue;
-        }
-
-        if (relFromSrc.startsWith("features")) {
-          const targetSlice = relFromSrc.split(path.sep)[1];
-          if (targetSlice && targetSlice !== ownSlice) {
-            violations.push(
-              `${path.relative(ROOT, file)} -> ${specifier} (cross-feature import: ${ownSlice} -> ${targetSlice})`,
-            );
-          }
+        const violation = checkFeatureImportViolation(file, specifier);
+        if (violation) {
+          violations.push(violation);
         }
       }
     }
@@ -126,5 +160,32 @@ describe("FSD architecture and zero-mock invariants", () => {
     }
 
     expect(violations).toEqual([]);
+  });
+
+  it("detects root-relative baseUrl (src/..., app/...) and relative ../app/... FSD violations", () => {
+    const homeFile = path.join(SRC_DIR, "features", "home", "ui", "home-screen.tsx");
+    const sharedFile = path.join(SRC_DIR, "shared", "ui", "button.tsx");
+
+    // Cross-feature via baseUrl root-relative path
+    expect(checkFeatureImportViolation(homeFile, "src/features/tasks/api/tasks")).toContain(
+      "cross-feature import: home -> tasks",
+    );
+    // Feature importing app/ route via baseUrl or relative path
+    expect(checkFeatureImportViolation(homeFile, "app/_layout")).toContain("imports app layer");
+    expect(checkFeatureImportViolation(homeFile, "src/app/composition")).toContain(
+      "imports app layer",
+    );
+    // Feature importing own slice or shared is allowed
+    expect(checkFeatureImportViolation(homeFile, "@/shared/ui/button")).toBeNull();
+    expect(checkFeatureImportViolation(homeFile, "src/features/home/model/home")).toBeNull();
+
+    // Shared importing app/ route via baseUrl root-relative path or relative traversal
+    expect(checkSharedImportViolation(sharedFile, "app/_layout")).not.toBeNull();
+    expect(checkSharedImportViolation(sharedFile, "../../../app/_layout")).not.toBeNull();
+    expect(checkSharedImportViolation(sharedFile, "src/app/composition")).not.toBeNull();
+    expect(checkSharedImportViolation(sharedFile, "src/features/tasks/api/tasks")).not.toBeNull();
+    // Shared importing shared or external package is allowed
+    expect(checkSharedImportViolation(sharedFile, "@/shared/ui/text")).toBeNull();
+    expect(checkSharedImportViolation(sharedFile, "react-native")).toBeNull();
   });
 });

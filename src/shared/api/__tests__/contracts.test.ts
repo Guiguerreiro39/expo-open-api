@@ -43,6 +43,7 @@ import {
   type SpyObservabilityAdapter,
 } from "@/shared/observability/spy-adapter";
 import { honoErrorResponse, server, TEST_API_BASE } from "@/test/msw-server";
+import { renderWithProviders } from "@/test/render";
 
 function TasksProbe({
   queryKey,
@@ -386,5 +387,29 @@ describe("defineContract, useEffectQuery, useEffectMutation, and matchEffect", (
     });
     expect(() => spy.assertNoDefects()).not.toThrow();
     expect(spy.breadcrumbs.some((b) => b.category === "api.expected_error")).toBe(true);
+  });
+
+  it("emits exactly 1 defect (not 2x) for a single HTTP 500 in useEffectQuery under createAppComposition", async () => {
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, () =>
+        honoErrorResponse(500, "INTERNAL_SERVER_ERROR", "Database exploded"),
+      ),
+    );
+
+    const spy = createSpyObservability();
+    const { composition } = renderWithProviders(
+      createElement(TasksProbe, { queryKey: ["tasks", "dedup-500"], spy, mode: "normal" }),
+      { observability: spy },
+    );
+
+    try {
+      await waitFor(() => {
+        expect(screen.getByText("Error: InternalServerError")).toBeTruthy();
+      });
+
+      expect(spy.defects).toHaveLength(1);
+    } finally {
+      await composition.dispose();
+    }
   });
 });

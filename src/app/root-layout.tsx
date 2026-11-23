@@ -50,8 +50,8 @@ export function RootLayout() {
                         options={{ headerShown: true, title: "Not Found" }}
                       />
                     </Stack>
+                    <PortalHost />
                   </ToastProvider>
-                  <PortalHost />
                 </ThemeProvider>
               </AuthBootstrapContext.Provider>
             </CredentialStoreContext.Provider>

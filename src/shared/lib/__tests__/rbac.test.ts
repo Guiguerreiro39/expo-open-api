@@ -44,6 +44,37 @@ describe("rbac matrix", () => {
     expect(hasPermission({ user: viewerUser, resource: "billing", action: "read" })).toBe(false);
   });
 
+  it("denies scope: 'all' mutations for non-admins even when resource.type is set and fails closed when user.id is omitted", () => {
+    expect(
+      hasPermission({
+        role: "member",
+        action: "task:delete",
+        resource: { type: "task", scope: "all" },
+      }),
+    ).toBe(false);
+    expect(
+      hasPermission({
+        role: "member",
+        action: "task:update",
+        resource: { type: "task", scope: "all" },
+      }),
+    ).toBe(false);
+    expect(
+      hasPermission({
+        role: "member",
+        action: "task:delete",
+        resource: { id: "t1", userId: "other" },
+      }),
+    ).toBe(false);
+    expect(
+      hasPermission({
+        user: { role: "member" },
+        action: "task:delete",
+        resource: { id: "t1", userId: "other" },
+      }),
+    ).toBe(false);
+  });
+
   it("grants admin full access across resources and cross-owner actions", () => {
     expect(hasPermission({ user: adminUser, action: "task:delete:any" })).toBe(true);
     expect(hasPermission({ user: adminUser, action: "file:delete:any" })).toBe(true);

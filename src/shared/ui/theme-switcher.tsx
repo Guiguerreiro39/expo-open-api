@@ -51,10 +51,10 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 elevated={isSelected}
                 onPress={() => setPreset(presetId)}
                 className={cn(
-                  "flex-row items-center justify-between gap-3 rounded-xl border px-4 py-3",
+                  "flex-row items-center justify-between gap-3 rounded-xl px-4 py-3",
                   isSelected
                     ? "border-primary bg-primary-fixed/40"
-                    : "border-outline-variant bg-surface-container-lowest",
+                    : "border-outline-variant bg-surface-container-lowest border",
                 )}
               >
                 <View className="flex-1 gap-0.5">
@@ -94,10 +94,10 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 elevated={isSelected}
                 onPress={() => setColorScheme(option.mode)}
                 className={cn(
-                  "min-h-11 flex-1 flex-row items-center justify-center gap-2 rounded-xl border px-3 py-2.5",
+                  "min-h-11 flex-1 flex-row items-center justify-center gap-2 rounded-xl px-3 py-2.5",
                   isSelected
                     ? "border-primary bg-primary"
-                    : "border-outline-variant bg-surface-container-lowest",
+                    : "border-outline-variant bg-surface-container-lowest border",
                 )}
               >
                 <Icon

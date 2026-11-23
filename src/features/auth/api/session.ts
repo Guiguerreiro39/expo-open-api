@@ -22,12 +22,15 @@ import {
   BEARER_TOKEN_STORAGE_KEY,
   clearCachedBearerToken,
   getCachedBearerToken,
+  purgePersistedQueryCaches,
   registerAuthSessionQueryOptions,
   resetAuthSessionCache,
   setCachedBearerToken,
 } from "@/shared/lib/auth-session-bridge";
 import type { ObservabilityService } from "@/shared/observability/port";
 import type { CredentialStorePort } from "@/shared/storage/credential-store";
+import type { KeyValueStorePort } from "@/shared/storage/kv-store";
+import { QUERY_CACHE_STORAGE_KEY } from "@/shared/storage/query-persister";
 
 export interface AuthSessionDependencies {
   readonly credentialStore?: CredentialStorePort;
@@ -38,6 +41,7 @@ export interface AuthActionDependencies {
   readonly credentialStore: CredentialStorePort;
   readonly queryClient: QueryClient;
   readonly observability?: ObservabilityService | null;
+  readonly kvStore?: KeyValueStorePort;
 }
 
 let activeDependencies: AuthSessionDependencies = {};
@@ -211,9 +215,10 @@ export async function fetchAuthSession(
     if (error instanceof FetchError && error.status === 401) {
       await purgePersistedCredentials(credentialStore);
       resetAuthSessionCache();
+      syncObservabilityUser(null, observability);
+      return null;
     }
-    syncObservabilityUser(null, observability);
-    return null;
+    throw error;
   }
 }
 
@@ -286,6 +291,8 @@ export async function signOut(deps: AuthActionDependencies): Promise<void> {
   await purgePersistedCredentials(deps.credentialStore);
   deps.queryClient.setQueryData(AUTH_QUERY_KEYS.session(), null);
   deps.queryClient.clear();
+  deps.kvStore?.delete(QUERY_CACHE_STORAGE_KEY);
+  purgePersistedQueryCaches();
   syncObservabilityUser(null, deps.observability ?? null);
 }
 

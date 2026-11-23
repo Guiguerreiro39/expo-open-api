@@ -8,11 +8,16 @@ export interface SwitchProps extends SwitchPrimitive.RootProps {
 }
 
 export const Switch = forwardRef<SwitchPrimitive.RootRef, SwitchProps>(
-  ({ className, thumbClassName, checked, disabled, ...props }, ref) => (
+  ({ className, thumbClassName, checked, disabled, accessibilityState, ...props }, ref) => (
     <SwitchPrimitive.Root
       ref={ref}
       checked={checked}
       disabled={disabled}
+      accessibilityState={{
+        ...accessibilityState,
+        checked: accessibilityState?.checked ?? checked,
+        disabled: accessibilityState?.disabled ?? Boolean(disabled),
+      }}
       className={cn(
         "h-7 w-12 shrink-0 flex-row items-center rounded-full border p-0.5",
         checked
