@@ -250,12 +250,12 @@ Mobile touch screens lack mouse hover states (`:hover`). Tactile realism is achi
 - **`Card` (`src/shared/ui/card.tsx`)**: `rounded-2xl border border-outline-variant bg-card text-card-foreground shadow-tactile`.
 - **`Input` & Form Controls (`src/shared/ui/input.tsx`)**: `rounded-xl border border-outline-variant bg-surface-container-lowest text-foreground px-4 py-3 focus:border-primary`.
 - **`LiveQueryBadge` (`src/shared/ui/live-query-badge.tsx`)**: Realtime connection status pill with semantic status containers (`bg-success-container text-on-success-container` when connected, `bg-warning-container text-on-warning-container` when connecting, `bg-destructive-container text-on-destructive-container` on error).
-- **`BentoShowcaseGrid` (`src/features/showcase/ui/BentoShowcaseScreen.tsx`)**: Reference showcase screen demonstrating live preset switching, color swatches, typography scale, form primitives, and tactile button physics.
+- **`ShowcaseScreen` (`src/features/showcase/ui/showcase-screen.tsx`)**: Reference showcase screen demonstrating live preset switching, color swatches, typography scale, overlays via `<PortalHost />`, form primitives, and tactile button physics.
 
 ---
 
 ## Automated Token Drift & Hygiene Verification
 
-Token integrity is governed by automated Vitest contract tests (`src/test/design-tokens.test.ts`):
+Token integrity is governed by both the standalone verification script (`pnpm verify:tokens` / `scripts/verify-design-tokens.mjs`) and automated Vitest contract tests (`src/test/design-tokens.test.ts`):
 1. **Schema Validation**: Asserts that all color tokens, typography scales, radii, and presets declared in `DESIGN.md` match `tailwind.config.ts` and `src/shared/lib/theme/presets.ts`.
 2. **Hygiene Rule**: Ensures zero hardcoded color literals (`#...`, `rgb(...)`) exist in production component files under `src/features/` and `src/shared/ui/`.
