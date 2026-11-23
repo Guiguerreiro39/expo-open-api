@@ -76,6 +76,15 @@ export default defineConfig({
         __dirname,
         "src/test/mocks/adapters/mock-lucide-react-native.tsx",
       ),
+      "react-native-mmkv": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-react-native-mmkv.ts",
+      ),
+      "@react-native-community/netinfo": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-netinfo.ts",
+      ),
+      "expo/fetch": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-fetch.ts"),
     },
   },
   test: {

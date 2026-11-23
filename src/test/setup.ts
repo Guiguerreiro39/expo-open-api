@@ -10,6 +10,8 @@ import { resetMockExpoSharing } from "./mocks/adapters/mock-expo-sharing";
 import { resetMockSplashScreen } from "./mocks/adapters/mock-expo-splash-screen";
 import { resetMockExpoWebBrowser } from "./mocks/adapters/mock-expo-web-browser";
 import { mockHaptics } from "./mocks/adapters/mock-haptics";
+import { resetMockNetInfo } from "./mocks/adapters/mock-netinfo";
+import { mockMmkv } from "./mocks/adapters/mock-react-native-mmkv";
 import { resetMockSecureStore } from "./mocks/adapters/mock-secure-store";
 import { resetMockSystemUI } from "./mocks/adapters/mock-system-ui";
 import { server } from "./msw-server";
@@ -31,6 +33,8 @@ afterEach(() => {
   MockEventSource.reset();
   MockXMLHttpRequest.reset();
   mockHaptics.reset();
+  resetMockNetInfo();
+  mockMmkv.reset();
   resetMockSystemUI();
   resetMockSecureStore();
   resetMockSplashScreen();

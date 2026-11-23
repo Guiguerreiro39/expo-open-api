@@ -8,6 +8,25 @@ export const tasksHandlers = [
       meta: { nextCursor: null, hasMore: false },
     }),
   ),
+  http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `event: init\ndata: ${JSON.stringify({
+              data: [],
+              meta: { nextCursor: null, hasMore: false },
+            })}\n\n`,
+          ),
+        );
+      },
+    });
+    return new HttpResponse(stream, {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  }),
   http.post(`${TEST_API_BASE}/api/v1/tasks`, async ({ request }) => {
     const body = (await request.json()) as { name?: string; done?: boolean };
     const now = new Date().toISOString();
@@ -22,5 +41,20 @@ export const tasksHandlers = [
       },
       { status: 201 },
     );
+  }),
+  http.patch(`${TEST_API_BASE}/api/v1/tasks/:id`, async ({ params, request }) => {
+    const body = (await request.json()) as { name?: string; done?: boolean };
+    const now = new Date().toISOString();
+    return HttpResponse.json({
+      id: String(params.id),
+      name: body.name ?? "Updated task",
+      done: Boolean(body.done),
+      userId: "user-1",
+      createdAt: now,
+      updatedAt: now,
+    });
+  }),
+  http.delete(`${TEST_API_BASE}/api/v1/tasks/:id`, () => {
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
