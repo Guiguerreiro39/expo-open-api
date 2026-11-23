@@ -64,7 +64,30 @@
         "noUnusedImports": "error",
         "noUnusedVariables": "error",
         "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error"
+        "useHookAtTopLevel": "error",
+        "noReactNativeRawText": {
+          "level": "error",
+          "options": {
+            "skip": [
+              "Badge",
+              "Button",
+              "CardDescription",
+              "CardTitle",
+              "FormDescription",
+              "FormLabel",
+              "FormMessage",
+              "Label"
+            ]
+          }
+        }
+      },
+      "suspicious": {
+        "noUnknownAtRules": {
+          "level": "error",
+          "options": {
+            "ignore": ["tailwind"]
+          }
+        }
       },
       "style": {
         "noProcessEnv": "error",
