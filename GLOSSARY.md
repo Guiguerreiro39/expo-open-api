@@ -140,5 +140,30 @@ _Avoid_: Modal root, overlay container, window host
 A specialized scroll container (`src/shared/ui/form-scroll-view.tsx`) backed by `react-native-keyboard-controller` that handles smooth keyboard avoidance, auto-scrolling to invalid fields, and drag dismissals.
 _Avoid_: Keyboard wrapper, scroll avoidance, form view
 
+**Mobile File Asset**:
+A normalized, platform-agnostic file representation (`MobileFileAsset` in `src/features/files/model/files.ts`) containing `{ uri, name, size, mimeType }` produced by `useMobileFilePicker()` from either `expo-document-picker` or `expo-image-picker`.
+_Avoid_: Picked file, native asset, raw document
+
+**File Transfer Port**:
+An abstraction seam (`FileTransferPort` in `src/features/files/api/`) decoupling file upload and download implementations from the concrete runtime transport (`expo-file-system` on mobile native vs in-memory mock transports in Vitest).
+_Avoid_: Upload client, transfer service, file manager
+
+**Direct Upload Strategy**:
+A single-step multipart upload (`POST /api/v1/files`) transmitting files $\le$ 10 MB directly to the backend API with Bearer token authentication and W3C `traceparent` headers via `FileSystemUploadType.MULTIPART`.
+_Avoid_: Multipart transfer, direct stream, API upload
+
+**Presigned Upload Strategy**:
+A 3-step file transfer workflow for files $\le$ 100 MB: requesting a presigned URL from the backend (`POST /api/v1/files/presign`), streaming binary content directly to storage via `FileSystemUploadType.BINARY_CONTENT` with `PUT`, and notifying the backend of completion (`POST /api/v1/files/:id/complete`).
+_Avoid_: S3 upload, signed transfer, 3-step flow
+
+**Upload Queue**:
+A concurrency-throttled transfer manager (`useUploadQueue` in `src/features/files/model/`) limiting active uploads to 2 concurrent streams, maintaining determinate byte-level progress metrics, and supporting individual item aborts and retries.
+_Avoid_: Transfer manager, upload array, progress tracker
+
+**Native Share Sheet**:
+The system-level sharing interface invoked via `expo-sharing` (`Sharing.shareAsync`) that allows users to save downloaded files to their local filesystem ("Save to Files"), AirDrop, or dispatch to external mobile applications.
+_Avoid_: System share, activity controller, native export
+
+
 
 
