@@ -33,5 +33,14 @@ export const ArrowRight = MockIconBase;
 export const ArrowLeft = MockIconBase;
 export const Compass = MockIconBase;
 export const Shield = MockIconBase;
+export const Radio = MockIconBase;
+export const Plus = MockIconBase;
+export const Trash2 = MockIconBase;
+export const Check = MockIconBase;
+export const Circle = MockIconBase;
+export const WifiOff = MockIconBase;
+export const RefreshCw = MockIconBase;
+export const AlertCircle = MockIconBase;
+export const ListTodo = MockIconBase;
 
 export default lucideProxy;

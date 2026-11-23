@@ -1,1 +1,1 @@
-export { TasksPlaceholderScreen as default } from "@/features/home/ui/route-placeholder";
+export { TasksScreen as default } from "@/features/tasks/ui/tasks-screen";
