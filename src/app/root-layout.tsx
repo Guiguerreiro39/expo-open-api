@@ -1,8 +1,10 @@
+import "../../global.css";
+import { PortalHost } from "@rn-primitives/portal";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ThemeProvider } from "@/shared/ui/theme-provider";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -13,11 +15,13 @@ export function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
+      <ThemeProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <PortalHost />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
