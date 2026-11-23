@@ -104,3 +104,24 @@ _Avoid_: Route middleware, navigation interceptor, protected route wrapper
 A pure TypeScript role-and-permission definition (`src/shared/lib/rbac.ts`) that maps system roles (`admin`, `member`, `viewer`) to domain actions and scopes (`own` vs `all`) identically to the backend authorization policy.
 _Avoid_: Permission list, role table, access list
 
+**Tactile Elevation**:
+Hard zero-blur offset shadow (`boxShadow: 4px 4px 0px 0px ...` on React Native 0.76+) combined with high-contrast structural borders applied to static cards and mechanical pressables.
+_Avoid_: Drop shadow, card elevation, material depth
+
+**Theme Preset**:
+A curated collection of semantic color tokens (`warm-tactile`, `editorial-slate`, `neo-brutalist`) injected into the React Native component tree via NativeWind `vars()` at the Composition Root and persisted in the Query Cache Tier.
+_Avoid_: Theme mode, style pack, skin
+
+**Tactile Pressable**:
+An interactive button primitive (`TactilePressable` in `src/shared/ui/`) combining `react-native-reanimated` spring translation with `expo-haptics` (`ImpactFeedbackStyle.Light`) to reproduce physical mechanical button feedback on touch screens.
+_Avoid_: Bouncy button, animated touchable, ripple pressable
+
+**Token Channel**:
+A space-separated HSL value (`H S% L%`) stored in CSS variables to enable Tailwind's `/alpha` opacity modifiers in React Native's native engine.
+_Avoid_: Raw color, HSL string, hex token
+
+**Dual Token Specification**:
+The design contract in `DESIGN.md` documenting canonical OKLCH coordinates alongside exact space-separated HSL channels for cross-platform fidelity and native compilation.
+_Avoid_: Multi-color spec, color mapping, palette duplication
+
+
