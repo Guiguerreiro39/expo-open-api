@@ -67,10 +67,21 @@ export const SignUpSchema = Schema.Struct({
 export type SignInInput = Schema.Schema.Type<typeof SignInSchema>;
 export type SignUpInput = Schema.Schema.Type<typeof SignUpSchema>;
 
+function hasAsciiControlCharacters(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code <= 0x1f || code === 0x7f) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * Validates that a redirect target is a strictly relative internal path.
  * Blocks protocol-relative (`//`), scheme URLs (`://`), backslashes (`\`),
- * and non-leading-slash paths to prevent open redirects.
+ * ASCII control characters (WHATWG URL whitespace-stripping vectors), and
+ * non-leading-slash paths to prevent open redirects.
  */
 export function sanitizeRedirect(url?: string | string[] | null): string | null {
   const candidate = Array.isArray(url) ? url[0] : url;
@@ -80,13 +91,23 @@ export function sanitizeRedirect(url?: string | string[] | null): string | null 
 
   const trimmed = candidate.trim();
   if (
-    trimmed.startsWith("/") &&
-    !trimmed.startsWith("//") &&
-    !trimmed.includes("://") &&
-    !trimmed.includes("\\")
+    !trimmed.startsWith("/") ||
+    trimmed.startsWith("//") ||
+    trimmed.includes("://") ||
+    trimmed.includes("\\") ||
+    hasAsciiControlCharacters(trimmed)
   ) {
-    return trimmed;
+    return null;
   }
 
-  return null;
+  try {
+    const parsed = new URL(trimmed, "http://internal.invalid");
+    if (parsed.origin !== "http://internal.invalid") {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return trimmed;
 }

@@ -165,6 +165,8 @@
                 "patterns": [
                   {
                     "group": [
+                      "app",
+                      "app/**",
                       "@/features",
                       "@/features/**",
                       "@/app",
@@ -202,6 +204,8 @@
                 "patterns": [
                   {
                     "group": [
+                      "app",
+                      "app/**",
                       "@/app",
                       "@/app/**",
                       "src/app",

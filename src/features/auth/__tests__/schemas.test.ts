@@ -30,6 +30,9 @@ describe("auth schemas and sanitizeRedirect", () => {
     expect(sanitizeRedirect("/tasks\\..\\evil")).toBeNull();
     expect(sanitizeRedirect("tasks")).toBeNull();
     expect(sanitizeRedirect("evil.com/tasks")).toBeNull();
+    expect(sanitizeRedirect("/\t/evil.com/phish")).toBeNull();
+    expect(sanitizeRedirect("/\n/evil.com")).toBeNull();
+    expect(sanitizeRedirect("/\r/evil.com")).toBeNull();
   });
 
   it("validates SignInSchema and SignUpSchema", () => {

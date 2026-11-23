@@ -19,6 +19,7 @@ import { renderWithProviders } from "@/test/render";
 const TestItemSchema = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
+  done: Schema.optional(Schema.Boolean),
 });
 
 const TestListSchema = Schema.Struct({
@@ -122,8 +123,15 @@ function LiveQueryProbe({
 
 function MutationBufferProbe({
   onCreateRequest,
+  onToggleRequest,
+  onDeleteRequest,
 }: {
-  onCreateRequest: (resolve: (item: { id: string; name: string }) => void) => void;
+  onCreateRequest?: (resolve: (item: { id: string; name: string; done?: boolean }) => void) => void;
+  onToggleRequest?: (
+    vars: { id: string; done: boolean },
+    resolve: (item: { id: string; name: string; done: boolean }) => void,
+  ) => void;
+  onDeleteRequest?: (vars: { id: string }, resolve: () => void) => void;
 }) {
   const queryClient = useQueryClient();
   const live = useLiveQuery({
@@ -142,8 +150,8 @@ function MutationBufferProbe({
   const createMutation = useMutation({
     mutationKey: ["test-items", "mutation", "create"],
     mutationFn: (_name: string) =>
-      new Promise<{ id: string; name: string }>((resolve) => {
-        onCreateRequest(resolve);
+      new Promise<{ id: string; name: string; done?: boolean }>((resolve) => {
+        onCreateRequest?.(resolve);
       }),
     onMutate: async (name: string) => {
       const optimisticId = "optimistic-local-1";
@@ -164,10 +172,62 @@ function MutationBufferProbe({
     },
   });
 
+  const toggleMutation = useMutation({
+    mutationKey: ["test-items", "mutation", "toggle"],
+    mutationFn: (vars: { id: string; done: boolean }) =>
+      new Promise<{ id: string; name: string; done: boolean }>((resolve) => {
+        onToggleRequest?.(vars, resolve);
+      }),
+    onMutate: async ({ id, done }) => {
+      queryClient.setQueryData<TestList>(["/api/v1/test-items"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((item) => (item.id === id ? { ...item, done } : item)),
+        };
+      });
+    },
+    onSuccess: (serverItem) => {
+      queryClient.setQueryData<TestList>(["/api/v1/test-items"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((item) => (item.id === serverItem.id ? serverItem : item)),
+        };
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationKey: ["test-items", "mutation", "delete"],
+    mutationFn: (vars: { id: string }) =>
+      new Promise<void>((resolve) => {
+        onDeleteRequest?.(vars, resolve);
+      }),
+    onMutate: async ({ id }) => {
+      queryClient.setQueryData<TestList>(["/api/v1/test-items"], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.filter((item) => item.id !== id),
+        };
+      });
+    },
+  });
+
   return (
     <View>
       <Pressable testID="create-btn" onPress={() => createMutation.mutate("My New Item")}>
         <Text>Create</Text>
+      </Pressable>
+      <Pressable
+        testID="toggle-btn"
+        onPress={() => toggleMutation.mutate({ id: "existing-1", done: true })}
+      >
+        <Text>Toggle</Text>
+      </Pressable>
+      <Pressable testID="delete-btn" onPress={() => deleteMutation.mutate({ id: "existing-1" })}>
+        <Text>Delete</Text>
       </Pressable>
       <Text testID="items-json">{JSON.stringify(live.data?.data ?? [])}</Text>
     </View>
@@ -641,6 +701,270 @@ describe("useLiveQuery", () => {
     });
 
     handle.close();
+    unmount();
+  });
+
+  it("preserves settled toggle/PATCH mutations when flushing a stale buffered SSE snapshot", async () => {
+    setCachedBearerToken("tok_buffer_toggle");
+    const { stream, handle } = createControlledSseStream();
+    let resolveToggle: ((item: { id: string; name: string; done: boolean }) => void) | null = null;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/test-items`, () =>
+        HttpResponse.json({
+          data: [{ id: "existing-1", name: "Existing", done: false }],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/test-items/live`, () => {
+        return new HttpResponse(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const { getByTestId, unmount } = renderWithProviders(
+      <MutationBufferProbe
+        onToggleRequest={(_vars, resolve) => {
+          resolveToggle = resolve;
+        }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).toContain('"done":false');
+    });
+
+    fireEvent.press(getByTestId("toggle-btn"));
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).toContain('"done":true');
+    });
+
+    // Stale SSE snapshot arrives while toggle is in flight (existing-1 still has done: false)
+    await act(async () => {
+      handle.send(
+        `event: update\ndata: ${JSON.stringify({
+          data: [
+            { id: "peer-1", name: "Peer Item", done: false },
+            { id: "existing-1", name: "Existing", done: false },
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        })}\n\n`,
+      );
+    });
+
+    // Toggle settles with server response done: true
+    await act(async () => {
+      resolveToggle?.({ id: "existing-1", name: "Existing", done: true });
+    });
+
+    await waitFor(() => {
+      const items = JSON.parse(getByTestId("items-json").props.children as string) as Array<{
+        id: string;
+        name: string;
+        done?: boolean;
+      }>;
+      expect(items.find((item) => item.id === "peer-1")).toBeDefined();
+      expect(items.find((item) => item.id === "existing-1")?.done).toBe(true);
+    });
+
+    handle.close();
+    unmount();
+  });
+
+  it("does not resurrect locally deleted items when flushing a stale buffered SSE snapshot", async () => {
+    setCachedBearerToken("tok_buffer_delete");
+    const { stream, handle } = createControlledSseStream();
+    let resolveDelete: (() => void) | null = null;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/test-items`, () =>
+        HttpResponse.json({
+          data: [
+            { id: "existing-1", name: "To Delete" },
+            { id: "existing-2", name: "Keep Me" },
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/test-items/live`, () => {
+        return new HttpResponse(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const { getByTestId, unmount } = renderWithProviders(
+      <MutationBufferProbe
+        onDeleteRequest={(_vars, resolve) => {
+          resolveDelete = resolve;
+        }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).toContain("existing-1");
+    });
+
+    fireEvent.press(getByTestId("delete-btn"));
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).not.toContain("existing-1");
+    });
+
+    // Stale SSE snapshot arrives while delete is in flight (still contains existing-1!)
+    await act(async () => {
+      handle.send(
+        `event: update\ndata: ${JSON.stringify({
+          data: [
+            { id: "peer-1", name: "Peer Item" },
+            { id: "existing-1", name: "To Delete" },
+            { id: "existing-2", name: "Keep Me" },
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        })}\n\n`,
+      );
+    });
+
+    await act(async () => {
+      resolveDelete?.();
+    });
+
+    await waitFor(() => {
+      const items = JSON.parse(getByTestId("items-json").props.children as string) as Array<{
+        id: string;
+        name: string;
+      }>;
+      const ids = items.map((item) => item.id);
+      expect(ids).toContain("peer-1");
+      expect(ids).toContain("existing-2");
+      expect(ids).not.toContain("existing-1");
+    });
+
+    handle.close();
+    unmount();
+  });
+
+  it("does not resurrect peer-deleted items when flushing a buffered SSE snapshot after an unrelated local mutation", async () => {
+    setCachedBearerToken("tok_buffer_peer_delete");
+    const { stream, handle } = createControlledSseStream();
+    let resolveCreate: ((item: { id: string; name: string }) => void) | null = null;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/test-items`, () =>
+        HttpResponse.json({
+          data: [
+            { id: "existing-1", name: "Keep Me" },
+            { id: "peer-deleted-1", name: "Deleted By Peer" },
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/test-items/live`, () => {
+        return new HttpResponse(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const { getByTestId, unmount } = renderWithProviders(
+      <MutationBufferProbe
+        onCreateRequest={(resolve) => {
+          resolveCreate = resolve;
+        }}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).toContain("peer-deleted-1");
+    });
+
+    // Start an unrelated local create mutation
+    fireEvent.press(getByTestId("create-btn"));
+
+    await waitFor(() => {
+      expect(getByTestId("items-json").props.children).toContain("optimistic-local-1");
+    });
+
+    // While local create is in flight, a peer deletes peer-deleted-1!
+    await act(async () => {
+      handle.send(
+        `event: update\ndata: ${JSON.stringify({
+          data: [{ id: "existing-1", name: "Keep Me" }],
+          meta: { nextCursor: null, hasMore: false },
+        })}\n\n`,
+      );
+    });
+
+    await act(async () => {
+      resolveCreate?.({ id: "server-created-1", name: "My New Item" });
+    });
+
+    await waitFor(() => {
+      const items = JSON.parse(getByTestId("items-json").props.children as string) as Array<{
+        id: string;
+        name: string;
+      }>;
+      const ids = items.map((item) => item.id);
+      expect(ids).toContain("server-created-1");
+      expect(ids).toContain("existing-1");
+      expect(ids).not.toContain("peer-deleted-1");
+    });
+
+    handle.close();
+    unmount();
+  });
+
+  it("halts reconnection immediately on SSE event: error frames with non-retryable 4xx (403 FORBIDDEN)", async () => {
+    setCachedBearerToken("tok_sse_403_frame");
+    let liveHits = 0;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/test-items`, () =>
+        HttpResponse.json({
+          data: [],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/test-items/live`, () => {
+        liveHits += 1;
+        const { stream, handle } = createControlledSseStream();
+        handle.send(
+          `event: error\ndata: ${JSON.stringify({
+            error: {
+              code: "FORBIDDEN",
+              message: "Insufficient role for scope=all",
+              requestId: "req_403_frame",
+            },
+          })}\n\n`,
+        );
+        handle.close();
+        return new HttpResponse(stream, {
+          status: 200,
+          headers: { "Content-Type": "text/event-stream" },
+        });
+      }),
+    );
+
+    const { getByTestId, unmount } = renderWithProviders(
+      <LiveQueryProbe baseDelayMs={10} maxDelayMs={20} />,
+    );
+
+    await waitFor(() => {
+      expect(getByTestId("live-status").props.children).toBe("error");
+      expect(getByTestId("stream-error").props.children).toBe("ForbiddenError");
+    });
+
+    // Verify no tight-loop reconnect occurs after stream closes
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    expect(liveHits).toBe(1);
+    // 403 must NOT wipe cached bearer token
+    expect(getCachedBearerToken()).toBe("tok_sse_403_frame");
+
     unmount();
   });
 });

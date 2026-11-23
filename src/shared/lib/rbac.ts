@@ -187,13 +187,18 @@ export function hasPermission({ role, user, resource, action }: HasPermissionOpt
     }
   }
 
-  // If resource has an owner and user is provided, check ownership
-  if (ownerId && user?.id) {
-    if (ownerId !== user.id) {
+  // If resource has an owner, enforce ownership for non-admins (fail closed if user.id is missing)
+  if (ownerId) {
+    if (!user?.id || ownerId !== user.id) {
       if (!effectiveAction.endsWith(":any")) {
         return false;
       }
     }
+  }
+
+  // Non-admins cannot mutate resources with scope: "all" even when resource.type is specified
+  if (scope === "all" && effectiveAction !== "read") {
+    return false;
   }
 
   const statementsForRole = ROLE_STATEMENTS[effectiveRole];

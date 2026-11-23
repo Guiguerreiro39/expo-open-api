@@ -278,12 +278,16 @@ export function useUploadQueue(options: UseUploadQueueOptions = {}): UseUploadQu
       const controller = controllersRef.current.get(id);
       if (controller) {
         controller.abort();
-        controllersRef.current.delete(id);
-        activeIdsRef.current.delete(id);
       }
 
       updateItems((prev) => prev.filter((entry) => entry.id !== id));
-      pumpQueue();
+
+      // For in-flight uploads, wait until the transfer promise settles in startItem's
+      // .then()/.catch() before releasing activeIdsRef and pumping the queue so
+      // active transfers never exceed maxConcurrent.
+      if (!controller) {
+        pumpQueue();
+      }
     },
     [pumpQueue, updateItems],
   );

@@ -264,4 +264,87 @@ describe("useUploadQueue", () => {
     });
     expect(result.current.items).toHaveLength(0);
   });
+
+  it("never exceeds MAX_CONCURRENT_UPLOADS when remove() aborts an in-flight upload whose cancellation settles asynchronously", async () => {
+    const queryClient = createTestQueryClient();
+    const obs = createSpyObservability();
+    let activeTransfers = 0;
+    let maxObservedConcurrency = 0;
+    let settleAbortedFirst: (() => void) | null = null;
+    const resolvers = new Map<string, (record: FileRecord) => void>();
+
+    const port = createInMemoryFileTransferPort({
+      uploadDirectMultipart: (_url, asset, options) => {
+        activeTransfers += 1;
+        maxObservedConcurrency = Math.max(maxObservedConcurrency, activeTransfers);
+
+        return new Promise<FileRecord>((resolve, reject) => {
+          options?.signal?.addEventListener(
+            "abort",
+            () => {
+              // Simulate native transfer cancellation settling asynchronously
+              settleAbortedFirst = () => {
+                activeTransfers -= 1;
+                reject(createAbortError("Aborted after native cleanup"));
+              };
+            },
+            { once: true },
+          );
+
+          resolvers.set(asset.name, (rec) => {
+            activeTransfers -= 1;
+            resolve(rec);
+          });
+        });
+      },
+    });
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <ObservabilityContext.Provider value={obs}>{children}</ObservabilityContext.Provider>
+      </QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useUploadQueue({ transferPort: port }), { wrapper });
+
+    act(() => {
+      result.current.enqueue(
+        [makeAsset("1.pdf"), makeAsset("2.pdf"), makeAsset("3.pdf")],
+        "direct",
+      );
+    });
+
+    await waitFor(() => {
+      expect(activeTransfers).toBe(2);
+    });
+
+    const firstId = result.current.items.find((item) => item.asset.name === "1.pdf")?.id ?? "";
+
+    // Remove the first in-flight upload while its native cancellation is still pending
+    act(() => {
+      result.current.remove(firstId);
+    });
+
+    // Must NOT have started 3.pdf yet because 1.pdf's transfer hasn't settled!
+    expect(maxObservedConcurrency).toBeLessThanOrEqual(2);
+    expect(activeTransfers).toBe(2);
+
+    // Once 1.pdf's cancellation settles asynchronously, 3.pdf should start cleanly
+    await act(async () => {
+      settleAbortedFirst?.();
+    });
+
+    await waitFor(() => {
+      expect(result.current.items.find((item) => item.asset.name === "3.pdf")?.status).toBe(
+        "uploading",
+      );
+    });
+    expect(maxObservedConcurrency).toBeLessThanOrEqual(2);
+
+    // Clean up remaining promises
+    await act(async () => {
+      resolvers.get("2.pdf")?.(makeRecord("22222222-2222-4222-8222-222222222222", "2.pdf"));
+      resolvers.get("3.pdf")?.(makeRecord("33333333-3333-4333-8333-333333333333", "3.pdf"));
+    });
+  });
 });

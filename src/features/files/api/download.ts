@@ -54,9 +54,11 @@ function isFilePendingConflict(error: unknown): boolean {
     return false;
   }
   const err = error as FetchError;
-  return (
-    err.status === 409 || err.code === "FILE_PENDING" || err.data?.error?.code === "FILE_PENDING"
-  );
+  const errorCode = err.code ?? err.data?.error?.code;
+  if (typeof errorCode === "string" && errorCode.length > 0) {
+    return errorCode === "FILE_PENDING";
+  }
+  return err.status === 409;
 }
 
 async function withPendingRetry<T>(

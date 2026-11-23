@@ -146,6 +146,45 @@ function decodeSseErrorFrame(raw: string): AnyApiError {
   return decodeApiError(new Error(raw || "SSE stream error"));
 }
 
+function matchesMutationKeyPrefix(
+  candidate: MutationKey | undefined,
+  prefix: MutationKey,
+): boolean {
+  if (!candidate || candidate.length < prefix.length) {
+    return false;
+  }
+  for (let index = 0; index < prefix.length; index += 1) {
+    if (candidate[index] !== prefix[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function extractItemWithId(value: unknown): (Record<string, unknown> & { id: string }) | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate.id !== "string" || candidate.id.length === 0) {
+    return null;
+  }
+  return candidate as Record<string, unknown> & { id: string };
+}
+
+function extractIdFromVariables(variables: unknown): string | null {
+  if (typeof variables === "string" && variables.length > 0) {
+    return variables;
+  }
+  if (typeof variables === "object" && variables !== null) {
+    const id = (variables as { id?: unknown }).id;
+    if (typeof id === "string" && id.length > 0) {
+      return id;
+    }
+  }
+  return null;
+}
+
 const defaultMobileFetch: LiveFetchImpl = (url, init) => {
   if (Platform.OS === "web") {
     return globalThis.fetch(url, init) as Promise<LiveFetchResponse>;
@@ -224,6 +263,14 @@ export function useLiveQuery<
   fetchImplRef.current = fetchImpl ?? defaultMobileFetch;
 
   const bufferedSnapshotRef = useRef<unknown | null>(null);
+  const locallyCreatedRef = useRef<Map<string, Record<string, unknown> & { id: string }>>(
+    new Map(),
+  );
+  const locallyUpdatedRef = useRef<Map<string, Record<string, unknown> & { id: string }>>(
+    new Map(),
+  );
+  const locallyDeletedRef = useRef<Set<string>>(new Set());
+  const processedMutationsRef = useRef<WeakSet<object>>(new WeakSet());
   const wakeBackoffRef = useRef<(() => void) | null>(null);
   const resetAttemptRef = useRef<(() => void) | null>(null);
 
@@ -274,42 +321,126 @@ export function useLiveQuery<
     };
   }, [isEnabled, queryClient]);
 
-  // Subscribe to MutationCache to flush buffered SSE snapshots after active mutations settle
+  // Subscribe to MutationCache to track settled local mutations and flush buffered SSE snapshots
   useEffect(() => {
-    const unsubscribe = queryClient.getMutationCache().subscribe(() => {
+    const clearWindowTrackers = () => {
+      locallyCreatedRef.current.clear();
+      locallyUpdatedRef.current.clear();
+      locallyDeletedRef.current.clear();
+    };
+
+    const unsubscribe = queryClient.getMutationCache().subscribe((event) => {
+      const mutation = event.mutation;
+      if (
+        mutation &&
+        matchesMutationKeyPrefix(mutation.options.mutationKey, mutationKeyRef.current) &&
+        mutation.state.status === "success" &&
+        !processedMutationsRef.current.has(mutation)
+      ) {
+        processedMutationsRef.current.add(mutation);
+        const opTag = mutation.options.mutationKey?.[mutationKeyRef.current.length];
+        const settledData = mutation.state.data;
+        const variables = mutation.state.variables;
+
+        if (
+          opTag === "delete" ||
+          (settledData === undefined && extractIdFromVariables(variables) !== null)
+        ) {
+          const deletedId = extractIdFromVariables(variables);
+          if (deletedId) {
+            locallyDeletedRef.current.add(deletedId);
+            locallyCreatedRef.current.delete(deletedId);
+            locallyUpdatedRef.current.delete(deletedId);
+          }
+        } else if (opTag === "create") {
+          const createdItem = extractItemWithId(settledData);
+          if (createdItem) {
+            locallyCreatedRef.current.set(createdItem.id, createdItem);
+            locallyDeletedRef.current.delete(createdItem.id);
+          }
+        } else if (opTag === "toggle" || opTag === "update" || opTag === "patch") {
+          const updatedItem = extractItemWithId(settledData);
+          if (updatedItem) {
+            locallyUpdatedRef.current.set(updatedItem.id, updatedItem);
+            if (locallyCreatedRef.current.has(updatedItem.id)) {
+              locallyCreatedRef.current.set(updatedItem.id, updatedItem);
+            }
+          }
+        } else {
+          const item = extractItemWithId(settledData);
+          if (item) {
+            const varId = extractIdFromVariables(variables);
+            if (varId && varId === item.id) {
+              locallyUpdatedRef.current.set(item.id, item);
+            } else {
+              locallyCreatedRef.current.set(item.id, item);
+              locallyDeletedRef.current.delete(item.id);
+            }
+          }
+        }
+      }
+
       const activeMutations = queryClient.isMutating({
         mutationKey: mutationKeyRef.current,
       });
 
-      if (activeMutations === 0 && bufferedSnapshotRef.current !== null) {
-        queueMicrotask(() => {
-          const stillActive = queryClient.isMutating({
-            mutationKey: mutationKeyRef.current,
-          });
-          if (stillActive > 0 || bufferedSnapshotRef.current === null) {
-            return;
-          }
-          const flushData = bufferedSnapshotRef.current;
-          bufferedSnapshotRef.current = null;
-          queryClient.setQueryData(queryKeyRef.current as QueryKey, (current: unknown) => {
-            if (!current || !flushData) return flushData;
-            const currentObj = current as { data?: Array<{ id?: string }> };
-            const flushObj = flushData as { data?: Array<{ id?: string }> };
-            if (Array.isArray(currentObj.data) && Array.isArray(flushObj.data)) {
-              const flushItems = flushObj.data;
-              const currentItems = currentObj.data;
-              const flushIds = new Set(flushItems.map((item) => item.id));
-              const newlyAdded = currentItems.filter(
-                (item) => item.id && !flushIds.has(item.id) && !item.id.startsWith("optimistic-"),
-              );
-              return {
-                ...(flushData as Record<string, unknown>),
-                data: [...newlyAdded, ...flushItems],
-              };
+      if (activeMutations === 0) {
+        if (bufferedSnapshotRef.current !== null) {
+          queueMicrotask(() => {
+            const stillActive = queryClient.isMutating({
+              mutationKey: mutationKeyRef.current,
+            });
+            if (stillActive > 0 || bufferedSnapshotRef.current === null) {
+              return;
             }
-            return flushData;
+            const flushData = bufferedSnapshotRef.current;
+            bufferedSnapshotRef.current = null;
+
+            const createdItems = new Map(locallyCreatedRef.current);
+            const updatedItems = new Map(locallyUpdatedRef.current);
+            const deletedIds = new Set(locallyDeletedRef.current);
+            clearWindowTrackers();
+
+            queryClient.setQueryData(queryKeyRef.current as QueryKey, () => {
+              if (!flushData || typeof flushData !== "object") return flushData;
+              const flushObj = flushData as { data?: Array<{ id?: string }> };
+              if (Array.isArray(flushObj.data)) {
+                const mergedItems = flushObj.data
+                  .filter((item) => !item.id || !deletedIds.has(item.id))
+                  .map((item) => (item.id ? (updatedItems.get(item.id) ?? item) : item));
+
+                const presentIds = new Set(
+                  mergedItems.map((item) => item.id).filter((id): id is string => Boolean(id)),
+                );
+                const newlyCreated: Array<Record<string, unknown> & { id: string }> = [];
+                for (const [id, item] of createdItems) {
+                  if (!deletedIds.has(id) && !presentIds.has(id)) {
+                    newlyCreated.push(updatedItems.get(id) ?? item);
+                  }
+                }
+
+                return {
+                  ...(flushData as Record<string, unknown>),
+                  data: [...newlyCreated, ...mergedItems],
+                };
+              }
+              return flushData;
+            });
           });
-        });
+        } else if (
+          locallyCreatedRef.current.size > 0 ||
+          locallyUpdatedRef.current.size > 0 ||
+          locallyDeletedRef.current.size > 0
+        ) {
+          queueMicrotask(() => {
+            const stillActive = queryClient.isMutating({
+              mutationKey: mutationKeyRef.current,
+            });
+            if (stillActive === 0 && bufferedSnapshotRef.current === null) {
+              clearWindowTrackers();
+            }
+          });
+        }
       }
     });
 
@@ -363,6 +494,9 @@ export function useLiveQuery<
         bufferedSnapshotRef.current = parsed;
       } else {
         bufferedSnapshotRef.current = null;
+        locallyCreatedRef.current.clear();
+        locallyUpdatedRef.current.clear();
+        locallyDeletedRef.current.clear();
         queryClient.setQueryData(queryKeyRef.current as QueryKey, parsed);
       }
     };
@@ -489,6 +623,13 @@ export function useLiveQuery<
                 });
                 if (decoded.status === 401) {
                   resetAuthSessionCache();
+                }
+                if (
+                  typeof decoded.status === "number" &&
+                  decoded.status >= 400 &&
+                  decoded.status < 500 &&
+                  decoded.status !== 429
+                ) {
                   setLiveStatus("error");
                   haltedByErrorFrame = true;
                 }

@@ -71,4 +71,17 @@ describe("ThemeSwitcher Widget", () => {
     expect(screen.getByTestId("resolved-scheme")).toHaveTextContent("light");
     expect(kvStore.getString(THEME_MODE_STORAGE_KEY)).toBe("light");
   });
+
+  it("preserves TactilePressable neo-brutalist border-2 on elevated preset and mode buttons", () => {
+    renderWithProviders(<ThemeSwitcher />, {
+      initialPreset: "neo-brutalist",
+      initialColorScheme: "light",
+    });
+
+    const brutalistButton = screen.getByRole("button", { name: /Neo-Brutalist Studio/i });
+    expect(brutalistButton.props.className).toContain("border-2");
+
+    const lightModeButton = screen.getByRole("button", { name: /^Light$/i });
+    expect(lightModeButton.props.className).toContain("border-2");
+  });
 });

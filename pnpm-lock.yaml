@@ -20,56 +20,56 @@ importers:
         specifier: 11.4.1
         version: 11.4.1(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))
       '@rn-primitives/accordion':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/alert-dialog':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/avatar':
-        specifier: ^1.5.2
-        version: 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/checkbox':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/dialog':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/dropdown-menu':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/label':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/popover':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/portal':
-        specifier: ^1.5.3
-        version: 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
       '@rn-primitives/progress':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/radio-group':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/select':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/separator':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/slot':
-        specifier: ^1.5.2
-        version: 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/switch':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/tabs':
-        specifier: ^1.5.2
-        version: 1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@rn-primitives/tooltip':
-        specifier: ^1.5.2
-        version: 1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+        specifier: 1.2.0
+        version: 1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.108.2
         version: 5.108.2
@@ -2512,8 +2512,8 @@ packages:
   '@react-navigation/routers@7.6.6':
     resolution: {integrity: sha512-h7YSfGDkgsJgivbxUeYS5nw2SXiPT2Y951k3lEnSKUEViaR6xbSOEl3WqPiJPagQCzt89dAM8T/N/NR/t+1uMg==}
 
-  '@rn-primitives/accordion@1.5.2':
-    resolution: {integrity: sha512-sK9GuVWAIIUcOZO7Hizes5i5oC6IW+PFb6KWh0nQRzET2LzETnLIPgbce+FC+F615tr6r5s4CuOrN19szZcYhQ==}
+  '@rn-primitives/accordion@1.2.0':
+    resolution: {integrity: sha512-gt1NQC6XTbSN6KEqX3QDbvqO4kXFDKhQGiljL/pq1WO0iJNVaV47/3E8fLOZLEuj2FSkQblNhSvVc4WU/7qHoA==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2524,45 +2524,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/alert-dialog@1.5.2':
-    resolution: {integrity: sha512-1x5alI5pQP9CiuzMt+aXpoEXAUMofen9djG1M5cGYfhpU4epk65SV6TR64BvFItVdU1KbSn/3UDZBMVAChcMAQ==}
-    peerDependencies:
-      '@rn-primitives/portal': '*'
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/avatar@1.5.2':
-    resolution: {integrity: sha512-anWmIPe0foF6k4L8FH0m3RY61XBcF9GbObAIyDh7NYNSI4H3AHkSYxAdcWrM6+X8pGcRWLh93ed1TgreHUKyMQ==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/checkbox@1.5.2':
-    resolution: {integrity: sha512-wZzxfDHms+DKCiZssbM3KUuDg2A7dmRDLTHhAyq/QPqaxSwvzp7O6ul/E6fmiSQ2s+A37UwjBTzCNoSNGYexdQ==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/dialog@1.5.2':
-    resolution: {integrity: sha512-FNrpYIULeZpFY5VFIaaU2EH1VxF52B4AfNlqic9eAKG74JAtRSoew/IMJOnsH4ujR/AA4I+9JZGZ35adFuc7DA==}
+  '@rn-primitives/alert-dialog@1.2.0':
+    resolution: {integrity: sha512-/XxvQVRMnIyQo29iuQ631CHjghGKY8U4k3gbsS2MCGP0hglZVFoBRiAF3Bgyr16LxWRu1DoPltvzwOrUCsB+YQ==}
     peerDependencies:
       '@rn-primitives/portal': '*'
       react: '*'
@@ -2574,8 +2537,32 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/dropdown-menu@1.5.2':
-    resolution: {integrity: sha512-uFb4nsRM8ifWNJCyOYERUtzZtdrzEwVcFAH1qoHdsMuNE2m/kz2Qf8zZpSl+FFekuPcZjXbwC/REUYNGIW/XHw==}
+  '@rn-primitives/avatar@1.2.0':
+    resolution: {integrity: sha512-ic029KaJRADdjmjPzpaSaZ9QrtgGF8DnAA7TcQ/gYqUfLXjkbfzsjARKv7NtEoJLjWAcjIAK6R8JkcbMfPtYig==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/checkbox@1.2.0':
+    resolution: {integrity: sha512-FU/c81eoo6zGm4J4uCccjnqijrQ0grMkt6W3xhnOFkxqxiU2QrnlXN7ddhm2yN+s8CNnke4bOj/xr78wIaYfiw==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/dialog@1.2.0':
+    resolution: {integrity: sha512-18q+SZe7ioyMQRYIL+aSleqque1Ky18LOQGA8kDPryrGMf16LYStd61SshMlluqhL2T00ZkEjsSVgpU5ZXvcnQ==}
     peerDependencies:
       '@rn-primitives/portal': '*'
       react: '*'
@@ -2587,32 +2574,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/hooks@1.5.2':
-    resolution: {integrity: sha512-7XUVqR/nS309Fpltd19GflRTUPE/bYwZnOh/ofEDw7UMMelfI5CIgc70BXfZPHAkrjG9/tU3JAZl0KWSrWLJCQ==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/label@1.5.2':
-    resolution: {integrity: sha512-x4eYuhO8cGv9xzo11yQGswXQVF8lUH1I4Ph5wkVtfN3Bp/+kL58GT9QXrupHCY8Z5ivIWBSUdVO/tSJKJrSybw==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/popover@1.5.2':
-    resolution: {integrity: sha512-eA4oYy96fV67/wiT+5h6BAFAQglV8i+z1LY0vKW7psoXiwca7TrDTAMrEiu2uUagJNwb9drscIQUoPq9Qz94Aw==}
+  '@rn-primitives/dropdown-menu@1.2.0':
+    resolution: {integrity: sha512-TJDDr8VQfw9CRZ7xZ6kBYLVMqL1xFVC5ZZ4sfRmWP6PCT0lNks4XqGuTFLeVVlNLPSmzt9GKC2DZqzDXui8/NQ==}
     peerDependencies:
       '@rn-primitives/portal': '*'
       react: '*'
@@ -2624,8 +2587,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/portal@1.5.3':
-    resolution: {integrity: sha512-P5k+StpUYVFmW6RwmIdKtvMPqpEwHh6q1GTroDFQsvykx3Z88iBskR2z1Uarnc0MO/lnoCWRJmDz3Cccd2u77w==}
+  '@rn-primitives/hooks@1.3.0':
+    resolution: {integrity: sha512-BR97reSu7uVDpyMeQdRJHT0w8KdS6jdYnOL6xQtqS2q3H6N7vXBlX4LFERqJZphD+aziJFIAJ3HJF1vtt6XlpQ==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2636,8 +2599,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/progress@1.5.2':
-    resolution: {integrity: sha512-GLptzS8kATisBI9fbDnAK1CTo7FsEf9LIFvVElVUf9tJWcWFpY2B19nH4iWC7ZJQ+IDtc6aiJ3RoMdk6EOpCzA==}
+  '@rn-primitives/label@1.2.0':
+    resolution: {integrity: sha512-eThBr6vn2jS81ZS4JNcg0+02TkEircH4bZmjF4IZUDl4XRpevwK95NyOkbfhGYmpVbAuisAVxDmvNOQ4OVjfug==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2648,20 +2611,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/radio-group@1.5.2':
-    resolution: {integrity: sha512-8mp5TtpQliBOYTqY1P3p21WG3sJ04QaQ9Vt/bKppHDn9hVy18ch2kqqCu4Rw7DiasCghzJbxbbMaOzL0zkg0Yw==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/select@1.5.2':
-    resolution: {integrity: sha512-39+5CeuPB0700pwIjboLj37eB+nhAREZgP+czd0pkFEknOOWXaVgKexiT88Q4piKZQ50BjDfvbOMP9mfJN1r/w==}
+  '@rn-primitives/popover@1.2.0':
+    resolution: {integrity: sha512-QJ2T+RcF1FyTQy58Nz8Bwy5lnan5Rt7xQPl8rB2n7DBCGOnZNhEub5LoHm+gjmskGo9t1JyNKoEAD7I4j/7jQQ==}
     peerDependencies:
       '@rn-primitives/portal': '*'
       react: '*'
@@ -2673,8 +2624,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/separator@1.5.2':
-    resolution: {integrity: sha512-/r0yx8zmc83hg5oKby434nTCKYe+Apmq1dDzExiUPs/qR+K27c9cjJ6GMsn7EqvmTQyniEJ0ZIBbPVGJAeGByw==}
+  '@rn-primitives/portal@1.2.0':
+    resolution: {integrity: sha512-vLnidkk1EBuRwzUJ48NDzpNk+25VLm8jEao+2QVLqxtCQXlPik+RXb2GmxSb3/brF2zK5pzOp3RYbCp7g+WJkA==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2685,8 +2636,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/slot@1.5.2':
-    resolution: {integrity: sha512-TGSMB8hMALrcI6d5logiS8/0YzPRUQvsHghaF7FAuia+MF84WZS96Jvm959W4sDEP26AiDJtuQfCkTHOv0oxbw==}
+  '@rn-primitives/progress@1.2.0':
+    resolution: {integrity: sha512-bbO4WGSNAd2idYDW0ma4xCX9UFOjNK3U4F4hLRhMKglz3c/QVYfpKvlGQ0Y0d7kpelA7MQizvFeqGGYfxSuisw==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2697,8 +2648,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/switch@1.5.2':
-    resolution: {integrity: sha512-0VOYYl670I84345wXuNT3NbG6jOvRWw2YNGEe/qhlIENj0LpdBs7SJebVWdnzPI3HIrESa0uOEhTB3i0/0EsXw==}
+  '@rn-primitives/radio-group@1.2.0':
+    resolution: {integrity: sha512-H/u3E4S6FmvDyWSgs3uLg0I5t12i8E2JGJRelbKv5QzLSLdq8684dLfCbwuNjs/OzDAi5x1l27bf9+Jw42MvNw==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2709,20 +2660,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/tabs@1.5.2':
-    resolution: {integrity: sha512-YrI028uvrjMJw0rXRnwcAlQedzIueT20ZHV20diHm18OP6vEgjwMvtwoe5EwH13u8fH+6NZqkr4M7tBpWIkwuQ==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native:
-        optional: true
-      react-native-web:
-        optional: true
-
-  '@rn-primitives/tooltip@1.5.2':
-    resolution: {integrity: sha512-4gkWVo6whikkUxSaHofg/haADCVowNMa2JFNVblx1zmcJU6eAw9r6poJSWFQue/TdoesS8qPfkFWvtZRg+UcjQ==}
+  '@rn-primitives/select@1.2.0':
+    resolution: {integrity: sha512-W3qFkdSAFPnjNMM7II5MiLCItjWOGXr8f+3obPtLAHcWrcsX/d1KogmplWXwmhBvVStCgE1OpJAD3DE2CHx9Rw==}
     peerDependencies:
       '@rn-primitives/portal': '*'
       react: '*'
@@ -2734,8 +2673,8 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/types@1.5.2':
-    resolution: {integrity: sha512-qoJOeCGBvQCTyEdKl4CL5MHwTLA2P3Lr6EzuJAxQcc/dUL0ev7IDtsAxHpoLraDD2kZdIkqnFtNsasr2iH25ZQ==}
+  '@rn-primitives/separator@1.2.0':
+    resolution: {integrity: sha512-1suBbXNm7cNEP/eKshh3xsn5dPNp532qU9fBfBA5mW9ZN5pUO3wrwv974heluVX/pOXBZ+li3HGN/Aos134stA==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -2746,8 +2685,69 @@ packages:
       react-native-web:
         optional: true
 
-  '@rn-primitives/utils@1.5.2':
-    resolution: {integrity: sha512-pNt1hemLFnzYwz7V8s+owMo2KG/oKDO++OuscgWz9hcUhn5CVGpgJ9HEnpAAcm406QPorxKlqL/vUDcQj7H8ww==}
+  '@rn-primitives/slot@1.2.0':
+    resolution: {integrity: sha512-cpbn+JLjSeq3wcA4uqgFsUimMrWYWx2Ks7r5rkwd1ds1utxynsGkLOKpYVQkATwWrYhtcoF1raxIKEqXuMN+/w==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/switch@1.2.0':
+    resolution: {integrity: sha512-M4r4LvLUFgn3SIkrMuEkDIxnRbHPLZF2cvKhdHmsk1vk6DSIw3WxYEA+0GkU6a8wnOCFzWRl4kHh5+x86bo1/w==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/tabs@1.2.0':
+    resolution: {integrity: sha512-sKqVYQD1s46eS8kGBsCGxJrtZ4my+sjXD5m2auGSdTJmJ8dNYqZJEI1caiMm64ZvRuQDe2bFsekAFGexBD4qUQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/tooltip@1.2.0':
+    resolution: {integrity: sha512-Fn1Y/maW1o64QI+nmBj2jBI/KdCEXv8kVGbDjjDFI68KUxDjuig/hACLiD7fEbLBhZqB/QnHUSRsnPUUOOVGdA==}
+    peerDependencies:
+      '@rn-primitives/portal': '*'
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/types@1.2.0':
+    resolution: {integrity: sha512-b+6zKgdKVqAfaFPSfhwlQL0dnPQXPpW890m3eguC0VDI1eOsoEvUfVb6lmgH4bum9MmI0xymq4tOUI/fsKLoCQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
+        optional: true
+
+  '@rn-primitives/utils@1.2.0':
+    resolution: {integrity: sha512-vLXV5NuxIHDeb4Bw57FzdUh89/g8gz6GERm8TsbJaSUPsDXfnC/ffeYiZJb0LxNteKE3Nr8na4Jy2n26tFil7w==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -9392,12 +9392,12 @@ snapshots:
     dependencies:
       nanoid: 3.3.20
 
-  '@rn-primitives/accordion@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/accordion@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-accordion': 1.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9407,13 +9407,13 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/alert-dialog@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/alert-dialog@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-alert-dialog': 1.2.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9423,22 +9423,22 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/avatar@1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/avatar@1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
       react-native-web: 0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@rn-primitives/checkbox@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/checkbox@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-checkbox': 1.4.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9448,13 +9448,13 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/dialog@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/dialog@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-dialog': 1.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9464,14 +9464,14 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/dropdown-menu@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/dropdown-menu@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-dropdown-menu': 2.2.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/utils': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/utils': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9481,19 +9481,19 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/hooks@1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/hooks@1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
       react-native-web: 0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@rn-primitives/label@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/label@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-label': 2.1.17(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9503,13 +9503,13 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/popover@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/popover@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-popover': 1.3.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9519,7 +9519,7 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))':
+  '@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))':
     dependencies:
       react: 18.3.1
       zustand: 5.1.0(@types/react@18.3.31)(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
@@ -9531,11 +9531,11 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  '@rn-primitives/progress@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/progress@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-progress': 1.2.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9545,11 +9545,11 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/radio-group@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/radio-group@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-radio-group': 1.5.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9559,13 +9559,13 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/select@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/select@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-select': 2.4.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9575,11 +9575,11 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/separator@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/separator@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-separator': 1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9589,18 +9589,18 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/slot@1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/slot@1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
       react-native-web: 0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@rn-primitives/switch@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/switch@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-switch': 1.4.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9610,11 +9610,11 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/tabs@1.5.2(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/tabs@1.2.0(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-tabs': 1.2.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9624,13 +9624,13 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/tooltip@1.5.2(@rn-primitives/portal@1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/tooltip@1.2.0(@rn-primitives/portal@1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1)))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-tooltip': 1.4.1(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@rn-primitives/hooks': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/portal': 1.5.3(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
-      '@rn-primitives/slot': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
-      '@rn-primitives/types': 1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/hooks': 1.3.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/portal': 1.2.0(@types/react@18.3.31)(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)(use-sync-external-store@1.7.0(react@18.3.1))
+      '@rn-primitives/slot': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
+      '@rn-primitives/types': 1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
@@ -9640,14 +9640,14 @@ snapshots:
       - '@types/react-dom'
       - react-dom
 
-  '@rn-primitives/types@1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/types@1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
     optionalDependencies:
       react-native: 0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1)
       react-native-web: 0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@rn-primitives/utils@1.5.2(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
+  '@rn-primitives/utils@1.2.0(react-native-web@0.19.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.76.9(@babel/core@7.29.13(supports-color@8.1.1))(@babel/preset-env@7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@18.3.31)(react@18.3.1)(supports-color@8.1.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
     optionalDependencies:

@@ -46,14 +46,22 @@ export interface SelectTriggerProps extends SelectPrimitive.TriggerProps {
 }
 
 export const SelectTrigger = forwardRef<SelectPrimitive.TriggerRef, SelectTriggerProps>(
-  ({ className, invalid = false, disabled, children, ...props }, ref) => {
+  ({ className, invalid = false, disabled, accessibilityState, children, ...props }, ref) => {
     const theme = useOptionalTheme();
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const rootContext = SelectPrimitive.useRootContext();
+    const isExpanded = "open" in rootContext ? Boolean(rootContext.open) : false;
+    const isDisabled = Boolean(disabled ?? rootContext.disabled);
 
     return (
       <SelectPrimitive.Trigger
         ref={ref}
         disabled={disabled}
+        accessibilityState={{
+          ...accessibilityState,
+          disabled: accessibilityState?.disabled ?? isDisabled,
+          expanded: accessibilityState?.expanded ?? isExpanded,
+        }}
         className={cn(
           PRESET_TRIGGER_RADIUS[preset],
           "bg-surface-container-lowest min-h-12 flex-row items-center justify-between gap-2 border px-4 py-3",

@@ -1,10 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
 import { AUTH_QUERY_KEYS } from "@/shared/api/query-keys";
 import {
   defaultSessionQueryFn,
   getAuthSessionQueryOptions,
-  registerQueryClient,
   type SessionData,
 } from "@/shared/lib/auth-session-bridge";
 import {
@@ -25,10 +24,6 @@ export interface UseCanOptions {
 export function useCan({ role, action, resource, user: directUser }: UseCanOptions): boolean {
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    return registerQueryClient(queryClient);
-  }, [queryClient]);
-
   const bridgeOptions = getAuthSessionQueryOptions();
   const cachedSession = queryClient.getQueryData<SessionData | null>(AUTH_QUERY_KEYS.session());
 
@@ -40,7 +35,6 @@ export function useCan({ role, action, resource, user: directUser }: UseCanOptio
   >({
     queryKey: AUTH_QUERY_KEYS.session(),
     enabled: directUser === undefined,
-    initialData: () => cachedSession ?? null,
     staleTime:
       typeof bridgeOptions?.staleTime === "number" ? bridgeOptions.staleTime : 5 * 60 * 1000,
     queryFn:

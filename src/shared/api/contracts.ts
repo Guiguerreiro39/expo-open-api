@@ -28,6 +28,7 @@ export interface BaseApiErrorFields {
   readonly message: string;
   readonly requestId: string;
   readonly details?: unknown;
+  readonly cause?: unknown;
 }
 
 export class SchemaDecodeError extends Data.TaggedError("SchemaDecodeError")<{
@@ -142,21 +143,23 @@ export function decodeApiError(error: unknown): AnyApiError {
     const requestId = err.requestId ?? errorEnv?.requestId ?? "unknown";
     const details = err.details ?? errorEnv?.details;
 
+    const cause = (error as { cause?: unknown }).cause ?? error;
+
     switch (status) {
       case 400:
-        return new BadRequestError({ status: 400, code, message, requestId, details });
+        return new BadRequestError({ status: 400, code, message, requestId, details, cause });
       case 401:
-        return new UnauthorizedError({ status: 401, code, message, requestId, details });
+        return new UnauthorizedError({ status: 401, code, message, requestId, details, cause });
       case 403:
-        return new ForbiddenError({ status: 403, code, message, requestId, details });
+        return new ForbiddenError({ status: 403, code, message, requestId, details, cause });
       case 404:
-        return new NotFoundError({ status: 404, code, message, requestId, details });
+        return new NotFoundError({ status: 404, code, message, requestId, details, cause });
       case 408:
-        return new RequestTimeoutError({ status: 408, code, message, requestId, details });
+        return new RequestTimeoutError({ status: 408, code, message, requestId, details, cause });
       case 409:
-        return new ConflictError({ status: 409, code, message, requestId, details });
+        return new ConflictError({ status: 409, code, message, requestId, details, cause });
       case 413:
-        return new PayloadTooLargeError({ status: 413, code, message, requestId, details });
+        return new PayloadTooLargeError({ status: 413, code, message, requestId, details, cause });
       case 422:
         return new ValidationError({
           status: 422,
@@ -164,12 +167,13 @@ export function decodeApiError(error: unknown): AnyApiError {
           message,
           requestId,
           details,
+          cause,
           issues: extractValidationIssues(details ?? errorEnv?.issues),
         });
       case 429:
-        return new RateLimitError({ status: 429, code, message, requestId, details });
+        return new RateLimitError({ status: 429, code, message, requestId, details, cause });
       case 500:
-        return new InternalServerError({ status: 500, code, message, requestId, details });
+        return new InternalServerError({ status: 500, code, message, requestId, details, cause });
       case 503:
         return new ServiceUnavailableError({
           status: 503,
@@ -177,10 +181,11 @@ export function decodeApiError(error: unknown): AnyApiError {
           message,
           requestId,
           details,
+          cause,
           data: err.data,
         });
       default:
-        return new UnknownError({ status, code, message, requestId, cause: error });
+        return new UnknownError({ status, code, message, requestId, cause });
     }
   }
 
