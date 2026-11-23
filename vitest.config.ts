@@ -43,6 +43,22 @@ export default defineConfig({
       nativewind: path.resolve(__dirname, "src/test/mocks/adapters/mock-nativewind.ts"),
       "expo-system-ui": path.resolve(__dirname, "src/test/mocks/adapters/mock-system-ui.ts"),
       "expo-haptics": path.resolve(__dirname, "src/test/mocks/adapters/mock-haptics.ts"),
+      "expo-secure-store": path.resolve(__dirname, "src/test/mocks/adapters/mock-secure-store.ts"),
+      "expo-constants": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-constants.ts"),
+      "expo-linking": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-linking.ts"),
+      "expo-splash-screen": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-splash-screen.ts",
+      ),
+      "expo-router": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-router.tsx"),
+      "react-native-svg": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-react-native-svg.tsx",
+      ),
+      "lucide-react-native": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-lucide-react-native.tsx",
+      ),
     },
   },
   test: {
@@ -51,7 +67,14 @@ export default defineConfig({
     exclude: ["node_modules", "dist", "ios", "android", ".expo"],
     server: {
       deps: {
-        inline: [/@rn-primitives\//, /^nativewind$/, /^react-native-css-interop/, /^expo-/],
+        inline: [
+          /@rn-primitives\//,
+          /^nativewind$/,
+          /^react-native-css-interop/,
+          /^expo-/,
+          /@better-auth\//,
+          /better-auth\//,
+        ],
       },
     },
     coverage: {

@@ -60,6 +60,14 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+      "a11y": {
+        "useValidAriaRole": {
+          "level": "error",
+          "options": {
+            "ignoreNonDom": true
+          }
+        }
+      },
       "correctness": {
         "noUnusedImports": "error",
         "noUnusedVariables": "error",

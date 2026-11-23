@@ -1,31 +1,37 @@
-import type { QueryClient, UseQueryOptions } from "@tanstack/react-query";
+import type { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { createContext, useContext } from "react";
 import { AUTH_QUERY_KEYS } from "@/shared/api/query-keys";
 
+export const BEARER_TOKEN_STORAGE_KEY = "expo_open_api_bearer_token";
+
 export interface SessionData {
-  user?: {
-    id: string;
-    name?: string;
-    email?: string;
-    role?: string | null;
-    image?: string | null;
-    [key: string]: unknown;
+  readonly user?: {
+    readonly id: string;
+    readonly name?: string;
+    readonly email?: string;
+    readonly role?: string | null;
+    readonly image?: string | null;
+    readonly [key: string]: unknown;
   } | null;
-  session?: {
-    id?: string;
-    token?: string;
-    expiresAt?: string;
-    [key: string]: unknown;
+  readonly session?: {
+    readonly id?: string;
+    readonly userId?: string;
+    readonly token?: string;
+    readonly expiresAt?: string | Date;
+    readonly [key: string]: unknown;
   } | null;
 }
 
-export type AuthSessionQueryOptions = UseQueryOptions<
-  SessionData | null,
-  unknown,
-  SessionData | null,
-  readonly ["auth", "session"]
->;
+export interface AuthSessionQueryOptions {
+  readonly queryKey: readonly ["auth", "session"];
+  readonly queryFn?: QueryFunction<SessionData | null, readonly ["auth", "session"]> | symbol;
+  readonly staleTime?: number | "static" | ((...args: never[]) => unknown);
+  readonly gcTime?: number;
+}
 
 export type UnauthorizedListener = () => void;
+
+export const defaultSessionQueryFn = async (): Promise<SessionData | null> => null;
 
 let cachedBearerToken: string | null = null;
 let sessionQueryOptions: AuthSessionQueryOptions | null = null;
@@ -80,4 +86,10 @@ export function resetAuthSessionCache(): void {
       // Isolate listener errors during session reset
     }
   }
+}
+
+export const AuthBootstrapContext = createContext<boolean>(false);
+
+export function useIsAuthBootstrapping(): boolean {
+  return useContext(AuthBootstrapContext);
 }

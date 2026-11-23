@@ -5,9 +5,13 @@ import type { ReactElement, ReactNode } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { type AppComposition, createAppComposition } from "@/app/composition";
 import { type AppRuntime, AppRuntimeContext } from "@/app/runtime";
+
+export { type AppComposition, createAppComposition as createTestComposition };
+
 import { AUTH_QUERY_KEYS } from "@/shared/api/query-keys";
-import { setCachedBearerToken } from "@/shared/lib/auth-session-bridge";
+import { AuthBootstrapContext, setCachedBearerToken } from "@/shared/lib/auth-session-bridge";
 import type { ThemeMode, ThemePreset } from "@/shared/lib/theme/presets";
+import { ObservabilityContext } from "@/shared/observability/observability-context";
 import {
   createSpyObservability,
   type SpyObservabilityAdapter,
@@ -16,6 +20,7 @@ import {
   type CredentialStorePort,
   createInMemoryCredentialStore,
 } from "@/shared/storage/credential-store";
+import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { createInMemoryKvStore, type KeyValueStorePort } from "@/shared/storage/kv-store";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
 import { buildTestSessionPayload, type TestAuthUser } from "./mocks/handlers/auth";
@@ -49,6 +54,7 @@ export interface RenderWithProvidersOptions extends Omit<RenderOptions, "wrapper
   readonly kvStore?: KeyValueStorePort;
   readonly initialPreset?: ThemePreset;
   readonly initialColorScheme?: ThemeMode;
+  readonly isBootstrapping?: boolean;
 }
 
 export interface RenderWithProvidersResult extends RenderResult {
@@ -64,6 +70,7 @@ interface TestProvidersProps {
   readonly composition: AppComposition;
   readonly initialPreset?: ThemePreset;
   readonly initialColorScheme?: ThemeMode;
+  readonly isBootstrapping?: boolean;
   readonly children: ReactNode;
 }
 
@@ -71,20 +78,27 @@ function TestProviders({
   composition,
   initialPreset,
   initialColorScheme,
+  isBootstrapping = false,
   children,
 }: TestProvidersProps) {
   return (
     <SafeAreaProvider initialMetrics={TEST_SAFE_AREA_METRICS}>
       <QueryClientProvider client={composition.queryClient}>
         <AppRuntimeContext.Provider value={composition.runtime}>
-          <ThemeProvider
-            storage={composition.kvStore}
-            initialPreset={initialPreset}
-            initialColorScheme={initialColorScheme}
-          >
-            {children}
-            <PortalHost />
-          </ThemeProvider>
+          <ObservabilityContext.Provider value={composition.observability}>
+            <CredentialStoreContext.Provider value={composition.credentialStore}>
+              <AuthBootstrapContext.Provider value={isBootstrapping}>
+                <ThemeProvider
+                  storage={composition.kvStore}
+                  initialPreset={initialPreset}
+                  initialColorScheme={initialColorScheme}
+                >
+                  {children}
+                  <PortalHost />
+                </ThemeProvider>
+              </AuthBootstrapContext.Provider>
+            </CredentialStoreContext.Provider>
+          </ObservabilityContext.Provider>
         </AppRuntimeContext.Provider>
       </QueryClientProvider>
     </SafeAreaProvider>
@@ -103,6 +117,7 @@ export function renderWithProviders(
     kvStore = createInMemoryKvStore(),
     initialPreset,
     initialColorScheme,
+    isBootstrapping = false,
     ...renderOptions
   } = options;
 
@@ -138,6 +153,7 @@ export function renderWithProviders(
       composition={composition}
       initialPreset={initialPreset}
       initialColorScheme={initialColorScheme}
+      isBootstrapping={isBootstrapping}
     >
       {ui}
     </TestProviders>,
