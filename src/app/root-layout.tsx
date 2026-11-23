@@ -5,17 +5,26 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useAppBootstrap } from "@/app/bootstrap";
 import { createAppComposition } from "@/app/composition";
 import { AppRuntimeContext } from "@/app/runtime";
+import { AuthBootstrapContext } from "@/shared/lib/auth-session-bridge";
+import { ObservabilityContext } from "@/shared/observability/observability-context";
+import { createSecureStoreCredentialStore } from "@/shared/storage/credential-store";
+import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
 
 void SplashScreen.preventAutoHideAsync();
 
 export function RootLayout() {
-  const [composition] = useState(() => createAppComposition());
+  const [composition] = useState(() =>
+    createAppComposition({
+      credentialStore: createSecureStoreCredentialStore(),
+    }),
+  );
+  const { isBootstrapping } = useAppBootstrap(composition);
 
   useEffect(() => {
-    void SplashScreen.hideAsync();
     return () => {
       void composition.dispose();
     };
@@ -25,13 +34,23 @@ export function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={composition.queryClient}>
         <AppRuntimeContext.Provider value={composition.runtime}>
-          <ThemeProvider storage={composition.kvStore}>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <PortalHost />
-          </ThemeProvider>
+          <ObservabilityContext.Provider value={composition.observability}>
+            <CredentialStoreContext.Provider value={composition.credentialStore}>
+              <AuthBootstrapContext.Provider value={isBootstrapping}>
+                <ThemeProvider storage={composition.kvStore}>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="+not-found"
+                      options={{ headerShown: true, title: "Not Found" }}
+                    />
+                  </Stack>
+                  <PortalHost />
+                </ThemeProvider>
+              </AuthBootstrapContext.Provider>
+            </CredentialStoreContext.Provider>
+          </ObservabilityContext.Provider>
         </AppRuntimeContext.Provider>
       </QueryClientProvider>
     </SafeAreaProvider>

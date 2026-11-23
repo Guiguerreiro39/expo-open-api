@@ -1,6 +1,11 @@
 import { type DefaultOptions, MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { decodeApiError } from "@/shared/api/contracts";
-import { registerQueryClient, resetAuthSessionCache } from "@/shared/lib/auth-session-bridge";
+import {
+  BEARER_TOKEN_STORAGE_KEY,
+  onAuthUnauthorized,
+  registerQueryClient,
+  resetAuthSessionCache,
+} from "@/shared/lib/auth-session-bridge";
 import { createObservabilityService } from "@/shared/observability/factory";
 import { type ObservabilityService, recordErrorOrDefect } from "@/shared/observability/port";
 import {
@@ -36,6 +41,7 @@ function isUnauthorizedError(error: unknown): boolean {
 
 function createManagedQueryClient(
   observability: ObservabilityService,
+  credentialStore: CredentialStorePort,
   options?: {
     defaultQueryOptions?: DefaultOptions["queries"];
     defaultMutationOptions?: DefaultOptions["mutations"];
@@ -49,6 +55,7 @@ function createManagedQueryClient(
 
     if (isUnauthorizedError(decoded)) {
       resetAuthSessionCache();
+      void credentialStore.deleteItem(BEARER_TOKEN_STORAGE_KEY);
       observability.clearUserContext();
       clientRef?.clear();
     }
@@ -96,15 +103,20 @@ export function createAppComposition(options: AppCompositionOptions = {}): AppCo
   const kvStore = options.kvStore ?? createInMemoryKvStore();
   const queryClient =
     options.queryClient ??
-    createManagedQueryClient(observability, {
+    createManagedQueryClient(observability, credentialStore, {
       defaultQueryOptions: options.defaultQueryOptions,
       defaultMutationOptions: options.defaultMutationOptions,
     });
 
   const runtime = createAppRuntime(undefined, { observability });
   const unregisterQueryClient = registerQueryClient(queryClient);
+  const unregisterUnauthorized = onAuthUnauthorized(() => {
+    void credentialStore.deleteItem(BEARER_TOKEN_STORAGE_KEY);
+    observability.clearUserContext();
+  });
 
   const dispose = async () => {
+    unregisterUnauthorized();
     unregisterQueryClient();
     queryClient.clear();
     await runtime.dispose();
