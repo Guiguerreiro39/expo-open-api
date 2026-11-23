@@ -164,6 +164,19 @@ _Avoid_: Transfer manager, upload array, progress tracker
 The system-level sharing interface invoked via `expo-sharing` (`Sharing.shareAsync`) that allows users to save downloaded files to their local filesystem ("Save to Files"), AirDrop, or dispatch to external mobile applications.
 _Avoid_: System share, activity controller, native export
 
+**Spy Observability Adapter**:
+An in-memory test double of `ObservabilityPort` that records telemetry events, defects, and render crashes in memory, enabling test assertions and preventing test runs from emitting remote telemetry.
+_Avoid_: Mock logger, test tracer, observability stub
+
+**Continuous Native Generation (CNG) Validation**:
+The prebuild verification step (`expo prebuild --clean --no-install`) ensuring that native iOS and Android configuration plugins, entitlements, and manifests synthesize deterministically without local build errors.
+_Avoid_: Native build check, prebuild run, gradle test
+
+**Runtime Verification Skill**:
+The automated agent verification procedure (`verify-expo-open-api`) executing the 5-phase loop (`Launch`, `Doctor`, `Drive`, `Evidence`, `Cleanup`) to guarantee end-to-end runtime health before PR submission.
+_Avoid_: Integration test script, smoke runner, QA workflow
+
+
 
 
 
