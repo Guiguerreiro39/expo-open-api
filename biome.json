@@ -77,14 +77,27 @@
           "level": "error",
           "options": {
             "skip": [
+              "AlertDescription",
+              "AlertDialogAction",
+              "AlertDialogCancel",
+              "AlertDialogDescription",
+              "AlertDialogTitle",
+              "AlertTitle",
+              "AvatarFallback",
               "Badge",
               "Button",
               "CardDescription",
               "CardTitle",
+              "DialogDescription",
+              "DialogTitle",
+              "DropdownMenuLabel",
               "FormDescription",
               "FormLabel",
               "FormMessage",
-              "Label"
+              "Label",
+              "SelectLabel",
+              "SheetDescription",
+              "SheetTitle"
             ]
           }
         }

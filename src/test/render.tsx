@@ -23,6 +23,7 @@ import {
 import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { createInMemoryKvStore, type KeyValueStorePort } from "@/shared/storage/kv-store";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
+import { ToastProvider } from "@/shared/ui/toast";
 import { buildTestSessionPayload, type TestAuthUser } from "./mocks/handlers/auth";
 import { mockAuthSession } from "./msw-server";
 
@@ -93,7 +94,7 @@ function TestProviders({
                   initialPreset={initialPreset}
                   initialColorScheme={initialColorScheme}
                 >
-                  {children}
+                  <ToastProvider>{children}</ToastProvider>
                   <PortalHost />
                 </ThemeProvider>
               </AuthBootstrapContext.Provider>

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { transform as esbuildTransform } from "esbuild";
 import { defineConfig } from "vitest/config";
@@ -5,21 +6,38 @@ import { reactNative } from "vitest-native";
 
 /**
  * Some React Native ecosystem packages (e.g. `@rn-primitives/*`) publish raw JSX
- * inside `.js` / `.mjs` files. Transform them before Vite import analysis.
+ * inside `.js` / `.mjs` files and use extensionless relative re-exports in `.mjs`
+ * entrypoints (`export * from "./label"`). Prefer `.mjs` siblings and transform JSX
+ * before Vite import analysis.
  */
 function transformRnEcosystemJsx() {
   return {
     name: "transform-rn-ecosystem-jsx",
     enforce: "pre" as const,
-    async transform(code: string, id: string) {
+    resolveId(source: string, importer?: string) {
       if (
-        id.includes("node_modules/@rn-primitives/") &&
-        (id.endsWith(".js") || id.endsWith(".mjs"))
+        importer?.includes("node_modules/@rn-primitives/") &&
+        source.startsWith(".") &&
+        !path.extname(source)
+      ) {
+        const cleanImporter = importer.split("?")[0] ?? importer;
+        const mjsCandidate = path.resolve(path.dirname(cleanImporter), `${source}.mjs`);
+        if (fs.existsSync(mjsCandidate)) {
+          return mjsCandidate;
+        }
+      }
+      return null;
+    },
+    async transform(code: string, id: string) {
+      const cleanId = id.split("?")[0] ?? id;
+      if (
+        cleanId.includes("node_modules/@rn-primitives/") &&
+        (cleanId.endsWith(".js") || cleanId.endsWith(".mjs"))
       ) {
         const result = await esbuildTransform(code, {
           loader: "jsx",
           jsx: "automatic",
-          sourcefile: id,
+          sourcefile: cleanId,
           sourcemap: true,
         });
         return { code: result.code, map: result.map };
