@@ -124,4 +124,21 @@ _Avoid_: Raw color, HSL string, hex token
 The design contract in `DESIGN.md` documenting canonical OKLCH coordinates alongside exact space-separated HSL channels for cross-platform fidelity and native compilation.
 _Avoid_: Multi-color spec, color mapping, palette duplication
 
+**Reusables Catalog**:
+The owned copy-in UI component library in `src/shared/ui/` built on `@rn-primitives` and NativeWind v4 semantic tokens providing headless, accessible cross-platform primitives.
+_Avoid_: Component kit, UI library, widget set, theme components
+
+**Form Primitive**:
+A compound layout component (`FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`) in `src/shared/ui/form.tsx` that coordinates field state, error tracking, and native accessibility attributes.
+_Avoid_: Form component, field wrapper, input container
+
+**Portal Host**:
+The top-level overlay anchor (`<PortalHost />` from `@rn-primitives/portal`) mounted at the Composition Root to render dialogs, sheets, select dropdowns, and popovers above all screens and tab bars.
+_Avoid_: Modal root, overlay container, window host
+
+**Form Scroll View**:
+A specialized scroll container (`src/shared/ui/form-scroll-view.tsx`) backed by `react-native-keyboard-controller` that handles smooth keyboard avoidance, auto-scrolling to invalid fields, and drag dismissals.
+_Avoid_: Keyboard wrapper, scroll avoidance, form view
+
+
 
