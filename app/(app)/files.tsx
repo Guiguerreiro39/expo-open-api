@@ -1,1 +1,1 @@
-export { FilesPlaceholderScreen as default } from "@/features/home/ui/route-placeholder";
+export { FilesScreen as default } from "@/features/files/ui/files-screen";
