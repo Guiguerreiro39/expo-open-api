@@ -2,6 +2,8 @@ nodeLinker: hoisted
 
 allowBuilds:
   lefthook: true
+  esbuild: true
+  msw: true
 
 packageExtensions:
   expo-router:
