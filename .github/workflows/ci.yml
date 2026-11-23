@@ -33,11 +33,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify Orval API Codegen Drift
+        run: pnpm generate:api && git diff --exit-code src/shared/api/generated
+
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Lint & Format
         run: pnpm biome ci .
+
+      - name: Unit & Contract Tests
+        run: pnpm test
 
       - name: CNG Prebuild Validation
         run: npx expo prebuild --clean --no-install
