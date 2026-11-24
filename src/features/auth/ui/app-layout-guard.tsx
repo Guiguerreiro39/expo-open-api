@@ -1,13 +1,18 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type Href, Redirect, Tabs, usePathname, useRouter } from "expo-router";
 import { CheckSquare, FolderOpen, Home, LogOut, Palette } from "lucide-react-native";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { signOut, useAuthSession } from "@/features/auth/api/session";
 import { sanitizeRedirect } from "@/features/auth/model/schemas";
 import { ROUTES } from "@/shared/config/routes";
 import { onAuthUnauthorized, useIsAuthBootstrapping } from "@/shared/lib/auth-session-bridge";
-import { DEFAULT_THEME_PRESET, resolveThemeColor } from "@/shared/lib/theme/presets";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  resolveThemeColor,
+} from "@/shared/lib/theme/presets";
+import { cn } from "@/shared/lib/utils";
 import { useObservability } from "@/shared/observability/observability-context";
 import { useCredentialStore } from "@/shared/storage/credential-store-context";
 import { Icon } from "@/shared/ui/icon";
@@ -35,6 +40,9 @@ export function AppLayoutGuard() {
   const observability = useObservability();
   const theme = useOptionalTheme();
 
+  const signingOutRef = useRef(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
   const scheme = theme?.resolvedColorScheme ?? "light";
 
@@ -45,12 +53,20 @@ export function AppLayoutGuard() {
   }, [pathname, router]);
 
   const handleSignOut = useCallback(async () => {
-    await signOut({
-      credentialStore,
-      queryClient,
-      observability,
-    });
-    router.replace(ROUTES.AUTH_LOGIN as Href);
+    if (signingOutRef.current) return;
+    signingOutRef.current = true;
+    setIsSigningOut(true);
+    try {
+      await signOut({
+        credentialStore,
+        queryClient,
+        observability,
+      });
+      router.replace(ROUTES.AUTH_LOGIN as Href);
+    } finally {
+      signingOutRef.current = false;
+      setIsSigningOut(false);
+    }
   }, [credentialStore, observability, queryClient, router]);
 
   const activeTint = resolveThemeColor(preset, scheme, "primary");
@@ -75,6 +91,7 @@ export function AppLayoutGuard() {
   const surfaceBg = resolveThemeColor(preset, scheme, "surface-container-low");
   const borderColor = resolveThemeColor(preset, scheme, "outline-variant");
   const foregroundColor = resolveThemeColor(preset, scheme, "foreground");
+  const elevation = getThemeElevation(preset, scheme);
 
   return (
     <Tabs
@@ -84,6 +101,8 @@ export function AppLayoutGuard() {
         },
         headerStyle: {
           backgroundColor: surfaceBg,
+          borderBottomWidth: elevation.borderWidth,
+          borderBottomColor: borderColor,
         },
         headerTintColor: foregroundColor,
         headerShadowVisible: false,
@@ -91,18 +110,25 @@ export function AppLayoutGuard() {
         tabBarInactiveTintColor: inactiveTint,
         tabBarStyle: {
           backgroundColor: surfaceBg,
+          borderTopWidth: elevation.borderWidth,
           borderTopColor: borderColor,
         },
         headerRight: () => (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Sign out"
+            accessibilityState={{ disabled: isSigningOut, busy: isSigningOut }}
+            disabled={isSigningOut}
+            hitSlop={4}
             onPress={() => void handleSignOut()}
-            className="mr-4 flex-row items-center gap-1.5 px-2 py-1"
+            className={cn(
+              "mr-3 min-h-11 min-w-11 flex-row items-center justify-center gap-1.5 rounded-lg px-2.5",
+              isSigningOut && "opacity-50",
+            )}
           >
             <Icon as={LogOut} size={16} className="text-on-surface-variant" />
             <Text variant="caption" className="text-on-surface-variant font-semibold">
-              Sign out
+              {isSigningOut ? "Signing out..." : "Sign out"}
             </Text>
           </Pressable>
         ),

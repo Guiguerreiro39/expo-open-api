@@ -1,10 +1,8 @@
-import { Moon, Palette, Sparkles, Sun } from "lucide-react-native";
+import { Palette, Sparkles } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { APP_INFO } from "@/shared/config/app-info";
-import { THEME_PRESET_IDS, THEME_PRESETS } from "@/shared/lib/theme/presets";
 import { Badge } from "@/shared/ui/badge";
-import { Button } from "@/shared/ui/button";
 import {
   Card,
   CardContent,
@@ -16,17 +14,20 @@ import {
 import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
 import { useTheme } from "@/shared/ui/theme-provider";
+import { ThemeSwitcher } from "@/shared/ui/theme-switcher";
 
 export function HomeScreen() {
-  const { preset, presetDefinition, setPreset, resolvedColorScheme, toggleColorScheme } =
-    useTheme();
+  const { presetDefinition, colorScheme, resolvedColorScheme } = useTheme();
+  const modeLabel =
+    colorScheme === "system"
+      ? `System (${resolvedColorScheme === "dark" ? "Dark" : "Light"})`
+      : resolvedColorScheme === "dark"
+        ? "Dark Mode"
+        : "Light Mode";
 
   return (
-    <SafeAreaView className="bg-background flex-1">
-      <ScrollView
-        contentContainerClassName="flex-grow justify-center px-6 py-8"
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView className="bg-background flex-1" edges={["left", "right"]}>
+      <ScrollView contentContainerClassName="px-5 py-6" showsVerticalScrollIndicator={false}>
         <View className="mx-auto w-full max-w-md gap-6">
           <View className="gap-3">
             <Badge variant="secondary">
@@ -38,45 +39,28 @@ export function HomeScreen() {
               </View>
             </Badge>
             <Text variant="h2">{APP_INFO.name}</Text>
-            <Text variant="lead">Expo SDK 52 · Expo Router v4 · Feature-Sliced Design</Text>
+            <Text variant="lead">{APP_INFO.stackSummary}</Text>
           </View>
 
           <Card>
             <CardHeader>
               <View className="flex-row items-center gap-2">
-                <Icon as={Palette} size={18} className="text-primary" />
-                <CardTitle>Runtime Theme Presets</CardTitle>
+                <Icon as={Palette} size={18} className="text-primary shrink-0" />
+                <CardTitle className="min-w-0 flex-1">Runtime Theme Presets</CardTitle>
               </View>
               <CardDescription>{presetDefinition.description}</CardDescription>
             </CardHeader>
-            <CardContent className="gap-2.5">
-              {THEME_PRESET_IDS.map((presetId) => {
-                const option = THEME_PRESETS[presetId];
-                const isActive = presetId === preset;
-                return (
-                  <Button
-                    key={presetId}
-                    variant={isActive ? "default" : "outline"}
-                    size="sm"
-                    onPress={() => setPreset(presetId)}
-                  >
-                    {option.label}
-                  </Button>
-                );
-              })}
+            <CardContent>
+              <ThemeSwitcher />
             </CardContent>
-            <CardFooter className="justify-between">
-              <Badge variant="info">
-                {resolvedColorScheme === "dark" ? "Dark Mode" : "Light Mode"}
-              </Badge>
-              <Button variant="secondary" size="sm" onPress={toggleColorScheme}>
-                <Icon
-                  as={resolvedColorScheme === "dark" ? Sun : Moon}
-                  size={16}
-                  className="text-on-secondary-container"
-                />
-                <Text>{resolvedColorScheme === "dark" ? "Switch to Light" : "Switch to Dark"}</Text>
-              </Button>
+            <CardFooter
+              testID="home-theme-card-footer"
+              className="flex-wrap items-center justify-between gap-2"
+            >
+              <Badge variant="info">{modeLabel}</Badge>
+              <Text variant="caption" className="shrink">
+                Synced across navigation & overlays
+              </Text>
             </CardFooter>
           </Card>
         </View>

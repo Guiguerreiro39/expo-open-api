@@ -1,12 +1,14 @@
-import { act } from "@testing-library/react-native";
+import { act, fireEvent, waitFor } from "@testing-library/react-native";
+import { HttpResponse, http } from "msw";
 import { ActivityIndicator } from "react-native";
 import { describe, expect, it } from "vitest";
 import { AppLayoutGuard } from "@/features/auth/ui/app-layout-guard";
 import { AuthLayoutGuard } from "@/features/auth/ui/auth-layout-guard";
 import { ROUTES } from "@/shared/config/routes";
 import { resetAuthSessionCache } from "@/shared/lib/auth-session-bridge";
-import { resolveThemeColor } from "@/shared/lib/theme/presets";
+import { getThemeElevation, resolveThemeColor } from "@/shared/lib/theme/presets";
 import { mockRouterState } from "@/test/mocks/adapters/mock-expo-router";
+import { server, TEST_API_BASE } from "@/test/msw-server";
 import { renderWithProviders } from "@/test/render";
 
 describe("layout route guards", () => {
@@ -96,6 +98,89 @@ describe("layout route guards", () => {
             entry.href?.pathname === ROUTES.AUTH_LOGIN,
         ),
       ).toBe(true);
+    });
+
+    it("applies preset-aligned header and tab bar border widths across presets", () => {
+      const neoElevation = getThemeElevation("neo-brutalist", "dark");
+      const neoBorder = resolveThemeColor("neo-brutalist", "dark", "outline-variant");
+
+      const { observability } = renderWithProviders(<AppLayoutGuard />, {
+        user: {
+          id: "user-1",
+          name: "Ada",
+          email: "ada@example.com",
+          role: "member",
+        },
+        initialPreset: "neo-brutalist",
+        initialColorScheme: "dark",
+      });
+
+      expect(mockRouterState.tabsScreenOptions).toMatchObject({
+        headerStyle: {
+          backgroundColor: resolveThemeColor("neo-brutalist", "dark", "surface-container-low"),
+          borderBottomWidth: neoElevation.borderWidth,
+          borderBottomColor: neoBorder,
+        },
+        tabBarStyle: {
+          backgroundColor: resolveThemeColor("neo-brutalist", "dark", "surface-container-low"),
+          borderTopWidth: neoElevation.borderWidth,
+          borderTopColor: neoBorder,
+        },
+      });
+      observability.assertNoDefects();
+    });
+
+    it("renders a >=44pt Sign out button and locks against double-tap while sign-out is in flight", async () => {
+      let signOutCalls = 0;
+      let releaseSignOut: (() => void) | null = null;
+      const signOutGate = new Promise<void>((resolve) => {
+        releaseSignOut = resolve;
+      });
+
+      server.use(
+        http.post(`${TEST_API_BASE}/api/auth/sign-out`, async () => {
+          signOutCalls += 1;
+          await signOutGate;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+
+      const { getByLabelText, getByText, observability } = renderWithProviders(<AppLayoutGuard />, {
+        user: {
+          id: "user-1",
+          name: "Ada",
+          email: "ada@example.com",
+          role: "member",
+        },
+      });
+
+      const signOutButton = getByLabelText("Sign out");
+      expect(String(signOutButton.props.className)).toContain("min-h-11");
+      expect(String(signOutButton.props.className)).toContain("min-w-11");
+
+      fireEvent.press(signOutButton);
+      fireEvent.press(signOutButton);
+
+      await waitFor(() => {
+        expect(signOutCalls).toBe(1);
+        expect(getByLabelText("Sign out").props.accessibilityState?.disabled).toBe(true);
+        expect(getByText("Signing out...")).toBeTruthy();
+      });
+
+      await act(async () => {
+        releaseSignOut?.();
+      });
+
+      await waitFor(() => {
+        expect(
+          mockRouterState.history.some(
+            (entry) => entry.type === "replace" && entry.href === ROUTES.AUTH_LOGIN,
+          ),
+        ).toBe(true);
+      });
+
+      expect(signOutCalls).toBe(1);
+      observability.assertNoDefects();
     });
   });
 
