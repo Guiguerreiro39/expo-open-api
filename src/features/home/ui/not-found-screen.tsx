@@ -1,39 +1,36 @@
 import { Link, Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { ArrowLeft, Compass } from "lucide-react-native";
+import { View } from "react-native";
+import { Button } from "@/shared/ui/button";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Icon } from "@/shared/ui/icon";
+import { Text } from "@/shared/ui/text";
 
 export function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Not Found" }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>This screen does not exist.</Text>
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen</Text>
-        </Link>
+      <View className="bg-background flex-1 items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <View className="flex-row items-center gap-2">
+              <Icon as={Compass} size={20} className="text-primary" />
+              <CardTitle>Screen not found</CardTitle>
+            </View>
+            <CardDescription>
+              This route does not exist. Return to the home workspace to continue.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Link href="/" asChild>
+              <Button className="w-full">
+                <Icon as={ArrowLeft} size={16} className="text-primary-foreground" />
+                <Text>Go to home screen</Text>
+              </Button>
+            </Link>
+          </CardFooter>
+        </Card>
       </View>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#ffffff",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  link: {
-    marginTop: 16,
-    paddingVertical: 12,
-  },
-  linkText: {
-    fontSize: 14,
-    color: "#2563eb",
-  },
-});

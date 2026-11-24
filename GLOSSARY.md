@@ -9,7 +9,7 @@ One of the four top-level horizontal tiers in the Feature-Sliced Design hierarch
 _Avoid_: Tier, bucket, package
 
 **Route Façade**:
-A thin (5–10 line) file-based routing entry point in `app/` that mounts a screen component from `src/features/<slice>/ui/<ScreenName>.tsx` without containing domain logic or state.
+A thin (1–10 line) file-based routing entry point in `app/` that mounts a screen component from `src/features/<slice>/ui/<screen-name>.tsx` without containing domain logic or state.
 _Avoid_: Screen file, page wrapper, router shim
 
 **Feature Slice**:
@@ -69,7 +69,7 @@ The cross-tier propagation of standardized distributed tracing headers (`tracepa
 _Avoid_: Request tagging, span linkage, tracking ID
 
 **Design Token**:
-A semantic color or layout property defined in `src/shared/ui/theme.ts` and bound to NativeWind via custom utility classes so components express visual role rather than literal style values.
+A semantic color or layout property specified in `DESIGN.md`, emitted as space-separated HSL channels in `global.css` and `src/shared/lib/theme/presets.ts`, and bound to NativeWind via `tailwind.config.ts` so components express visual role rather than literal style values.
 _Avoid_: Hardcoded hex, magic value, arbitrary color utility
 
 **Test Harness**:
@@ -97,7 +97,7 @@ A synchronous in-memory variable (`cachedBearerToken`) hydrated once from `Crede
 _Avoid_: Token store, volatile JWT, session variable
 
 **Layout Guard**:
-A declarative route redirection rule implemented at the root of a pathless Expo Router route group (`app/(auth)/_layout.tsx`, `app/(app)/_layout.tsx`, `app/(public)/_layout.tsx`) that enforces authentication and authorization state transitions before mounting child screens.
+A declarative route redirection rule implemented at the root of a pathless Expo Router route group (`app/(auth)/_layout.tsx`, `app/(app)/_layout.tsx`) that enforces authentication and authorization state transitions before mounting child screens.
 _Avoid_: Route middleware, navigation interceptor, protected route wrapper
 
 **RBAC Matrix**:
@@ -137,7 +137,7 @@ The top-level overlay anchor (`<PortalHost />` from `@rn-primitives/portal`) mou
 _Avoid_: Modal root, overlay container, window host
 
 **Form Scroll View**:
-A specialized scroll container (`src/shared/ui/form-scroll-view.tsx`) backed by `react-native-keyboard-controller` that handles smooth keyboard avoidance, auto-scrolling to invalid fields, and drag dismissals.
+A specialized scroll container (`src/shared/ui/form-scroll-view.tsx`) combining React Native `KeyboardAvoidingView` and `ScrollView` (`keyboardShouldPersistTaps="handled"`, `keyboardDismissMode="on-drag"`) for zero-extra-linking keyboard avoidance on iOS, Android, and web.
 _Avoid_: Keyboard wrapper, scroll avoidance, form view
 
 **Mobile File Asset**:

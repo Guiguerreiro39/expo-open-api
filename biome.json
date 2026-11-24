@@ -60,11 +60,55 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+      "a11y": {
+        "useValidAriaRole": {
+          "level": "error",
+          "options": {
+            "ignoreNonDom": true
+          }
+        }
+      },
       "correctness": {
         "noUnusedImports": "error",
         "noUnusedVariables": "error",
         "useExhaustiveDependencies": "warn",
-        "useHookAtTopLevel": "error"
+        "useHookAtTopLevel": "error",
+        "noReactNativeRawText": {
+          "level": "error",
+          "options": {
+            "skip": [
+              "AlertDescription",
+              "AlertDialogAction",
+              "AlertDialogCancel",
+              "AlertDialogDescription",
+              "AlertDialogTitle",
+              "AlertTitle",
+              "AvatarFallback",
+              "Badge",
+              "Button",
+              "CardDescription",
+              "CardTitle",
+              "DialogDescription",
+              "DialogTitle",
+              "DropdownMenuLabel",
+              "FormDescription",
+              "FormLabel",
+              "FormMessage",
+              "Label",
+              "SelectLabel",
+              "SheetDescription",
+              "SheetTitle"
+            ]
+          }
+        }
+      },
+      "suspicious": {
+        "noUnknownAtRules": {
+          "level": "error",
+          "options": {
+            "ignore": ["tailwind"]
+          }
+        }
       },
       "style": {
         "noProcessEnv": "error",
@@ -121,6 +165,8 @@
                 "patterns": [
                   {
                     "group": [
+                      "app",
+                      "app/**",
                       "@/features",
                       "@/features/**",
                       "@/app",
@@ -158,6 +204,8 @@
                 "patterns": [
                   {
                     "group": [
+                      "app",
+                      "app/**",
                       "@/app",
                       "@/app/**",
                       "src/app",
