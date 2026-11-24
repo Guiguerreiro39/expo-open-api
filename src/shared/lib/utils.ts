@@ -4,6 +4,19 @@ import { extendTailwindMerge } from "tailwind-merge";
 const twMerge = extendTailwindMerge({
   extend: {
     classGroups: {
+      "font-family": [
+        {
+          font: [
+            "sans",
+            "sans-medium",
+            "sans-semibold",
+            "sans-bold",
+            "display",
+            "mono",
+            "mono-bold",
+          ],
+        },
+      ],
       "font-size": [
         {
           text: [

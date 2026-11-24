@@ -8,6 +8,7 @@ import { useAppBootstrap } from "@/app/bootstrap";
 import { type AppComposition, createAppComposition } from "@/app/composition";
 import { AUTH_QUERY_KEYS } from "@/shared/api/query-keys";
 import { BEARER_TOKEN_STORAGE_KEY, getCachedBearerToken } from "@/shared/lib/auth-session-bridge";
+import { loadAppFonts } from "@/shared/lib/theme/fonts";
 import { createSpyObservability } from "@/shared/observability/spy-adapter";
 import { createInMemoryCredentialStore } from "@/shared/storage/credential-store";
 import { createInMemoryKvStore } from "@/shared/storage/kv-store";
@@ -16,14 +17,21 @@ import {
   QUERY_CACHE_STORAGE_KEY,
   shouldDehydrateAppQuery,
 } from "@/shared/storage/query-persister";
+import { mockExpoFont } from "@/test/mocks/adapters/mock-expo-font";
 import { mockSplashScreen } from "@/test/mocks/adapters/mock-expo-splash-screen";
 import { emitMockNetInfoState } from "@/test/mocks/adapters/mock-netinfo";
 import { buildTestSessionPayload } from "@/test/mocks/handlers/auth";
 import { server, TEST_API_BASE } from "@/test/msw-server";
 import { renderWithProviders } from "@/test/render";
 
-function BootstrapProbe({ composition }: { composition: AppComposition }) {
-  const { isBootstrapping, isReady } = useAppBootstrap(composition);
+function BootstrapProbe({
+  composition,
+  loadFonts,
+}: {
+  composition: AppComposition;
+  loadFonts?: () => Promise<void>;
+}) {
+  const { isBootstrapping, isReady } = useAppBootstrap(composition, { loadFonts });
   return (
     <View>
       <Text testID="bootstrap-status">{isBootstrapping ? "bootstrapping" : "complete"}</Text>
@@ -233,6 +241,70 @@ describe("useAppBootstrap", () => {
       expect(onlineManager.isOnline()).toBe(true);
     } finally {
       onlineManager.setOnline(true);
+      await composition.dispose();
+    }
+  });
+
+  it("hydrates bundled Quicksand and JetBrains Mono font weights before hiding splash screen", async () => {
+    const observability = createSpyObservability();
+    const composition = createAppComposition({
+      observability,
+      defaultQueryOptions: { retry: false, gcTime: Number.POSITIVE_INFINITY, staleTime: 0 },
+    });
+
+    try {
+      const { getByTestId } = renderWithProviders(
+        <BootstrapProbe composition={composition} loadFonts={loadAppFonts} />,
+        {
+          observability,
+          queryClient: composition.queryClient,
+        },
+      );
+
+      await waitFor(() => {
+        expect(getByTestId("bootstrap-ready").props.children).toBe("ready");
+      });
+
+      expect(mockExpoFont.loadedFontMaps).toHaveLength(1);
+      expect(Object.keys(mockExpoFont.loadedFontMaps[0] ?? {}).sort()).toEqual([
+        "JetBrainsMono-Bold",
+        "JetBrainsMono-Regular",
+        "Quicksand-Bold",
+        "Quicksand-Medium",
+        "Quicksand-Regular",
+        "Quicksand-SemiBold",
+      ]);
+      expect(mockSplashScreen.hideCalls).toBe(1);
+      observability.assertNoDefects();
+    } finally {
+      await composition.dispose();
+    }
+  });
+
+  it("falls back gracefully to system fonts and still dismisses splash screen if font loading fails", async () => {
+    mockExpoFont.nextError = new Error("Simulated font asset failure");
+    const observability = createSpyObservability();
+    const composition = createAppComposition({
+      observability,
+      defaultQueryOptions: { retry: false, gcTime: Number.POSITIVE_INFINITY, staleTime: 0 },
+    });
+
+    try {
+      const { getByTestId } = renderWithProviders(
+        <BootstrapProbe composition={composition} loadFonts={loadAppFonts} />,
+        {
+          observability,
+          queryClient: composition.queryClient,
+        },
+      );
+
+      await waitFor(() => {
+        expect(getByTestId("bootstrap-ready").props.children).toBe("ready");
+        expect(mockSplashScreen.hideCalls).toBe(1);
+      });
+
+      observability.assertNoDefects();
+    } finally {
       await composition.dispose();
     }
   });

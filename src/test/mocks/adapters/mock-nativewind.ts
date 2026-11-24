@@ -3,6 +3,9 @@ import { useCallback, useState } from "react";
 type ColorSchemeOption = "light" | "dark" | "system";
 
 let currentScheme: "light" | "dark" = "light";
+export const mockNativeWindState: { lastSetColorScheme: ColorSchemeOption | null } = {
+  lastSetColorScheme: null,
+};
 
 export function vars<T extends Record<string, string | number>>(variables: T): T {
   return variables;
@@ -30,6 +33,7 @@ export function useColorScheme() {
   const [scheme, setSchemeState] = useState<"light" | "dark">(currentScheme);
 
   const setColorScheme = useCallback((next: ColorSchemeOption) => {
+    mockNativeWindState.lastSetColorScheme = next;
     const resolved = next === "dark" ? "dark" : "light";
     currentScheme = resolved;
     setSchemeState(resolved);

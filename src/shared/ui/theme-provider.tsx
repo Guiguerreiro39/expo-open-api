@@ -1,3 +1,4 @@
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
@@ -13,6 +14,7 @@ import {
 import { Platform, useColorScheme as useSystemColorScheme, View } from "react-native";
 import {
   DEFAULT_THEME_PRESET,
+  getThemeTokenMap,
   getThemeVars,
   isThemeMode,
   isThemePreset,
@@ -71,6 +73,54 @@ function readInitialColorScheme(
   return isThemeMode(stored) ? stored : "system";
 }
 
+function readWebSystemPrefersDark(): boolean | null {
+  if (
+    Platform.OS !== "web" ||
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
+    return null;
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function syncWebDocumentTheme(preset: ThemePreset, resolvedColorScheme: ResolvedColorScheme): void {
+  if (Platform.OS !== "web" || typeof document === "undefined") {
+    return;
+  }
+  const root = document.documentElement;
+  if (!root) {
+    return;
+  }
+
+  root.classList.toggle("dark", resolvedColorScheme === "dark");
+
+  const tokenMap = getThemeTokenMap(preset, resolvedColorScheme);
+  for (const [cssVar, value] of Object.entries(tokenMap)) {
+    root.style.setProperty(cssVar, value);
+  }
+
+  root.style.backgroundColor = resolveThemeColor(preset, resolvedColorScheme, "background");
+  root.style.colorScheme = resolvedColorScheme;
+}
+
+export function buildNavigationTheme(preset: ThemePreset, scheme: ResolvedColorScheme) {
+  const baseTheme = scheme === "dark" ? DarkTheme : DefaultTheme;
+  return {
+    ...baseTheme,
+    dark: scheme === "dark",
+    colors: {
+      ...baseTheme.colors,
+      primary: resolveThemeColor(preset, scheme, "primary"),
+      background: resolveThemeColor(preset, scheme, "background"),
+      card: resolveThemeColor(preset, scheme, "surface-container-low"),
+      text: resolveThemeColor(preset, scheme, "foreground"),
+      border: resolveThemeColor(preset, scheme, "outline-variant"),
+      notification: resolveThemeColor(preset, scheme, "destructive"),
+    },
+  };
+}
+
 export function ThemeProvider({
   children,
   storage,
@@ -86,9 +136,46 @@ export function ThemeProvider({
   const [colorScheme, setColorSchemeState] = useState<ThemeMode>(() =>
     readInitialColorScheme(storage, initialColorScheme),
   );
+  const [webPrefersDark, setWebPrefersDark] = useState<boolean | null>(() =>
+    readWebSystemPrefersDark(),
+  );
+
+  useEffect(() => {
+    if (
+      Platform.OS !== "web" ||
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    setWebPrefersDark(mediaQuery.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setWebPrefersDark(event.matches);
+    };
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+      };
+    }
+    return undefined;
+  }, []);
+
+  const resolvedSystemScheme: ResolvedColorScheme =
+    Platform.OS === "web" && webPrefersDark !== null
+      ? webPrefersDark
+        ? "dark"
+        : "light"
+      : systemColorScheme === "dark"
+        ? "dark"
+        : "light";
 
   const resolvedColorScheme: ResolvedColorScheme =
-    colorScheme === "system" ? (systemColorScheme === "dark" ? "dark" : "light") : colorScheme;
+    colorScheme === "system" ? resolvedSystemScheme : colorScheme;
 
   const setPreset = useCallback(
     (nextPreset: ThemePreset) => {
@@ -114,21 +201,32 @@ export function ThemeProvider({
 
   useEffect(() => {
     try {
-      setNativeWindColorScheme(colorScheme);
+      // On Web, react-native-css-interop strips `.dark` when passed `"system"`;
+      // always pass the resolved scheme on Web so OS dark mode is preserved.
+      setNativeWindColorScheme(Platform.OS === "web" ? resolvedColorScheme : colorScheme);
     } catch {
       // Guard against non-interactive/SSR environments where NativeWind scheme sync is unavailable.
     }
-  }, [colorScheme, setNativeWindColorScheme]);
+  }, [colorScheme, resolvedColorScheme, setNativeWindColorScheme]);
 
   useEffect(() => {
+    if (Platform.OS === "web") {
+      syncWebDocumentTheme(preset, resolvedColorScheme);
+      return;
+    }
     const backgroundColor = resolveThemeColor(preset, resolvedColorScheme, "background");
-    if (Platform.OS !== "web" && typeof SystemUI.setBackgroundColorAsync === "function") {
+    if (typeof SystemUI.setBackgroundColorAsync === "function") {
       void SystemUI.setBackgroundColorAsync(backgroundColor).catch(() => {});
     }
   }, [preset, resolvedColorScheme]);
 
   const themeVars = useMemo(
     () => getThemeVars(preset, resolvedColorScheme),
+    [preset, resolvedColorScheme],
+  );
+
+  const navigationTheme = useMemo(
+    () => buildNavigationTheme(preset, resolvedColorScheme),
     [preset, resolvedColorScheme],
   );
 
@@ -147,13 +245,15 @@ export function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={value}>
-      <View
-        style={[themeVars, { flex: 1 }]}
-        className={cn("bg-background", resolvedColorScheme === "dark" && "dark")}
-      >
-        <StatusBar style={resolvedColorScheme === "dark" ? "light" : "dark"} />
-        {children}
-      </View>
+      <NavigationThemeProvider value={navigationTheme}>
+        <View
+          style={[themeVars, { flex: 1 }]}
+          className={cn("bg-background", resolvedColorScheme === "dark" && "dark")}
+        >
+          <StatusBar style={resolvedColorScheme === "dark" ? "light" : "dark"} />
+          {children}
+        </View>
+      </NavigationThemeProvider>
     </ThemeContext.Provider>
   );
 }

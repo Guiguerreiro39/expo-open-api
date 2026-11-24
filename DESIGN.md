@@ -24,7 +24,7 @@ colors:
   outline-variant: '#e1bfb5'
   primary: '#a93201'
   primary-foreground: '#ffffff'
-  primary-container: '#cb4a1b'
+  primary-container: '#c7481a'
   on-primary-container: '#fffbff'
   primary-fixed: '#ffdbd0'
   primary-fixed-dim: '#ffb59e'
@@ -53,6 +53,7 @@ colors:
   info-foreground: '#ffffff'
   info-container: '#d9ecff'
   on-info-container: '#0d3b61'
+  scrim: '#000000'
 typography:
   display-lg:
     fontFamily: Quicksand-Bold
@@ -167,10 +168,10 @@ Three built-in theme presets are provided out of the box, switchable at runtime 
    - *Personality*: Warm, artisanal, grounded. Terracotta primary (`hsl(16 99% 33%)`), sage secondary (`hsl(133 26% 33%)`), warm parchment background (`hsl(24 75% 98%)`), and soft earth outlines.
    - *Geometry & Elevation*: Soft organic radii (`rounded-2xl` cards, `rounded-xl` buttons), warm 4px offset shadow (`shadow-tactile`), and 2px diagonal spring press translation.
 2. **`editorial-slate`**:
-   - *Personality*: Cool, technical, journalistic. Deep navy primary (`hsl(215 90% 28%)`), slate neutrals, crisp white surfaces, and subtle cool outlines.
+   - *Personality*: Cool, technical, journalistic. Deep indigo primary (`hsl(226 80% 44%)`), slate neutrals, crisp white surfaces, and subtle cool outlines.
    - *Geometry & Elevation*: Clean structured radii (`rounded-xl` cards, `rounded-lg` buttons), subtle 2px offset shadow, and 1px crisp press translation.
 3. **`neo-brutalist`**:
-   - *Personality*: High-energy, bold, graphic. Electric amber primary (`hsl(45 100% 50%)`), stark pure black outlines (`hsl(0 0% 0%)`, 2px solid borders), saturated accents, and stark high-contrast typography.
+   - *Personality*: High-energy, bold, graphic. Electric cobalt primary (`hsl(223 100% 46%)`), chartreuse secondary/accent (`hsl(65 75% 47%)`), stark near-black outlines (`hsl(0 0% 2%)`, 2px solid borders), saturated accents, and stark high-contrast typography.
    - *Geometry & Elevation*: Hard angular corners (`rounded-none` or `rounded-sm`), prominent 4px hard black offset shadows (`boxShadow: 4px 4px 0px 0px #000`), and deep 4px mechanical button depression.
 
 ---
@@ -192,6 +193,8 @@ Color roles follow a strict hierarchical taxonomy:
   - `outline-variant`: Subtle card dividers, table borders, and disabled indicators.
 - **Status & Feedback Pairs**:
   - Every status token defines an intentional pair: container + content (`success` + `success-foreground`, `success-container` + `on-success-container`, `destructive` + `destructive-foreground`, `warning`, `info`).
+- **Overlay Scrim (`scrim`)**:
+  - Mode-invariant dark backdrop channel (`--scrim: 0 0% 0%`) consumed with opacity modifiers (`bg-scrim/50`, `bg-scrim/55`, `bg-scrim/25`, `bg-scrim/20`) behind dialogs, alert dialogs, sheets, selects, popovers, and dropdown menus so dark-mode overlays dim comfortably instead of turning milky white.
 
 ---
 
@@ -256,6 +259,7 @@ Mobile touch screens lack mouse hover states (`:hover`). Tactile realism is achi
 
 ## Automated Token Drift & Hygiene Verification
 
-Token integrity is governed by both the standalone verification script (`pnpm verify:tokens` / `scripts/verify-design-tokens.mjs`) and automated Vitest contract tests (`src/test/design-tokens.test.ts`):
-1. **Schema Validation**: Asserts that all color tokens, typography scales, radii, and presets declared in `DESIGN.md` match `tailwind.config.ts` and `src/shared/lib/theme/presets.ts`.
-2. **Hygiene Rule**: Ensures zero hardcoded color literals (`#...`, `rgb(...)`) exist in production component files under `src/features/` and `src/shared/ui/`.
+Token integrity is governed by a single shared verification module (`src/test/design-token-verifier.ts`) executed by both the standalone CLI (`pnpm verify:tokens` / `scripts/verify-design-tokens.mjs`) and automated Vitest contract tests (`src/test/design-tokens.test.ts`):
+1. **Schema & Parity Validation**: Asserts that all color tokens (including `--scrim`), typography scales, font weight mappings, radii, and presets declared in `DESIGN.md` match `tailwind.config.ts`, `global.css`, and `src/shared/lib/theme/presets.ts` with exact `warm-tactile` parity.
+2. **WCAG AA Contrast & Surface Separation**: Verifies `>= 4.5:1` contrast for all semantic text pairs, `>= 3.0:1` for `outline` borders across all 3 presets × light/dark, and distinct dark-mode surface elevation steps (`background`, `surface-container-low`, `card`, `surface-container`, `popover`).
+3. **Full-Repo Hygiene Rule**: Ensures zero hardcoded color literals (`#...`, `rgb(...)`, `hsl(...)`) or raw Tailwind palette classes exist in production files under `app/`, `src/app/`, `src/features/`, and `src/shared/ui/`.

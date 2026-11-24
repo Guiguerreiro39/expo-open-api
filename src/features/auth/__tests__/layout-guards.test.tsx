@@ -1,22 +1,35 @@
 import { act } from "@testing-library/react-native";
+import { ActivityIndicator } from "react-native";
 import { describe, expect, it } from "vitest";
 import { AppLayoutGuard } from "@/features/auth/ui/app-layout-guard";
 import { AuthLayoutGuard } from "@/features/auth/ui/auth-layout-guard";
 import { ROUTES } from "@/shared/config/routes";
 import { resetAuthSessionCache } from "@/shared/lib/auth-session-bridge";
+import { resolveThemeColor } from "@/shared/lib/theme/presets";
 import { mockRouterState } from "@/test/mocks/adapters/mock-expo-router";
 import { renderWithProviders } from "@/test/render";
 
 describe("layout route guards", () => {
   describe("AppLayoutGuard", () => {
-    it("renders nothing while app bootstrap is still in progress", () => {
-      const { queryByTestId } = renderWithProviders(<AppLayoutGuard />, {
-        user: null,
-        isBootstrapping: true,
-      });
+    it("renders a themed loading screen while app bootstrap is still in progress", () => {
+      const { getByTestId, queryByTestId, UNSAFE_getByType } = renderWithProviders(
+        <AppLayoutGuard />,
+        {
+          user: null,
+          isBootstrapping: true,
+          initialPreset: "editorial-slate",
+          initialColorScheme: "dark",
+        },
+      );
 
       expect(queryByTestId("expo-router-redirect")).toBeNull();
       expect(queryByTestId("expo-router-tabs")).toBeNull();
+      expect(String(getByTestId("layout-guard-loading").props.className)).toContain(
+        "bg-background",
+      );
+      expect(UNSAFE_getByType(ActivityIndicator).props.color).toBe(
+        resolveThemeColor("editorial-slate", "dark", "primary"),
+      );
     });
 
     it("redirects unauthenticated users to login while preserving sanitized redirect path", () => {
@@ -35,7 +48,7 @@ describe("layout route guards", () => {
       );
     });
 
-    it("renders authenticated app tabs shell when user is signed in", () => {
+    it("renders authenticated app tabs shell with themed scene background when user is signed in", () => {
       const { getByTestId, queryByTestId } = renderWithProviders(<AppLayoutGuard />, {
         user: {
           id: "user-1",
@@ -43,10 +56,21 @@ describe("layout route guards", () => {
           email: "ada@example.com",
           role: "member",
         },
+        initialPreset: "editorial-slate",
+        initialColorScheme: "dark",
       });
 
       expect(queryByTestId("expo-router-redirect")).toBeNull();
       expect(getByTestId("expo-router-tabs")).toBeTruthy();
+      expect(mockRouterState.tabsScreenOptions).toMatchObject({
+        sceneStyle: {
+          backgroundColor: resolveThemeColor("editorial-slate", "dark", "background"),
+        },
+        headerStyle: {
+          backgroundColor: resolveThemeColor("editorial-slate", "dark", "surface-container-low"),
+        },
+        headerTintColor: resolveThemeColor("editorial-slate", "dark", "foreground"),
+      });
     });
 
     it("redirects to login when an unauthorized 401 session reset fires", async () => {
@@ -76,23 +100,42 @@ describe("layout route guards", () => {
   });
 
   describe("AuthLayoutGuard", () => {
-    it("renders nothing while app bootstrap is in progress", () => {
-      const { queryByTestId } = renderWithProviders(<AuthLayoutGuard />, {
-        user: null,
-        isBootstrapping: true,
-      });
+    it("renders a themed loading screen while app bootstrap is in progress", () => {
+      const { getByTestId, queryByTestId, UNSAFE_getByType } = renderWithProviders(
+        <AuthLayoutGuard />,
+        {
+          user: null,
+          isBootstrapping: true,
+          initialPreset: "neo-brutalist",
+          initialColorScheme: "dark",
+        },
+      );
 
       expect(queryByTestId("expo-router-redirect")).toBeNull();
       expect(queryByTestId("expo-router-stack")).toBeNull();
+      expect(String(getByTestId("layout-guard-loading").props.className)).toContain(
+        "bg-background",
+      );
+      expect(UNSAFE_getByType(ActivityIndicator).props.color).toBe(
+        resolveThemeColor("neo-brutalist", "dark", "primary"),
+      );
     });
 
-    it("renders auth stack for unauthenticated visitors", () => {
+    it("renders auth stack with themed content background for unauthenticated visitors", () => {
       const { getByTestId, queryByTestId } = renderWithProviders(<AuthLayoutGuard />, {
         user: null,
+        initialPreset: "warm-tactile",
+        initialColorScheme: "dark",
       });
 
       expect(queryByTestId("expo-router-redirect")).toBeNull();
       expect(getByTestId("expo-router-stack")).toBeTruthy();
+      expect(mockRouterState.stackScreenOptions).toMatchObject({
+        headerShown: false,
+        contentStyle: {
+          backgroundColor: resolveThemeColor("warm-tactile", "dark", "background"),
+        },
+      });
     });
 
     it("redirects authenticated users to /(app) by default", () => {
