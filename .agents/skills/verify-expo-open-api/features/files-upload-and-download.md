@@ -1,6 +1,6 @@
 # Verification Flow: Files Upload & Download (`files-upload-and-download`)
 
-Validates unified file picking (`useMobileFilePicker`), dual upload strategies (direct multipart <= 10 MB and 3-step presigned <= 100 MB), 2-slot concurrency throttling (`useUploadQueue`), cancellation/retry, 409 `FILE_PENDING` backoff, and native sharing (`expo-sharing`) on `/(app)/files`.
+Validates unified file picking (`useMobileFilePicker`), dual upload strategies (direct multipart <= 10 MB and 3-step presigned <= 100 MB), 2-slot concurrency throttling (`useUploadQueue`), shared `<Progress>` indicators, visible `<Alert>` refresh/action error states, `<AlertDialog>` delete confirmations, cancellation/retry, 409 `FILE_PENDING` backoff, and native sharing (`expo-sharing`) on `/(app)/files`.
 
 ---
 
@@ -14,11 +14,12 @@ pnpm test src/features/files/__tests__/
 
 ## Interactive / Paired Verification Steps
 
-### 1. Unified File Picker & Client Validation Boundaries
+### 1. Single-Header Chrome, Unified File Picker & Client Validation Boundaries
 
-1. Open the **Files** tab (`/(app)/files`) and pick a file via Document Picker, Photo Library, or Camera (`useMobileFilePicker`).
-2. Verify boundary validation (`validateUploadFile`):
-   - `0` bytes -> rejected before network egress (breadcrumb only, zero defects).
+1. Open the **Files** tab (`/(app)/files`) and confirm no duplicate `"Files"` heading or redundant top `SafeAreaView` gap renders beneath the `<Tabs>` header.
+2. Verify `FilePickerCard` and `UploadProgressList` headers and action rows wrap cleanly on 320–375px screens.
+3. Pick a file via Document Picker, Photo Library, or Camera (`useMobileFilePicker`) and verify boundary validation (`validateUploadFile`):
+   - `0` bytes -> rejected before network egress with a destructive `<Alert>` (breadcrumb only, zero defects).
    - `> 10 MB` with strategy forced to `"direct"` -> rejected with actionable guidance.
    - `> 100 MB` -> rejected across all strategies.
 
@@ -27,7 +28,7 @@ pnpm test src/features/files/__tests__/
 1. Pick a file `<= 10 MB` under `"auto"` or `"direct"` strategy.
 2. **Assertion**:
    - Single `POST /api/v1/files` executes via `FileTransferPort.uploadDirectMultipart` (`FileSystemUploadType.MULTIPART`, field `file`) with `Authorization: Bearer`, `X-Request-Id`, and `traceparent`.
-   - Upload progress updates smoothly and `filesQueryKeys.all` invalidates on completion.
+   - Shared `<Progress>` bar updates smoothly and `filesQueryKeys.all` invalidates on completion.
 
 ### 3. Three-Step Presigned Upload (<= 100 MB)
 
@@ -44,10 +45,13 @@ pnpm test src/features/files/__tests__/
 2. Cancel an active upload:
    - **Assertion**: `AbortSignal` aborts the transfer, transitions status to `"aborted"`, records a breadcrumb (zero defects), and allows clean retry via `retry(id)`.
 
-### 5. Download, 409 `FILE_PENDING` Backoff & Native Share Sheet
+### 5. Download, Preview, Refresh Errors & `AlertDialog` Delete Confirmation
 
-1. Tap **Download / Share** on a ready file:
+1. Confirm file list rows use a themed `ActivityIndicator` while loading, truncate long MIME captions (`numberOfLines={1}`) with balanced padding, and display a destructive `<Alert>` banner above the list if a refresh fails while files are already displayed.
+2. Tap **Download / Share** on a ready file:
    - **Assertion**: `GET /api/v1/files/{id}/download` writes to `${cacheDirectory}transfers/` with Bearer + trace headers and opens `Sharing.shareAsync(localUri)`.
    - If the backend responds `409 FILE_PENDING`, the downloader retries up to 3 attempts with exponential backoff before failing.
-2. Tap **Preview** on a ready file:
+3. Tap **Preview** on a ready file:
    - **Assertion**: `GET /api/v1/files/{id}/url` resolves a temporary URL and opens it in-app via `WebBrowser.openBrowserAsync`.
+4. Tap **Delete** on a ready file:
+   - **Assertion**: An `<AlertDialog>` confirmation opens (`Cancel` / `Delete`); cancelling preserves the file, confirming executes `DELETE /api/v1/files/{id}`, and failures render a destructive `<Alert>`.
