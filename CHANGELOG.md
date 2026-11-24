@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.1.2](https://github.com/Guiguerreiro39/expo-open-api/compare/v0.1.1...v0.1.2) (2026-11-24)
+
+
+### Features
+
+* **forms:** harden zero-jump inputs, form scroll view, form primitives, and auth screens ([3a12567](https://github.com/Guiguerreiro39/expo-open-api/commit/3a12567e8d7190525e471c10738ac6d9d6272fb9))
+* **overlays:** harden cross-platform overlays, select, sheet, tooltip, and top toast ([920b5b1](https://github.com/Guiguerreiro39/expo-open-api/commit/920b5b149eb36f92ec1bdd794eb4cd75208a4748))
+* **screens:** unify tab chrome, screen ergonomics, and delete confirmations ([b0e646e](https://github.com/Guiguerreiro39/expo-open-api/commit/b0e646e3feb5678c7c5f1fb50c6a81091abb247d))
+* **showcase:** overhaul showcase screen and sync runtime verification skill ([a3aa4ce](https://github.com/Guiguerreiro39/expo-open-api/commit/a3aa4ced22fc9f752e0734985b39c5fd4ad1128f))
+* **theme:** add tri-layer theme mirroring, wcag tokens, scrim, fonts, and shared verifier ([6654999](https://github.com/Guiguerreiro39/expo-open-api/commit/6654999607d15ff5afc2e983590855df8c7005f7))
+* **ui:** add tactile shadow compression, preset geometry, hardened controls and rebuilt slider ([7d88274](https://github.com/Guiguerreiro39/expo-open-api/commit/7d88274b602e809431ca86e956b061ecfed92da1))
+* **ui:** overhaul cross-platform ui, theme sync, forms, and primitives ([b196eab](https://github.com/Guiguerreiro39/expo-open-api/commit/b196eabea4f8001b9b38414f69342435242a725b))
+
+
+### Bug Fixes
+
+* **ui:** resolve all 21 spec-36 interrogate hardening findings ([56daada](https://github.com/Guiguerreiro39/expo-open-api/commit/56daada9eaff7a1fe4ca767b6fdc3501e8e52fc8))
+* **ui:** use normal pressable buttons, fix mode contrast, and add screen spacing ([8f7bf92](https://github.com/Guiguerreiro39/expo-open-api/commit/8f7bf924b64b96cdd3a172b8f340c9a1fce2893a))
+
+
+### Documentation
+
+* **adr:** add adr-0014 and overlay scrim glossary entry for spec 36 ([adf182d](https://github.com/Guiguerreiro39/expo-open-api/commit/adf182d5d96501977f1ef51febff9b9c788c949c))
+
 ## [0.1.1](https://github.com/Guiguerreiro39/expo-open-api/compare/v0.1.0...v0.1.1) (2026-11-24)
 
 
