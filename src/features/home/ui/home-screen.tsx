@@ -27,9 +27,9 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView className="bg-background flex-1" edges={["left", "right"]}>
-      <ScrollView contentContainerClassName="px-5 py-6" showsVerticalScrollIndicator={false}>
-        <View className="mx-auto w-full max-w-md gap-6">
-          <View className="gap-3">
+      <ScrollView contentContainerClassName="px-6 py-8" showsVerticalScrollIndicator={false}>
+        <View className="mx-auto w-full max-w-md gap-8">
+          <View className="gap-4">
             <Badge variant="secondary">
               <View className="flex-row items-center gap-1.5">
                 <Icon as={Sparkles} size={14} className="text-on-secondary-container" />
@@ -43,19 +43,19 @@ export function HomeScreen() {
           </View>
 
           <Card>
-            <CardHeader>
-              <View className="flex-row items-center gap-2">
+            <CardHeader className="gap-2 p-6">
+              <View className="flex-row items-center gap-2.5">
                 <Icon as={Palette} size={18} className="text-primary shrink-0" />
                 <CardTitle className="min-w-0 flex-1">Runtime Theme Presets</CardTitle>
               </View>
               <CardDescription>{presetDefinition.description}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-6 pb-6">
               <ThemeSwitcher />
             </CardContent>
             <CardFooter
               testID="home-theme-card-footer"
-              className="flex-wrap items-center justify-between gap-2"
+              className="flex-wrap items-center justify-between gap-3 px-6 pb-6"
             >
               <Badge variant="info">{modeLabel}</Badge>
               <Text variant="caption" className="shrink">

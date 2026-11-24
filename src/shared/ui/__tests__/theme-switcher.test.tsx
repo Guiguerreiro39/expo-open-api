@@ -107,6 +107,19 @@ describe("ThemeSwitcher Widget", () => {
       ),
     ).toContain("text-on-primary-container");
 
+    // Selected color mode button uses bg-primary + text-primary-foreground (never text-foreground)
+    const selectedModeClasses = String(selectedMode.props.className).split(/\s+/);
+    expect(selectedModeClasses).toContain("bg-primary");
+    const selectedModeTextClasses = String(screen.getByText("Dark").props.className).split(/\s+/);
+    expect(selectedModeTextClasses).toContain("text-primary-foreground");
+    expect(selectedModeTextClasses).not.toContain("text-foreground");
+
+    const unselectedModeTextClasses = String(screen.getByText("Light").props.className).split(
+      /\s+/,
+    );
+    expect(unselectedModeTextClasses).toContain("text-foreground");
+    expect(unselectedModeTextClasses).not.toContain("text-primary-foreground");
+
     // Header and color-mode rows wrap cleanly on narrow 320-375px screens
     expect(String(screen.getByTestId("theme-switcher-header").props.className)).toContain(
       "flex-wrap",

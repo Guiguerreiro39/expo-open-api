@@ -50,7 +50,6 @@ import { Icon } from "@/shared/ui/icon";
 import { Input } from "@/shared/ui/input";
 import { LiveQueryBadge } from "@/shared/ui/live-query-badge";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { TactilePressable } from "@/shared/ui/tactile-pressable";
 import { Text } from "@/shared/ui/text";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 import { useToast } from "@/shared/ui/toast";
@@ -425,15 +424,14 @@ export function TasksScreen() {
           {FILTER_OPTIONS.map((option) => {
             const selected = filter === option.value;
             return (
-              <TactilePressable
+              <Pressable
                 key={option.value}
-                elevated={selected}
                 accessibilityRole="tab"
                 accessibilityLabel={`Filter tasks: ${option.label}`}
                 accessibilityState={{ selected }}
                 onPress={() => setFilter(option.value)}
                 className={cn(
-                  "rounded-full px-4 py-2",
+                  "rounded-full px-4 py-2 active:opacity-80",
                   borderClass,
                   selected
                     ? "border-primary bg-primary"
@@ -448,7 +446,7 @@ export function TasksScreen() {
                 >
                   {option.label}
                 </Text>
-              </TactilePressable>
+              </Pressable>
             );
           })}
         </View>

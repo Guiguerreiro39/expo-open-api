@@ -63,7 +63,7 @@ export function UploadProgressList({
 
   return (
     <Card>
-      <CardHeader className="flex-row flex-wrap items-center justify-between gap-2">
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 p-6">
         <CardTitle className="min-w-0 flex-1">{`Transfer Queue (${items.length})`}</CardTitle>
         {hasCompleted ? (
           <Button
@@ -78,7 +78,7 @@ export function UploadProgressList({
         ) : null}
       </CardHeader>
 
-      <CardContent className="gap-3">
+      <CardContent className="gap-4 px-6 pb-6">
         {items.map((item) => {
           const badge = STATUS_BADGE[item.status];
           const canCancel = item.status === "queued" || item.status === "uploading";
@@ -89,7 +89,7 @@ export function UploadProgressList({
             <View
               key={item.id}
               className={cn(
-                "border-outline-variant bg-surface-container-low gap-2 p-3",
+                "border-outline-variant bg-surface-container-low gap-3 p-4",
                 PRESET_ITEM_RADIUS[preset],
                 borderClass,
               )}

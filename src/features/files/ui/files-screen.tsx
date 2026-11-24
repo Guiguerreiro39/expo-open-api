@@ -202,10 +202,10 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
         : null;
 
   const header = (
-    <View className="gap-4 pb-2">
+    <View className="gap-6 pb-2">
       <View
         testID="files-status-header"
-        className="flex-row flex-wrap items-center justify-between gap-2"
+        className="flex-row flex-wrap items-center justify-between gap-3"
       >
         <Text variant="muted" className="min-w-0 flex-1">
           Stream multipart or presigned uploads, track transfer progress, and share files natively.
@@ -269,7 +269,7 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
         </Alert>
       ) : null}
 
-      <View className="flex-row flex-wrap items-center justify-between gap-2 pt-1">
+      <View className="flex-row flex-wrap items-center justify-between gap-2 pt-2">
         <Text variant="h4">Stored Files</Text>
         <Text variant="caption">{`${files.length} file${files.length === 1 ? "" : "s"}`}</Text>
       </View>

@@ -1,8 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentRef, forwardRef, type ReactNode } from "react";
-import { DEFAULT_THEME_PRESET, type ThemePreset } from "@/shared/lib/theme/presets";
-import { cn } from "@/shared/lib/utils";
-import { TactilePressable, type TactilePressableProps } from "@/shared/ui/tactile-pressable";
+import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from "react-native";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
+import { cn, resolvePresetBorderOverride } from "@/shared/lib/utils";
 import { Text, TextClassContext } from "@/shared/ui/text";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 
@@ -59,13 +63,17 @@ export const buttonTextVariants = cva("text-body-sm text-center", {
 });
 
 export interface ButtonProps
-  extends Omit<TactilePressableProps, "children">,
+  extends Omit<PressableProps, "children" | "style">,
     VariantProps<typeof buttonVariants> {
   children?: ReactNode;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
   textClassName?: string;
+  elevated?: boolean;
+  hapticFeedback?: boolean;
 }
 
-export const Button = forwardRef<ComponentRef<typeof TactilePressable>, ButtonProps>(
+export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(
   (
     {
       className,
@@ -73,6 +81,8 @@ export const Button = forwardRef<ComponentRef<typeof TactilePressable>, ButtonPr
       variant = "default",
       size = "default",
       elevated,
+      hapticFeedback: _hapticFeedback,
+      disabled,
       children,
       ...props
     },
@@ -80,8 +90,18 @@ export const Button = forwardRef<ComponentRef<typeof TactilePressable>, ButtonPr
   ) => {
     const theme = useOptionalTheme();
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const scheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, scheme);
     const isElevated = elevated ?? (variant !== "ghost" && variant !== "link");
     const resolvedTextClass = cn(buttonTextVariants({ variant, size }), textClassName);
+    const baseClassName = cn(
+      PRESET_BUTTON_RADIUS[preset],
+      buttonVariants({ variant, size }),
+      className,
+    );
+    const enforcedBorderClass = resolvePresetBorderOverride(baseClassName, elevation.borderWidth, {
+      applyDefault: isElevated,
+    });
 
     const renderedChildren =
       typeof children === "string" || typeof children === "number" ? (
@@ -92,15 +112,20 @@ export const Button = forwardRef<ComponentRef<typeof TactilePressable>, ButtonPr
 
     return (
       <TextClassContext.Provider value={resolvedTextClass}>
-        <TactilePressable
+        <Pressable
           ref={ref}
           accessibilityRole="button"
-          elevated={isElevated}
-          className={cn(PRESET_BUTTON_RADIUS[preset], buttonVariants({ variant, size }), className)}
+          disabled={disabled}
+          className={cn(
+            baseClassName,
+            enforcedBorderClass,
+            "active:opacity-80",
+            disabled && "opacity-50",
+          )}
           {...props}
         >
           {renderedChildren}
-        </TactilePressable>
+        </Pressable>
       </TextClassContext.Provider>
     );
   },

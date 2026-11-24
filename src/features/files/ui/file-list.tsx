@@ -96,7 +96,7 @@ export function FileList({
           />
         ) : undefined
       }
-      contentContainerClassName="gap-4 px-5 pb-10 pt-4"
+      contentContainerClassName="gap-5 px-6 pb-12 pt-6"
       ListHeaderComponent={listHeader}
       ListEmptyComponent={
         isLoading ? (
@@ -156,9 +156,9 @@ export function FileList({
 
         return (
           <Card>
-            <CardContent className="gap-3 py-4">
-              <View className="flex-row items-start justify-between gap-2">
-                <View className="min-w-0 flex-1 gap-1">
+            <CardContent className="gap-4 p-5">
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="min-w-0 flex-1 gap-1.5">
                   <Text variant="title" numberOfLines={1}>
                     {item.originalName}
                   </Text>
@@ -174,7 +174,7 @@ export function FileList({
                 </Badge>
               </View>
 
-              <View className="flex-row flex-wrap items-center gap-2">
+              <View className="flex-row flex-wrap items-center gap-2.5">
                 <Button
                   variant="secondary"
                   size="sm"

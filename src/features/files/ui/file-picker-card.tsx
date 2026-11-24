@@ -57,7 +57,7 @@ export function FilePickerCard({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="gap-2 p-6">
         <View className="flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="min-w-0 flex-1">Upload Files</CardTitle>
           <Badge variant="info" className="shrink-0">
@@ -70,10 +70,10 @@ export function FilePickerCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="gap-4">
-        <View className="gap-2">
+      <CardContent className="gap-5 px-6 pb-6">
+        <View className="gap-3">
           <Text variant="label">Transfer Strategy</Text>
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row flex-wrap gap-2.5">
             {STRATEGIES.map((item) => {
               const selected = item.value === strategy;
               return (
@@ -93,7 +93,7 @@ export function FilePickerCard({
           {activeStrategy ? <Text variant="caption">{activeStrategy.hint}</Text> : null}
         </View>
 
-        <View className="flex-row flex-wrap gap-2">
+        <View className="flex-row flex-wrap gap-2.5">
           <Button
             variant="default"
             size="sm"

@@ -1,5 +1,5 @@
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react-native";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import {
   getThemeElevation,
   THEME_PRESET_IDS,
@@ -9,7 +9,6 @@ import {
 } from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
-import { TactilePressable } from "@/shared/ui/tactile-pressable";
 import { Text } from "@/shared/ui/text";
 import { useTheme } from "@/shared/ui/theme-provider";
 
@@ -40,8 +39,8 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   const tileRadiusClass = PRESET_TILE_RADIUS[preset];
 
   return (
-    <View className={cn("gap-4", className)}>
-      <View className="gap-2">
+    <View className={cn("gap-6", className)}>
+      <View className="gap-3">
         <View
           testID="theme-switcher-header"
           className="flex-row flex-wrap items-center justify-between gap-2"
@@ -55,21 +54,20 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
           </Text>
         </View>
 
-        <View className="gap-2">
+        <View className="gap-2.5">
           {THEME_PRESET_IDS.map((presetId) => {
             const definition = THEME_PRESETS[presetId];
             const isSelected = preset === presetId;
 
             return (
-              <TactilePressable
+              <Pressable
                 key={presetId}
                 accessibilityRole="button"
                 accessibilityLabel={definition.label}
                 accessibilityState={{ selected: isSelected }}
-                elevated={isSelected}
                 onPress={() => setPreset(presetId)}
                 className={cn(
-                  "flex-row items-center justify-between gap-3 px-4 py-3",
+                  "flex-row items-center justify-between gap-3 px-4 py-3.5 active:opacity-85",
                   tileRadiusClass,
                   borderClass,
                   isSelected
@@ -77,7 +75,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                     : "border-outline-variant bg-surface-container-lowest",
                 )}
               >
-                <View className="min-w-0 flex-1 gap-0.5">
+                <View className="min-w-0 flex-1 gap-1">
                   <Text
                     variant="label"
                     className={
@@ -99,28 +97,27 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                     <Icon as={Check} size={14} className="text-primary-container" />
                   </View>
                 ) : null}
-              </TactilePressable>
+              </Pressable>
             );
           })}
         </View>
       </View>
 
-      <View className="gap-2">
+      <View className="gap-3">
         <Text variant="label">Color Mode</Text>
-        <View testID="theme-switcher-modes" className="flex-row flex-wrap gap-2">
+        <View testID="theme-switcher-modes" className="flex-row flex-wrap gap-2.5">
           {COLOR_SCHEME_OPTIONS.map((option) => {
             const isSelected = colorScheme === option.mode;
 
             return (
-              <TactilePressable
+              <Pressable
                 key={option.mode}
                 accessibilityRole="button"
                 accessibilityLabel={option.label}
                 accessibilityState={{ selected: isSelected }}
-                elevated={isSelected}
                 onPress={() => setColorScheme(option.mode)}
                 className={cn(
-                  "min-h-11 min-w-24 flex-1 flex-row items-center justify-center gap-1.5 px-3 py-2.5",
+                  "min-h-11 min-w-24 flex-1 flex-row items-center justify-center gap-2 px-3.5 py-3 active:opacity-85",
                   tileRadiusClass,
                   borderClass,
                   isSelected
@@ -144,7 +141,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 >
                   {option.label}
                 </Text>
-              </TactilePressable>
+              </Pressable>
             );
           })}
         </View>
