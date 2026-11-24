@@ -72,6 +72,19 @@ export const useAppForm: typeof baseUseAppForm = ((opts?: Record<string, unknown
         return;
       }
       try {
+        // Re-validate any field with a lingering onBlur error so a valid field updated
+        // programmatically or without triggering blur cannot deadlock submission.
+        const fieldMeta = form.state.fieldMeta as Record<
+          string,
+          { errorMap?: { onBlur?: unknown } } | undefined
+        >;
+        for (const [fieldName, meta] of Object.entries(fieldMeta)) {
+          if (meta?.errorMap?.onBlur !== undefined) {
+            await (
+              form.validateField as (field: string, cause: "blur") => Promise<unknown> | unknown
+            )(fieldName, "blur");
+          }
+        }
         return await originalHandleSubmit.call(form, submitMeta);
       } catch (error) {
         // Already captured in wrappedOptions.onSubmit (deduplicated by recordErrorOrDefect).
@@ -104,6 +117,8 @@ export interface FormFieldProps {
   children: React.ReactNode;
 }
 
+const EMPTY_ERRORS: string[] = [];
+
 function normalizeError(error: unknown): string {
   if (typeof error === "string") return error;
   if (error && typeof error === "object") {
@@ -115,17 +130,36 @@ function normalizeError(error: unknown): string {
 }
 
 export function FormField({ field, children }: FormFieldProps) {
-  const rawErrors = field.state.meta.errors ?? [];
-  const errors = rawErrors.map(normalizeError).filter(Boolean);
+  const rawErrors = field.state.meta.errors;
+  const stableErrorsRef = React.useRef<string[]>(EMPTY_ERRORS);
+
+  const errors = React.useMemo(() => {
+    const nextErrors =
+      rawErrors && rawErrors.length > 0
+        ? rawErrors.map(normalizeError).filter(Boolean)
+        : EMPTY_ERRORS;
+    const prevErrors = stableErrorsRef.current;
+    if (
+      prevErrors.length === nextErrors.length &&
+      prevErrors.every((item, index) => item === nextErrors[index])
+    ) {
+      return prevErrors;
+    }
+    stableErrorsRef.current = nextErrors;
+    return nextErrors;
+  }, [rawErrors]);
+
   const isInvalid = errors.length > 0;
 
   const clearSubmitError = React.useCallback(() => {
-    if (field.state.meta.errorMap?.onSubmit) {
+    const errorMap = field.state.meta.errorMap;
+    if (errorMap?.onSubmit !== undefined || errorMap?.onBlur !== undefined) {
       field.setMeta((prev) => ({
         ...prev,
         errorMap: {
           ...prev.errorMap,
           onSubmit: undefined,
+          onBlur: undefined,
         },
       }));
     }
@@ -163,7 +197,7 @@ export function useFormItem() {
   const descriptionId = itemContext?.descriptionId ?? `${id}-description`;
   const messageId = itemContext?.messageId ?? `${id}-message`;
   const isInvalid = itemContext?.isInvalid ?? fieldContextValue?.isInvalid ?? false;
-  const errors = itemContext?.errors ?? fieldContextValue?.errors ?? [];
+  const errors = itemContext?.errors ?? fieldContextValue?.errors ?? EMPTY_ERRORS;
   const clearSubmitError = itemContext?.clearSubmitError ?? fieldContextValue?.clearSubmitError;
 
   return {
@@ -190,7 +224,7 @@ export function FormItem({ className, ...props }: FormItemProps) {
       descriptionId: `${id}-description`,
       messageId: `${id}-message`,
       isInvalid: fieldContextValue?.isInvalid ?? false,
-      errors: fieldContextValue?.errors ?? [],
+      errors: fieldContextValue?.errors ?? EMPTY_ERRORS,
       clearSubmitError: fieldContextValue?.clearSubmitError,
     }),
     [
@@ -289,20 +323,19 @@ export function FormDescription({ className, ...props }: TextProps) {
 export function FormMessage({ className, children, ...props }: TextProps) {
   const { messageId, isInvalid, errors } = useFormItem();
   const body = children ?? (isInvalid && errors.length > 0 ? errors[0] : null);
-
-  if (!body) {
-    return null;
-  }
+  const hasMessage = Boolean(body);
 
   return (
     <Text
       nativeID={messageId}
-      accessibilityRole="alert"
+      accessibilityRole={hasMessage ? "alert" : undefined}
+      accessibilityElementsHidden={!hasMessage}
+      importantForAccessibility={hasMessage ? "yes" : "no"}
       variant="caption"
-      className={cn("text-destructive font-medium", className)}
+      className={cn("text-destructive min-h-5 font-medium", className)}
       {...props}
     >
-      {body}
+      {body ?? ""}
     </Text>
   );
 }

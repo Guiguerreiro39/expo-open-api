@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted (amended by ADR-0014)
 date: 2026-11-23
 decision-ticket: https://github.com/Guiguerreiro39/expo-open-api/issues/14
 ---

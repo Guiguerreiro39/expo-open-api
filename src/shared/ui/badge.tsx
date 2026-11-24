@@ -1,8 +1,20 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ReactNode } from "react";
+import { type ComponentRef, forwardRef, type ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { Text, TextClassContext } from "@/shared/ui/text";
+import { useOptionalTheme } from "@/shared/ui/theme-provider";
+
+const PRESET_BADGE_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-full",
+  "editorial-slate": "rounded-full",
+  "neo-brutalist": "rounded-sm",
+};
 
 export const badgeVariants = cva("flex-row items-center self-start rounded-full border px-3 py-1", {
   variants: {
@@ -46,8 +58,14 @@ export interface BadgeProps
   children?: ReactNode;
 }
 
-export const Badge = forwardRef<View, BadgeProps>(
+export const Badge = forwardRef<ComponentRef<typeof View>, BadgeProps>(
   ({ className, textClassName, variant = "default", children, ...props }, ref) => {
+    const theme = useOptionalTheme();
+    const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const resolvedScheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, resolvedScheme);
+    const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+
     const resolvedTextClass = cn(badgeTextVariants({ variant }), textClassName);
     const renderedChildren =
       typeof children === "string" || typeof children === "number" ? (
@@ -58,7 +76,16 @@ export const Badge = forwardRef<View, BadgeProps>(
 
     return (
       <TextClassContext.Provider value={resolvedTextClass}>
-        <View ref={ref} className={cn(badgeVariants({ variant }), className)} {...props}>
+        <View
+          ref={ref}
+          className={cn(
+            badgeVariants({ variant }),
+            PRESET_BADGE_RADIUS[preset],
+            borderClass,
+            className,
+          )}
+          {...props}
+        >
           {renderedChildren}
         </View>
       </TextClassContext.Provider>

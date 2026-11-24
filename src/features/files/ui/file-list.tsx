@@ -1,12 +1,15 @@
-import { Download, ExternalLink, Paperclip, Trash2 } from "lucide-react-native";
+import { AlertCircle, Download, ExternalLink, Paperclip, Trash2 } from "lucide-react-native";
 import type { ReactElement } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, View } from "react-native";
+import { DEFAULT_THEME_PRESET, resolveThemeColor } from "@/shared/lib/theme/presets";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Can } from "@/shared/ui/can";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
+import { useOptionalTheme } from "@/shared/ui/theme-provider";
 import { type FileRecord, formatFileSize } from "../model/files";
 
 export interface FileListProps {
@@ -14,8 +17,8 @@ export interface FileListProps {
   readonly isLoading?: boolean;
   readonly isRefreshing?: boolean;
   readonly errorMessage?: string | null;
-  readonly busyFileId?: string | null;
-  readonly deletingFileId?: string | null;
+  readonly busyFileIds?: ReadonlySet<string>;
+  readonly deletingFileIds?: ReadonlySet<string>;
   readonly hasNextPage?: boolean;
   readonly isFetchingNextPage?: boolean;
   readonly header?: ReactElement;
@@ -31,8 +34,8 @@ export function FileList({
   isLoading = false,
   isRefreshing = false,
   errorMessage,
-  busyFileId,
-  deletingFileId,
+  busyFileIds,
+  deletingFileIds,
   hasNextPage = false,
   isFetchingNextPage = false,
   header,
@@ -42,36 +45,90 @@ export function FileList({
   onPreviewUrl,
   onDelete,
 }: FileListProps) {
+  const theme = useOptionalTheme();
+  const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+  const scheme = theme?.resolvedColorScheme ?? "light";
+  const primaryColor = resolveThemeColor(preset, scheme, "primary");
+
+  const showRefreshErrorBanner = Boolean(errorMessage && files.length > 0);
+  const listHeader =
+    header || showRefreshErrorBanner ? (
+      <View className="gap-3">
+        {header}
+        {showRefreshErrorBanner ? (
+          <Alert variant="destructive">
+            <View className="flex-row items-start gap-2.5">
+              <Icon
+                as={AlertCircle}
+                size={18}
+                className="text-on-destructive-container mt-0.5 shrink-0"
+              />
+              <View className="min-w-0 flex-1 gap-2">
+                <View className="gap-0.5">
+                  <AlertTitle>Unable to refresh files</AlertTitle>
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </View>
+                {onRefresh ? (
+                  <View className="self-start">
+                    <Button variant="outline" size="sm" onPress={onRefresh}>
+                      Try Again
+                    </Button>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </Alert>
+        ) : null}
+      </View>
+    ) : undefined;
+
   return (
     <FlatList
       data={files}
       keyExtractor={(item) => item.id}
-      refreshing={isRefreshing}
-      onRefresh={onRefresh}
-      contentContainerClassName="gap-4 px-5 pb-10 pt-4"
-      ListHeaderComponent={header}
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={primaryColor}
+            colors={[primaryColor]}
+          />
+        ) : undefined
+      }
+      contentContainerClassName="gap-5 px-6 pb-12 pt-6"
+      ListHeaderComponent={listHeader}
       ListEmptyComponent={
         isLoading ? (
           <Card>
             <CardContent className="items-center gap-3 py-8">
-              <ActivityIndicator />
+              <ActivityIndicator color={primaryColor} />
               <Text variant="muted">Loading files...</Text>
             </CardContent>
           </Card>
         ) : errorMessage ? (
-          <Card>
-            <CardContent className="gap-3 py-6">
-              <Text variant="title" className="text-destructive">
-                Unable to load files
-              </Text>
-              <Text variant="muted">{errorMessage}</Text>
-              {onRefresh ? (
-                <Button variant="outline" size="sm" onPress={onRefresh}>
-                  Try Again
-                </Button>
-              ) : null}
-            </CardContent>
-          </Card>
+          <Alert variant="destructive">
+            <View className="flex-row items-start gap-2.5">
+              <Icon
+                as={AlertCircle}
+                size={18}
+                className="text-on-destructive-container mt-0.5 shrink-0"
+              />
+              <View className="min-w-0 flex-1 gap-3">
+                <View className="gap-0.5">
+                  <AlertTitle>Unable to load files</AlertTitle>
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </View>
+                {onRefresh ? (
+                  <View className="self-start">
+                    <Button variant="outline" size="sm" onPress={onRefresh}>
+                      Try Again
+                    </Button>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          </Alert>
         ) : (
           <Card>
             <CardContent className="items-center gap-2 py-8">
@@ -91,30 +148,33 @@ export function FileList({
               {isFetchingNextPage ? "Loading more..." : "Load More"}
             </Button>
           </View>
-        ) : null
+        ) : undefined
       }
       renderItem={({ item }) => {
-        const isBusy = busyFileId === item.id;
-        const isDeleting = deletingFileId === item.id;
+        const isBusy = busyFileIds?.has(item.id) ?? false;
+        const isDeleting = deletingFileIds?.has(item.id) ?? false;
 
         return (
           <Card>
-            <CardContent className="gap-3 pt-4">
-              <View className="flex-row items-start justify-between gap-2">
-                <View className="flex-1 gap-1">
+            <CardContent className="gap-4 p-5">
+              <View className="flex-row items-start justify-between gap-3">
+                <View className="min-w-0 flex-1 gap-1.5">
                   <Text variant="title" numberOfLines={1}>
                     {item.originalName}
                   </Text>
-                  <Text variant="caption">
+                  <Text variant="caption" numberOfLines={1}>
                     {`${formatFileSize(item.sizeBytes)} • ${item.mimeType}`}
                   </Text>
                 </View>
-                <Badge variant={item.status === "ready" ? "success" : "warning"}>
+                <Badge
+                  variant={item.status === "ready" ? "success" : "warning"}
+                  className="shrink-0"
+                >
                   {item.status === "ready" ? "Ready" : "Pending"}
                 </Badge>
               </View>
 
-              <View className="flex-row flex-wrap items-center gap-2">
+              <View className="flex-row flex-wrap items-center gap-2.5">
                 <Button
                   variant="secondary"
                   size="sm"

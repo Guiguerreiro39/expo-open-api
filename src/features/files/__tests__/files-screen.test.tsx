@@ -1,8 +1,11 @@
-import { fireEvent, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, waitFor } from "@testing-library/react-native";
 import { HttpResponse, http } from "msw";
+import { ActivityIndicator, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { describe, expect, it } from "vitest";
+import { resolveThemeColor } from "@/shared/lib/theme/presets";
 import { TEST_API_BASE } from "@/test/mocks/handlers/auth";
-import { server } from "@/test/msw-server";
+import { honoErrorResponse, server } from "@/test/msw-server";
 import { renderWithProviders } from "@/test/render";
 import { createInMemoryFileTransferPort } from "../api/transfer-port";
 import type { FileRecord, MobileFileAsset } from "../model/files";
@@ -255,10 +258,242 @@ describe("FilesScreen integration", () => {
 
     fireEvent.press(screen.getByLabelText("Delete budget.pdf"));
     await waitFor(() => {
+      expect(screen.getByText("Delete file?")).toBeTruthy();
+    });
+    expect(screen.getByText("budget.pdf")).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText("Confirm delete file"));
+    await waitFor(() => {
       expect(screen.queryByText("budget.pdf")).toBeNull();
     });
 
     screen.observability.assertNoDefects();
+  });
+
+  it("cancels file deletion in AlertDialog without issuing DELETE request", async () => {
+    const port = createInMemoryFileTransferPort();
+    let deleteCalls = 0;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files`, () =>
+        HttpResponse.json({
+          data: [
+            makeFileRecord({
+              id: OWN_FILE_ID,
+              userId: "user-member-1",
+              originalName: "keep-me.pdf",
+            }),
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.delete(`${TEST_API_BASE}/api/v1/files/:id`, () => {
+        deleteCalls += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const screen = renderWithProviders(
+      <FilesScreen transferPort={port} pickerAdapter={makePickerAdapter()} />,
+      {
+        user: {
+          id: "user-member-1",
+          name: "Alex Member",
+          email: "alex@example.com",
+          role: "member",
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("keep-me.pdf")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText("Delete keep-me.pdf"));
+    await waitFor(() => {
+      expect(screen.getByText("Delete file?")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText("Cancel"));
+    await waitFor(() => {
+      expect(screen.queryByText("Delete file?")).toBeNull();
+    });
+
+    expect(screen.getByText("keep-me.pdf")).toBeTruthy();
+    expect(deleteCalls).toBe(0);
+    screen.observability.assertNoDefects();
+  });
+
+  it("uses horizontal-only SafeAreaView, compact header without giant Files title, themed loader, truncated MIME captions, and surfaces refresh errors even when files are listed", async () => {
+    const port = createInMemoryFileTransferPort();
+    let releaseFirstLoad: (() => void) | null = null;
+    const firstLoadGate = new Promise<void>((resolve) => {
+      releaseFirstLoad = resolve;
+    });
+    let listCalls = 0;
+    const longMime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files`, async () => {
+        listCalls += 1;
+        if (listCalls === 1) {
+          await firstLoadGate;
+          return HttpResponse.json({
+            data: [
+              makeFileRecord({
+                id: OWN_FILE_ID,
+                userId: "user-member-1",
+                originalName: "spec-sheet.docx",
+                mimeType: longMime,
+              }),
+            ],
+            meta: { nextCursor: null, hasMore: false },
+          });
+        }
+        return honoErrorResponse(503, "SERVICE_UNAVAILABLE", "Storage backend unavailable");
+      }),
+    );
+
+    const screen = renderWithProviders(
+      <FilesScreen transferPort={port} pickerAdapter={makePickerAdapter()} />,
+      {
+        user: {
+          id: "user-member-1",
+          name: "Alex Member",
+          email: "alex@example.com",
+          role: "member",
+        },
+        initialPreset: "editorial-slate",
+        initialColorScheme: "dark",
+      },
+    );
+
+    // Horizontal-only SafeAreaView edges (single top header belongs to <Tabs>)
+    expect(screen.UNSAFE_getByType(SafeAreaView).props.edges).toEqual(["left", "right"]);
+
+    // No duplicate giant "Files" title
+    expect(screen.queryByText("Files")).toBeNull();
+
+    // Themed ActivityIndicator while loading
+    expect(screen.UNSAFE_getByType(ActivityIndicator).props.color).toBe(
+      resolveThemeColor("editorial-slate", "dark", "primary"),
+    );
+
+    await act(async () => {
+      releaseFirstLoad?.();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("spec-sheet.docx")).toBeTruthy();
+    });
+
+    // Truncated MIME caption
+    const mimeCaption = screen.getByText(new RegExp(longMime));
+    expect(mimeCaption.props.numberOfLines).toBe(1);
+
+    // Pull-to-refresh fails while file is already listed -> refresh error Alert MUST still render
+    const refreshControl = screen.UNSAFE_getByType(RefreshControl);
+    expect(refreshControl.props.tintColor).toBe(
+      resolveThemeColor("editorial-slate", "dark", "primary"),
+    );
+
+    await act(async () => {
+      refreshControl.props.onRefresh?.();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("spec-sheet.docx")).toBeTruthy();
+      expect(screen.getByText(/Unable to refresh files/i)).toBeTruthy();
+      expect(screen.getByText(/Storage backend unavailable/i)).toBeTruthy();
+    });
+  });
+
+  it("renders destructive Alert on action and upload errors", async () => {
+    const port = createInMemoryFileTransferPort();
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files`, () =>
+        HttpResponse.json({
+          data: [
+            makeFileRecord({
+              id: OWN_FILE_ID,
+              userId: "user-member-1",
+              originalName: "locked.pdf",
+            }),
+          ],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.delete(`${TEST_API_BASE}/api/v1/files/:id`, () =>
+        honoErrorResponse(403, "FORBIDDEN", "File deletion restricted"),
+      ),
+    );
+
+    const screen = renderWithProviders(
+      <FilesScreen transferPort={port} pickerAdapter={makePickerAdapter()} />,
+      {
+        user: {
+          id: "user-member-1",
+          name: "Alex Member",
+          email: "alex@example.com",
+          role: "member",
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("locked.pdf")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText("Delete locked.pdf"));
+    await waitFor(() => {
+      expect(screen.getByText("Delete file?")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText("Confirm delete file"));
+
+    await waitFor(() => {
+      const alert = screen.getByTestId("files-action-alert");
+      expect(alert.props.accessibilityRole).toBe("alert");
+      expect(String(alert.props.className)).toContain("border-destructive");
+      expect(screen.getByText("Access denied")).toBeTruthy();
+      expect(screen.getByText(/File deletion restricted/i)).toBeTruthy();
+    });
+
+    screen.observability.assertNoDefects();
+  });
+
+  it("reuses shared Progress and destructive Alert for upload queue failures", async () => {
+    const port = createInMemoryFileTransferPort({
+      uploadDirectMultipart: async () => {
+        throw new Error("Upload quota exceeded");
+      },
+    });
+    const picker = makePickerAdapter({
+      uri: "file:///cache/large.pdf",
+      name: "large.pdf",
+      size: 4096,
+      mimeType: "application/pdf",
+    });
+
+    const screen = renderWithProviders(<FilesScreen transferPort={port} pickerAdapter={picker} />, {
+      user: {
+        id: "user-member-1",
+        name: "Alex Member",
+        email: "alex@example.com",
+        role: "member",
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Pick Document")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByLabelText("Pick Document"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Failed")).toBeTruthy();
+      expect(screen.getByText("Upload quota exceeded")).toBeTruthy();
+    });
   });
 
   it("displays upload progress queue with cancel and retry controls", async () => {
@@ -333,5 +568,75 @@ describe("FilesScreen integration", () => {
     });
 
     screen.observability.assertNoDefects();
+  });
+
+  it("tracks per-file delete locks independently so deleting File B never unlocks in-flight File A", async () => {
+    let releaseDeleteA!: () => void;
+    let releaseDeleteB!: () => void;
+    let deleteACalls = 0;
+
+    const port = createInMemoryFileTransferPort();
+    const fileA = makeFileRecord({
+      id: OWN_FILE_ID,
+      originalName: "alpha.pdf",
+    });
+    const fileB = makeFileRecord({
+      id: OTHER_FILE_ID,
+      originalName: "beta.pdf",
+    });
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files`, () =>
+        HttpResponse.json({ data: [fileA, fileB], meta: { nextCursor: null, hasMore: false } }),
+      ),
+      http.delete(`${TEST_API_BASE}/api/v1/files/:id`, async ({ params }) => {
+        if (params.id === fileA.id) {
+          deleteACalls += 1;
+          await new Promise<void>((resolve) => {
+            releaseDeleteA = resolve;
+          });
+          return new HttpResponse(null, { status: 204 });
+        }
+        await new Promise<void>((resolve) => {
+          releaseDeleteB = resolve;
+        });
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const view = renderWithProviders(
+      <FilesScreen transferPort={port} pickerAdapter={makePickerAdapter()} />,
+      { user: { id: "user-member-1", name: "Alex", email: "alex@example.com", role: "member" } },
+    );
+
+    await waitFor(() => {
+      expect(view.getByText("alpha.pdf")).toBeTruthy();
+      expect(view.getByText("beta.pdf")).toBeTruthy();
+    });
+
+    fireEvent.press(view.getByLabelText("Delete alpha.pdf"));
+    fireEvent.press(await waitFor(() => view.getByLabelText("Confirm delete file")));
+    await waitFor(() => {
+      expect(view.getByLabelText("Delete alpha.pdf").props.accessibilityState?.disabled).toBe(true);
+    });
+
+    fireEvent.press(view.getByLabelText("Delete beta.pdf"));
+    fireEvent.press(await waitFor(() => view.getByLabelText("Confirm delete file")));
+    await waitFor(() => {
+      expect(view.getByLabelText("Delete beta.pdf").props.accessibilityState?.disabled).toBe(true);
+    });
+
+    // File A MUST remain locked while both deletes are in flight
+    expect(view.getByLabelText("Delete alpha.pdf").props.accessibilityState?.disabled).toBe(true);
+    fireEvent.press(view.getByLabelText("Delete alpha.pdf"));
+    expect(view.queryByLabelText("Confirm delete file")).toBeNull();
+
+    await act(async () => {
+      releaseDeleteA();
+      releaseDeleteB();
+    });
+
+    expect(deleteACalls).toBe(1);
+    view.observability.assertNoDefects();
   });
 });

@@ -1,6 +1,6 @@
 # Verification Flow: Live Tasks & Realtime SSE (`live-tasks`)
 
-Validates realtime Server-Sent Events synchronization via `useLiveQuery`, optimistic mutations, `["tasks", "mutation"]` microtask anti-clobber buffering, `AppState`/`NetInfo` lifecycle resilience, and MMKV offline cache persistence on `/(app)/tasks`.
+Validates realtime Server-Sent Events synchronization via `useLiveQuery`, single-header compact status chrome, skeleton loading & pull-to-refresh, optimistic mutations, `["tasks", "mutation"]` microtask anti-clobber buffering, `AlertDialog` delete confirmation, visible mutation/`403` error feedback, `AppState`/`NetInfo` lifecycle resilience, and MMKV offline cache persistence on `/(app)/tasks`.
 
 ---
 
@@ -14,20 +14,23 @@ pnpm test src/features/tasks/__tests__/ src/shared/lib/hooks/__tests__/ src/shar
 
 ## Interactive / Paired Verification Steps
 
-### 1. Streaming SSE Connection & `LiveQueryBadge`
+### 1. Single-Header Status Strip, Streaming SSE & `LiveQueryBadge`
 
 1. Navigate to the **Tasks** tab (`/(app)/tasks`) as an authenticated user.
 2. **Assertion**:
+   - No duplicate `"Tasks"` heading or redundant top `SafeAreaView` inset stacks below the `<Tabs>` header; a compact wrapping status strip houses task counts and `LiveQueryBadge` cleanly on 320–375px screens.
+   - Initial loading renders `<Skeleton>` placeholders rather than plain loading text, and the task list supports pull-to-refresh and `keyboardDismissMode="on-drag"`.
    - `useLiveQuery` opens `GET /api/v1/tasks/live` over streaming `expo/fetch` with `Authorization: Bearer <token>`, `Accept: text/event-stream`, `X-Request-Id`, and `traceparent` (never `?token=` in query params).
-   - Incoming `event: init` and `event: update` payloads decode through Effect `GetApiV1Tasks200Response` and populate the TanStack Query cache (`staleTime: Infinity` while connected).
-   - `LiveQueryBadge` transitions to `"Connected"`.
+   - Incoming `event: init` and `event: update` payloads decode through Effect `GetApiV1Tasks200Response` and populate the TanStack Query cache (`staleTime: Infinity` while connected), transitioning `LiveQueryBadge` to `"Connected"`.
 
-### 2. Optimistic Create, Toggle & Rollback
+### 2. Optimistic Create/Toggle, Delete Confirmation & Visible Error Feedback
 
 1. Create a new task from the Tasks form:
-   - **Assertion**: An optimistic row (`optimistic-<uuid>`) appears immediately; once `POST /api/v1/tasks` returns `201`, the optimistic ID swaps seamlessly to the server UUID.
-2. Toggle task completion and simulate a `500` server failure:
-   - **Assertion**: UI rolls back to the prior state cleanly and reports a defect via `ObservabilityPort`.
+   - **Assertion**: An optimistic row (`optimistic-<uuid>`) appears immediately; once `POST /api/v1/tasks` returns `201`, the optimistic ID swaps seamlessly to the server UUID. Filter pills wrap cleanly on narrow screens with constant preset border widths, completion toggles provide `>= 44×44pt` touch targets, and long unspaced titles truncate/wrap without pushing delete actions off-card.
+2. Tap a task's delete button:
+   - **Assertion**: An `<AlertDialog>` confirmation opens (`Cancel` / `Delete`); cancelling keeps the task intact, and confirming executes `DELETE /api/v1/tasks/{id}`.
+3. Simulate a `403 Forbidden` or `500` server failure on create, toggle, or delete:
+   - **Assertion**: Optimistic state rolls back cleanly AND a visible `<Alert>` / `<Toast>` error surfaces the failure to the user (`403` records a breadcrumb with zero defects; `500` reports a defect via `ObservabilityPort`).
 
 ### 3. Mutation Buffering & Anti-Clobber Merge
 

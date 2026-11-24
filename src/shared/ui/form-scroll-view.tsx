@@ -1,4 +1,5 @@
-import { forwardRef } from "react";
+import { HeaderHeightContext } from "expo-router/react-navigation";
+import { type ComponentRef, forwardRef, useContext } from "react";
 import {
   KeyboardAvoidingView,
   type KeyboardAvoidingViewProps,
@@ -16,7 +17,7 @@ export interface FormScrollViewProps extends ScrollViewProps {
   avoidingBehavior?: KeyboardAvoidingViewProps["behavior"];
 }
 
-export const FormScrollView = forwardRef<ScrollView, FormScrollViewProps>(
+export const FormScrollView = forwardRef<ComponentRef<typeof ScrollView>, FormScrollViewProps>(
   (
     {
       className,
@@ -24,30 +25,36 @@ export const FormScrollView = forwardRef<ScrollView, FormScrollViewProps>(
       containerClassName,
       keyboardShouldPersistTaps = "handled",
       keyboardDismissMode = "on-drag",
-      keyboardVerticalOffset = 0,
+      keyboardVerticalOffset,
       avoidingBehavior,
       children,
       ...props
     },
     ref,
-  ) => (
-    <KeyboardAvoidingView
-      behavior={avoidingBehavior ?? (Platform.OS === "ios" ? "padding" : "height")}
-      keyboardVerticalOffset={keyboardVerticalOffset}
-      className={cn("flex-1", containerClassName)}
-    >
-      <ScrollView
-        ref={ref}
-        keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-        keyboardDismissMode={keyboardDismissMode}
-        className={cn("flex-1", className)}
-        contentContainerClassName={cn("flex-grow", contentContainerClassName)}
-        {...props}
+  ) => {
+    const headerHeight = useContext(HeaderHeightContext) ?? 0;
+    const resolvedBehavior = avoidingBehavior ?? (Platform.OS === "ios" ? "padding" : undefined);
+    const resolvedKeyboardVerticalOffset = keyboardVerticalOffset ?? headerHeight;
+
+    return (
+      <KeyboardAvoidingView
+        behavior={resolvedBehavior}
+        keyboardVerticalOffset={resolvedKeyboardVerticalOffset}
+        className={cn("flex-1", containerClassName)}
       >
-        {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
-  ),
+        <ScrollView
+          ref={ref}
+          keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+          keyboardDismissMode={keyboardDismissMode}
+          className={cn("flex-1", className)}
+          contentContainerClassName={cn("flex-grow", contentContainerClassName)}
+          {...props}
+        >
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  },
 );
 
 FormScrollView.displayName = "FormScrollView";

@@ -1,7 +1,10 @@
 import { act, fireEvent, waitFor } from "@testing-library/react-native";
 import { HttpResponse, http } from "msw";
+import { FlatList, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { describe, expect, it } from "vitest";
 import { TasksScreen } from "@/features/tasks/ui/tasks-screen";
+import { resolveThemeColor } from "@/shared/lib/theme/presets";
 import { emitMockNetInfoState } from "@/test/mocks/adapters/mock-netinfo";
 import { honoErrorResponse, server, TEST_API_BASE } from "@/test/msw-server";
 import { renderWithProviders } from "@/test/render";
@@ -205,7 +208,7 @@ describe("TasksScreen", () => {
       }),
     );
 
-    const { getByLabelText, getByText, queryByText, unmount } = renderWithProviders(
+    const { getByLabelText, getByText, getAllByText, queryByText, unmount } = renderWithProviders(
       <TasksScreen />,
       {
         user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
@@ -215,20 +218,182 @@ describe("TasksScreen", () => {
     const deleteButton = await waitFor(() => getByLabelText("Delete task Build SSE transport"));
     fireEvent.press(deleteButton);
 
-    // Immediately removed optimistically
+    // Must ask for confirmation first — task remains visible until confirmed
+    await waitFor(() => {
+      expect(getByText("Delete task?")).toBeTruthy();
+    });
+    expect(getByText("Build SSE transport")).toBeTruthy();
+
+    fireEvent.press(getByText("Delete"));
+
+    // Immediately removed optimistically after confirmation
     await waitFor(() => {
       expect(queryByText("Build SSE transport")).toBeNull();
     });
 
-    // Server fails with 500 -> task reappears via rollback
+    // Server fails with 500 -> task reappears via rollback and shows visible error feedback
     await act(async () => {
       releaseDelete?.();
     });
 
     await waitFor(() => {
       expect(getByText("Build SSE transport")).toBeTruthy();
+      expect(getAllByText(/Delete failed/i).length).toBeGreaterThanOrEqual(1);
     });
 
+    unmount();
+  });
+
+  it("cancels task deletion in AlertDialog without calling DELETE API", async () => {
+    let deleteCalls = 0;
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, () =>
+        HttpResponse.json({
+          data: [FIRST_TASK],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => createInitSseResponse([FIRST_TASK])),
+      http.delete(`${TEST_API_BASE}/api/v1/tasks/:id`, () => {
+        deleteCalls += 1;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const { getByLabelText, getByText, queryByText, observability, unmount } = renderWithProviders(
+      <TasksScreen />,
+      {
+        user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
+      },
+    );
+
+    const deleteButton = await waitFor(() => getByLabelText("Delete task Build SSE transport"));
+    fireEvent.press(deleteButton);
+
+    await waitFor(() => {
+      expect(getByText("Delete task?")).toBeTruthy();
+    });
+
+    fireEvent.press(getByText("Cancel"));
+
+    await waitFor(() => {
+      expect(queryByText("Delete task?")).toBeNull();
+    });
+
+    expect(getByText("Build SSE transport")).toBeTruthy();
+    expect(deleteCalls).toBe(0);
+    observability.assertNoDefects();
+    unmount();
+  });
+
+  it("surfaces visible 403 ForbiddenError feedback on toggle/create failures without reporting defects", async () => {
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, () =>
+        HttpResponse.json({
+          data: [FIRST_TASK],
+          meta: { nextCursor: null, hasMore: false },
+        }),
+      ),
+      http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => createInitSseResponse([FIRST_TASK])),
+      http.patch(`${TEST_API_BASE}/api/v1/tasks/:id`, () =>
+        honoErrorResponse(403, "FORBIDDEN", "Not allowed to edit this task"),
+      ),
+    );
+
+    const { getByLabelText, getAllByText, observability, unmount } = renderWithProviders(
+      <TasksScreen />,
+      {
+        user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
+      },
+    );
+
+    const toggleButton = await waitFor(() => getByLabelText("Toggle task Build SSE transport"));
+    fireEvent.press(toggleButton);
+
+    await waitFor(() => {
+      expect(getAllByText(/Access denied/i).length).toBeGreaterThanOrEqual(1);
+      expect(getAllByText(/Not allowed to edit this task/i).length).toBeGreaterThanOrEqual(1);
+      expect(
+        getByLabelText("Toggle task Build SSE transport").props.accessibilityState?.checked,
+      ).toBe(false);
+    });
+
+    observability.assertNoDefects();
+    unmount();
+  });
+
+  it("renders skeleton loading, horizontal-only safe area, compact status strip, >=44pt toggles, wrapping filter pills, and themed pull-to-refresh", async () => {
+    let releaseGet: (() => void) | null = null;
+    const getGate = new Promise<void>((resolve) => {
+      releaseGet = resolve;
+    });
+    let getCalls = 0;
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, async () => {
+        getCalls += 1;
+        if (getCalls === 1) {
+          await getGate;
+        }
+        return HttpResponse.json({
+          data: [FIRST_TASK],
+          meta: { nextCursor: null, hasMore: false },
+        });
+      }),
+      http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => createInitSseResponse([FIRST_TASK])),
+    );
+
+    const { getByTestId, getByLabelText, queryByText, UNSAFE_getByType, observability, unmount } =
+      renderWithProviders(<TasksScreen />, {
+        user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
+        initialPreset: "neo-brutalist",
+        initialColorScheme: "dark",
+      });
+
+    // Horizontal-only SafeAreaView edges (single top header belongs to <Tabs>)
+    expect(UNSAFE_getByType(SafeAreaView).props.edges).toEqual(["left", "right"]);
+
+    // No duplicate giant "Tasks" screen heading
+    expect(queryByText("Tasks")).toBeNull();
+
+    // Compact wrapping status strip
+    expect(String(getByTestId("tasks-status-strip").props.className)).toContain("flex-wrap");
+
+    // Shows Skeleton loading while pending
+    expect(getByTestId("tasks-loading-skeleton")).toBeTruthy();
+
+    // Release initial query
+    await act(async () => {
+      releaseGet?.();
+    });
+
+    const toggleButton = await waitFor(() => getByLabelText("Toggle task Build SSE transport"));
+    expect(String(toggleButton.props.className)).toContain("min-h-11");
+    expect(String(toggleButton.props.className)).toContain("min-w-11");
+
+    // Filter pills wrap and keep constant border-2 in neo-brutalist
+    const allPill = getByLabelText("Filter tasks: All");
+    const activePill = getByLabelText("Filter tasks: Active");
+    expect(String(allPill.props.className)).toContain("border-2");
+    expect(String(activePill.props.className)).toContain("border-2");
+
+    // FlatList keyboardDismissMode="on-drag" & themed RefreshControl
+    const flatList = UNSAFE_getByType(FlatList);
+    expect(flatList.props.keyboardDismissMode).toBe("on-drag");
+    const refreshControl = UNSAFE_getByType(RefreshControl);
+    expect(refreshControl.props.tintColor).toBe(
+      resolveThemeColor("neo-brutalist", "dark", "primary"),
+    );
+
+    await act(async () => {
+      refreshControl.props.onRefresh?.();
+    });
+
+    await waitFor(() => {
+      expect(getCalls).toBeGreaterThanOrEqual(2);
+    });
+
+    observability.assertNoDefects();
     unmount();
   });
 
@@ -268,6 +433,87 @@ describe("TasksScreen", () => {
       expect(queryByText(/You are offline/i)).toBeNull();
     });
 
+    unmount();
+  });
+
+  it("disables toggle and delete controls on optimistic tasks until server creation settles", async () => {
+    const patchIds: string[] = [];
+    const deleteIds: string[] = [];
+    let initialGetSettled = false;
+    let releasePost!: () => void;
+    const postGate = new Promise<void>((resolve) => {
+      releasePost = resolve;
+    });
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, () => {
+        initialGetSettled = true;
+        return HttpResponse.json({ data: [], meta: { nextCursor: null, hasMore: false } });
+      }),
+      http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => createInitSseResponse([])),
+      http.post(`${TEST_API_BASE}/api/v1/tasks`, async ({ request }) => {
+        const body = (await request.json()) as { name: string };
+        await postGate;
+        const now = new Date().toISOString();
+        return HttpResponse.json(
+          {
+            id: "44444444-4444-4444-8444-444444444444",
+            name: body.name,
+            done: false,
+            userId: "member-1",
+            createdAt: now,
+            updatedAt: now,
+          },
+          { status: 201 },
+        );
+      }),
+      http.patch(`${TEST_API_BASE}/api/v1/tasks/:id`, ({ params }) => {
+        patchIds.push(String(params.id));
+        return honoErrorResponse(404, "NOT_FOUND", "Task not found");
+      }),
+      http.delete(`${TEST_API_BASE}/api/v1/tasks/:id`, ({ params }) => {
+        deleteIds.push(String(params.id));
+        return honoErrorResponse(404, "NOT_FOUND", "Task not found");
+      }),
+    );
+
+    const { getByPlaceholderText, getByLabelText, getByText, queryByText, queryClient, unmount } =
+      renderWithProviders(<TasksScreen />, {
+        user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
+      });
+
+    await waitFor(() => {
+      expect(initialGetSettled).toBe(true);
+      expect(queryClient.isFetching()).toBe(0);
+      expect(getByText("No tasks to show")).toBeTruthy();
+      expect(getByText("Live Connected")).toBeTruthy();
+    });
+
+    fireEvent.changeText(getByPlaceholderText("Add a new task..."), "Brand new task");
+    fireEvent.press(getByLabelText("Add task"));
+
+    const toggleOpt = await waitFor(() => getByLabelText("Toggle task Brand new task"));
+    const deleteOpt = getByLabelText("Delete task Brand new task");
+
+    expect(toggleOpt.props.accessibilityState?.disabled).toBe(true);
+    expect(deleteOpt.props.accessibilityState?.disabled).toBe(true);
+
+    fireEvent.press(toggleOpt);
+    fireEvent.press(deleteOpt);
+    expect(queryByText("Delete task?")).toBeNull();
+
+    await act(async () => {
+      releasePost();
+    });
+
+    await waitFor(() => {
+      expect(getByLabelText("Toggle task Brand new task").props.accessibilityState?.disabled).toBe(
+        false,
+      );
+    });
+
+    expect(patchIds).toEqual([]);
+    expect(deleteIds).toEqual([]);
     unmount();
   });
 

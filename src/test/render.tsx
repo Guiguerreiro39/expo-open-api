@@ -23,7 +23,7 @@ import {
 import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { createInMemoryKvStore, type KeyValueStorePort } from "@/shared/storage/kv-store";
 import { ThemeProvider } from "@/shared/ui/theme-provider";
-import { ToastProvider } from "@/shared/ui/toast";
+import { TOAST_PORTAL_HOST, ToastProvider } from "@/shared/ui/toast";
 import { buildTestSessionPayload, type TestAuthUser } from "./mocks/handlers/auth";
 import { mockAuthSession } from "./msw-server";
 
@@ -97,6 +97,7 @@ function TestProviders({
                   <ToastProvider>
                     {children}
                     <PortalHost />
+                    <PortalHost name={TOAST_PORTAL_HOST} />
                   </ToastProvider>
                 </ThemeProvider>
               </AuthBootstrapContext.Provider>

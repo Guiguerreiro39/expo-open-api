@@ -4,6 +4,7 @@ import { MockEventSource } from "./mock-event-source";
 import { MockXMLHttpRequest } from "./mock-xml-http-request";
 import { resetMockDocumentPicker } from "./mocks/adapters/mock-expo-document-picker";
 import { resetMockExpoFileSystem } from "./mocks/adapters/mock-expo-file-system";
+import { resetMockExpoFont } from "./mocks/adapters/mock-expo-font";
 import { resetMockImagePicker } from "./mocks/adapters/mock-expo-image-picker";
 import { resetMockExpoRouter } from "./mocks/adapters/mock-expo-router-state";
 import { resetMockExpoSharing } from "./mocks/adapters/mock-expo-sharing";
@@ -23,6 +24,11 @@ beforeAll(() => {
     configurable: true,
     value: MockEventSource,
   });
+  Object.defineProperty(globalThis, "NitroModulesProxy", {
+    writable: true,
+    configurable: true,
+    value: {},
+  });
 });
 
 afterEach(() => {
@@ -39,6 +45,7 @@ afterEach(() => {
   resetMockSecureStore();
   resetMockSplashScreen();
   resetMockExpoRouter();
+  resetMockExpoFont();
   resetMockExpoFileSystem();
   resetMockDocumentPicker();
   resetMockImagePicker();

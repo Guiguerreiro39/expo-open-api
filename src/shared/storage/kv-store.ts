@@ -1,5 +1,21 @@
-import { Platform } from "react-native";
-import { MMKV } from "react-native-mmkv";
+import { Platform, TurboModuleRegistry } from "react-native";
+import type { MMKV } from "react-native-mmkv";
+
+type MmkvModule = {
+  readonly createMMKV?: (configuration?: { readonly id?: string }) => MMKV;
+};
+
+function hasNativeNitroModules(): boolean {
+  const runtime = globalThis as { readonly NitroModulesProxy?: unknown };
+  if (runtime.NitroModulesProxy != null) {
+    return true;
+  }
+  // Probe TurboModuleRegistry before loading react-native-mmkv so Metro's
+  // module loader never emits a LogBox error in Expo Go or un-rebuilt binaries.
+  return typeof TurboModuleRegistry?.get === "function"
+    ? TurboModuleRegistry.get("NitroModules") != null
+    : false;
+}
 
 export interface KeyValueStorePort {
   getString(key: string): string | undefined;
@@ -45,13 +61,19 @@ export interface MmkvKvStoreOptions {
 export function createMmkvKvStore(options: MmkvKvStoreOptions = {}): KeyValueStorePort {
   const fallbackStore = options.fallbackStore ?? createInMemoryKvStore();
 
-  if (Platform.OS === "web") {
+  if (Platform.OS === "web" || !hasNativeNitroModules()) {
     return fallbackStore;
   }
 
-  let instance: MMKV | null = null;
+  let instance: MMKV;
   try {
-    instance = new MMKV(options.id ? { id: options.id } : undefined);
+    // Lazy-require so Expo Go / environments without NitroModules fall back cleanly
+    // instead of throwing during top-level module evaluation.
+    const mmkvModule = require("react-native-mmkv") as MmkvModule;
+    if (typeof mmkvModule.createMMKV !== "function") {
+      return fallbackStore;
+    }
+    instance = mmkvModule.createMMKV(options.id ? { id: options.id } : undefined);
   } catch {
     return fallbackStore;
   }
@@ -64,7 +86,7 @@ export function createMmkvKvStore(options: MmkvKvStoreOptions = {}): KeyValueSto
       instance.set(key, value);
     },
     delete(key: string): void {
-      instance.delete(key);
+      instance.remove(key);
     },
     clearAll(): void {
       instance.clearAll();

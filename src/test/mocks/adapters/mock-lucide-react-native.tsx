@@ -1,7 +1,7 @@
-import { createElement, forwardRef } from "react";
+import { type ComponentRef, createElement, forwardRef } from "react";
 import { View } from "react-native";
 
-const MockIconBase = forwardRef<View, Record<string, unknown>>((props, ref) =>
+const MockIconBase = forwardRef<ComponentRef<typeof View>, Record<string, unknown>>((props, ref) =>
   createElement(View, { ...props, ref }),
 );
 MockIconBase.displayName = "MockLucideIcon";
@@ -34,6 +34,8 @@ export const Clock = MockIconBase;
 export const Compass = MockIconBase;
 export const Download = MockIconBase;
 export const ExternalLink = MockIconBase;
+export const Eye = MockIconBase;
+export const EyeOff = MockIconBase;
 export const FileText = MockIconBase;
 export const FolderOpen = MockIconBase;
 export const Home = MockIconBase;

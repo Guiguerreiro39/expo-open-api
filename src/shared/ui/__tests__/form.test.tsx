@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
   useAppForm,
+  useFormItem,
 } from "@/shared/ui/form";
 import { FormScrollView } from "@/shared/ui/form-scroll-view";
 import { Input } from "@/shared/ui/input";
@@ -73,7 +74,7 @@ function TestFormHarness({
                   />
                 </FormControl>
                 <FormDescription>Provide a descriptive title.</FormDescription>
-                <FormMessage />
+                <FormMessage testID="title-message" />
               </FormItem>
             </FormField>
           )}
@@ -209,6 +210,81 @@ function AccessibilityControlsHarness() {
           </FormField>
         )}
       </form.Field>
+    </View>
+  );
+}
+
+function ErrorsObserver({ onCapture }: { onCapture: (errors: string[]) => void }) {
+  const { errors } = useFormItem();
+  onCapture(errors);
+  return null;
+}
+
+function MemoErrorsHarness({ onCapture }: { onCapture: (errors: string[]) => void }) {
+  const form = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async () => {},
+  });
+
+  return (
+    <form.Field name="title">
+      {(field) => (
+        <FormField field={field}>
+          <FormItem>
+            <FormControl>
+              <Input
+                testID="memo-input"
+                value={field.state.value}
+                onChangeText={(text) => field.handleChange(text)}
+              />
+            </FormControl>
+            <ErrorsObserver onCapture={onCapture} />
+          </FormItem>
+        </FormField>
+      )}
+    </form.Field>
+  );
+}
+
+function BlurRecoveryHarness({
+  onSubmit,
+}: {
+  readonly onSubmit: (value: { title: string }) => void;
+}) {
+  const form = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
+  });
+
+  return (
+    <View>
+      <form.Field
+        name="title"
+        validators={{
+          onBlur: Schema.standardSchemaV1(TitleFieldSchema),
+          onSubmit: Schema.standardSchemaV1(TitleFieldSchema),
+        }}
+      >
+        {(field) => (
+          <FormField field={field}>
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input
+                  testID="blur-title-input"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={(text) => field.handleChange(text)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        )}
+      </form.Field>
+      <Button onPress={() => void form.handleSubmit()}>Submit Blur Form</Button>
     </View>
   );
 }
@@ -372,5 +448,58 @@ describe("Mobile TanStack Form Primitives", () => {
         invalid: false,
       });
     });
+  });
+
+  it("reserves stable min-h-5 layout height on FormMessage when empty without exposing an alert role", async () => {
+    renderWithProviders(<TestFormHarness onSubmit={vi.fn()} />);
+
+    const emptyMessage = screen.getByTestId("title-message", { includeHiddenElements: true });
+    expect(String(emptyMessage.props.className ?? "")).toContain("min-h-5");
+    expect(emptyMessage.props.accessibilityRole).toBeUndefined();
+    expect(emptyMessage.props.accessibilityElementsHidden).toBe(true);
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    fireEvent.press(screen.getByRole("button", { name: "Submit" }));
+
+    const activeMessage = await screen.findByRole("alert");
+    expect(activeMessage).toHaveTextContent("Title is required");
+    expect(String(activeMessage.props.className ?? "")).toContain("min-h-5");
+  });
+
+  it("keeps FormField errors array reference stable across keystrokes when errors have not changed", () => {
+    const capturedErrorRefs: Array<string[]> = [];
+
+    renderWithProviders(
+      <MemoErrorsHarness onCapture={(errors) => capturedErrorRefs.push(errors)} />,
+    );
+
+    fireEvent.changeText(screen.getByTestId("memo-input"), "a");
+    fireEvent.changeText(screen.getByTestId("memo-input"), "ab");
+    fireEvent.changeText(screen.getByTestId("memo-input"), "abc");
+
+    expect(capturedErrorRefs.length).toBeGreaterThanOrEqual(4);
+    const firstErrorsRef = capturedErrorRefs[0];
+    for (const ref of capturedErrorRefs) {
+      expect(ref).toBe(firstErrorsRef);
+    }
+  });
+
+  it("clears stale onBlur errors on change and never deadlocks submission when a previously invalid field becomes valid", async () => {
+    const onSubmit = vi.fn();
+
+    renderWithProviders(<BlurRecoveryHarness onSubmit={onSubmit} />);
+
+    fireEvent.changeText(screen.getByTestId("blur-title-input"), "ab");
+    fireEvent(screen.getByTestId("blur-title-input"), "blur");
+    expect(await screen.findByText("Title must be at least 3 characters")).toBeTruthy();
+
+    // Fix text without firing blur (simulating keyboardShouldPersistTaps="handled" or keyboard Done)
+    fireEvent.changeText(screen.getByTestId("blur-title-input"), "Valid Title");
+    fireEvent.press(screen.getByRole("button", { name: "Submit Blur Form" }));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ title: "Valid Title" });
+    });
+    expect(screen.queryAllByRole("alert")).toEqual([]);
   });
 });

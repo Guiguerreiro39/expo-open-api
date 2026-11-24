@@ -1,5 +1,6 @@
-import { Camera, FileText, Image as ImageIcon } from "lucide-react-native";
+import { AlertCircle, Camera, FileText, Image as ImageIcon } from "lucide-react-native";
 import { View } from "react-native";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -56,10 +57,12 @@ export function FilePickerCard({
 
   return (
     <Card>
-      <CardHeader>
-        <View className="flex-row items-center justify-between gap-2">
-          <CardTitle>Upload Files</CardTitle>
-          <Badge variant="info">Max 2 concurrent</Badge>
+      <CardHeader className="gap-2 p-6">
+        <View className="flex-row flex-wrap items-center justify-between gap-2">
+          <CardTitle className="min-w-0 flex-1">Upload Files</CardTitle>
+          <Badge variant="info" className="shrink-0">
+            Max 2 concurrent
+          </Badge>
         </View>
         <CardDescription>
           Stream documents, photos, or camera captures directly from disk without buffering bytes in
@@ -67,10 +70,10 @@ export function FilePickerCard({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="gap-4">
-        <View className="gap-2">
+      <CardContent className="gap-5 px-6 pb-6">
+        <View className="gap-3">
           <Text variant="label">Transfer Strategy</Text>
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row flex-wrap gap-2.5">
             {STRATEGIES.map((item) => {
               const selected = item.value === strategy;
               return (
@@ -90,7 +93,7 @@ export function FilePickerCard({
           {activeStrategy ? <Text variant="caption">{activeStrategy.hint}</Text> : null}
         </View>
 
-        <View className="flex-row flex-wrap gap-2">
+        <View className="flex-row flex-wrap gap-2.5">
           <Button
             variant="default"
             size="sm"
@@ -126,14 +129,16 @@ export function FilePickerCard({
         </View>
 
         {pickerError ? (
-          <View
-            accessibilityRole="alert"
-            className="border-destructive bg-destructive-container rounded-xl border px-3 py-2"
-          >
-            <Text variant="caption" className="text-on-destructive-container">
-              {pickerError}
-            </Text>
-          </View>
+          <Alert variant="destructive" className="p-3">
+            <View className="flex-row items-start gap-2">
+              <Icon
+                as={AlertCircle}
+                size={16}
+                className="text-on-destructive-container mt-0.5 shrink-0"
+              />
+              <AlertDescription className="min-w-0 flex-1">{pickerError}</AlertDescription>
+            </View>
+          </Alert>
         ) : null}
       </CardContent>
     </Card>

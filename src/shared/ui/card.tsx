@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { type ComponentRef, forwardRef } from "react";
 import { View, type ViewProps } from "react-native";
 import {
   DEFAULT_THEME_PRESET,
@@ -15,12 +15,14 @@ const PRESET_CARD_RADIUS: Record<ThemePreset, string> = {
   "neo-brutalist": "rounded-sm",
 };
 
+const STANDALONE_BORDER_CLASS_REGEX = /(?:^|\s)border(?:\s|$)/;
+
 export interface CardProps extends ViewProps {
   className?: string;
   elevated?: boolean;
 }
 
-export const Card = forwardRef<View, CardProps>(
+export const Card = forwardRef<ComponentRef<typeof View>, CardProps>(
   ({ className, style, elevated = true, ...props }, ref) => {
     const theme = useOptionalTheme();
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
@@ -28,6 +30,10 @@ export const Card = forwardRef<View, CardProps>(
     const elevation = getThemeElevation(preset, resolvedScheme);
 
     const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+    const preserveThickBorder =
+      elevation.borderWidth >= 2 &&
+      typeof className === "string" &&
+      STANDALONE_BORDER_CLASS_REGEX.test(className);
 
     return (
       <TextClassContext.Provider value="text-card-foreground">
@@ -38,6 +44,7 @@ export const Card = forwardRef<View, CardProps>(
             borderClass,
             "border-outline-variant bg-card",
             className,
+            preserveThickBorder && "border-2",
           )}
           style={[elevated ? { boxShadow: elevation.boxShadow } : undefined, style]}
           {...props}
@@ -53,9 +60,11 @@ export interface CardSectionProps extends ViewProps {
   className?: string;
 }
 
-export const CardHeader = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("flex-col gap-1.5 p-5", className)} {...props} />
-));
+export const CardHeader = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("flex-col gap-1.5 p-5", className)} {...props} />
+  ),
+);
 
 CardHeader.displayName = "CardHeader";
 
@@ -85,14 +94,18 @@ export const CardDescription = forwardRef<React.ComponentRef<typeof Text>, TextP
 
 CardDescription.displayName = "CardDescription";
 
-export const CardContent = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("px-5 pb-5", className)} {...props} />
-));
+export const CardContent = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("px-5 pb-5", className)} {...props} />
+  ),
+);
 
 CardContent.displayName = "CardContent";
 
-export const CardFooter = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("flex-row items-center gap-3 px-5 pb-5", className)} {...props} />
-));
+export const CardFooter = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("flex-row items-center gap-3 px-5 pb-5", className)} {...props} />
+  ),
+);
 
 CardFooter.displayName = "CardFooter";

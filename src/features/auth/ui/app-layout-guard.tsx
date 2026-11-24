@@ -1,14 +1,20 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type Href, Redirect, Tabs, usePathname, useRouter } from "expo-router";
 import { CheckSquare, FolderOpen, Home, LogOut, Palette } from "lucide-react-native";
-import { useCallback, useEffect } from "react";
-import { Pressable } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { signOut, useAuthSession } from "@/features/auth/api/session";
 import { sanitizeRedirect } from "@/features/auth/model/schemas";
 import { ROUTES } from "@/shared/config/routes";
 import { onAuthUnauthorized, useIsAuthBootstrapping } from "@/shared/lib/auth-session-bridge";
-import { DEFAULT_THEME_PRESET, resolveThemeColor } from "@/shared/lib/theme/presets";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  resolveThemeColor,
+} from "@/shared/lib/theme/presets";
+import { cn } from "@/shared/lib/utils";
 import { useObservability } from "@/shared/observability/observability-context";
+import { recordErrorOrDefect } from "@/shared/observability/port";
 import { useCredentialStore } from "@/shared/storage/credential-store-context";
 import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
@@ -27,7 +33,12 @@ function buildLoginRedirectHref(pathname: string): Href {
 
 export function AppLayoutGuard() {
   const isBootstrapping = useIsAuthBootstrapping();
-  const { isAuthenticated, isLoading } = useAuthSession();
+  const signingOutRef = useRef(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [hasSignedOut, setHasSignedOut] = useState(false);
+  const { isAuthenticated, isLoading } = useAuthSession({
+    enabled: !isSigningOut && !hasSignedOut,
+  });
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -45,33 +56,62 @@ export function AppLayoutGuard() {
   }, [pathname, router]);
 
   const handleSignOut = useCallback(async () => {
-    await signOut({
-      credentialStore,
-      queryClient,
-      observability,
-    });
-    router.replace(ROUTES.AUTH_LOGIN as Href);
+    if (signingOutRef.current) return;
+    signingOutRef.current = true;
+    setIsSigningOut(true);
+    try {
+      await signOut({
+        credentialStore,
+        queryClient,
+        observability,
+      });
+    } catch (error) {
+      recordErrorOrDefect(observability, error, {
+        source: "AppLayoutGuard.handleSignOut",
+      });
+      queryClient.clear();
+    } finally {
+      setHasSignedOut(true);
+      router.replace(ROUTES.AUTH_LOGIN as Href);
+      signingOutRef.current = false;
+      setIsSigningOut(false);
+    }
   }, [credentialStore, observability, queryClient, router]);
 
+  const activeTint = resolveThemeColor(preset, scheme, "primary");
+  const backgroundColor = resolveThemeColor(preset, scheme, "background");
+
   if (isBootstrapping || isLoading) {
-    return null;
+    return (
+      <View
+        testID="layout-guard-loading"
+        className="bg-background flex-1 items-center justify-center"
+      >
+        <ActivityIndicator size="large" color={activeTint} accessibilityLabel="Loading" />
+      </View>
+    );
   }
 
   if (!isAuthenticated) {
     return <Redirect href={buildLoginRedirectHref(pathname)} />;
   }
 
-  const activeTint = resolveThemeColor(preset, scheme, "primary");
   const inactiveTint = resolveThemeColor(preset, scheme, "on-surface-variant");
   const surfaceBg = resolveThemeColor(preset, scheme, "surface-container-low");
   const borderColor = resolveThemeColor(preset, scheme, "outline-variant");
   const foregroundColor = resolveThemeColor(preset, scheme, "foreground");
+  const elevation = getThemeElevation(preset, scheme);
 
   return (
     <Tabs
       screenOptions={{
+        sceneStyle: {
+          backgroundColor,
+        },
         headerStyle: {
           backgroundColor: surfaceBg,
+          borderBottomWidth: elevation.borderWidth,
+          borderBottomColor: borderColor,
         },
         headerTintColor: foregroundColor,
         headerShadowVisible: false,
@@ -79,18 +119,25 @@ export function AppLayoutGuard() {
         tabBarInactiveTintColor: inactiveTint,
         tabBarStyle: {
           backgroundColor: surfaceBg,
+          borderTopWidth: elevation.borderWidth,
           borderTopColor: borderColor,
         },
         headerRight: () => (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Sign out"
+            accessibilityState={{ disabled: isSigningOut, busy: isSigningOut }}
+            disabled={isSigningOut}
+            hitSlop={4}
             onPress={() => void handleSignOut()}
-            className="mr-4 flex-row items-center gap-1.5 px-2 py-1"
+            className={cn(
+              "mr-3 min-h-11 min-w-11 flex-row items-center justify-center gap-1.5 rounded-lg px-2.5",
+              isSigningOut && "opacity-50",
+            )}
           >
             <Icon as={LogOut} size={16} className="text-on-surface-variant" />
             <Text variant="caption" className="text-on-surface-variant font-semibold">
-              Sign out
+              {isSigningOut ? "Signing out..." : "Sign out"}
             </Text>
           </Pressable>
         ),

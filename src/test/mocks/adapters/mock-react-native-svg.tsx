@@ -1,8 +1,8 @@
-import { createElement, forwardRef } from "react";
+import { type ComponentRef, createElement, forwardRef } from "react";
 import { View } from "react-native";
 
-const MockSvgElement = forwardRef<View, Record<string, unknown>>((props, ref) =>
-  createElement(View, { ...props, ref }),
+const MockSvgElement = forwardRef<ComponentRef<typeof View>, Record<string, unknown>>(
+  (props, ref) => createElement(View, { ...props, ref }),
 );
 MockSvgElement.displayName = "MockSvgElement";
 

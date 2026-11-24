@@ -1,6 +1,6 @@
 # Expo OpenAPI Starter
 
-A reusable mobile React Native starter built on Expo SDK 52+, Expo Router v4, Feature-Sliced Design, TanStack Query with offline cache persistence, Effect, Orval OpenAPI contracts, Better Auth, and NativeWind v4 + React Native Reusables, paired with `hono-open-api`.
+A reusable mobile React Native starter built on Expo SDK 58, Expo Router, Feature-Sliced Design, TanStack Query with offline cache persistence, Effect, Orval OpenAPI contracts, Better Auth, and NativeWind v4 + React Native Reusables, paired with `hono-open-api`.
 
 ## Language
 
@@ -135,6 +135,10 @@ _Avoid_: Form component, field wrapper, input container
 **Portal Host**:
 The top-level overlay anchor (`<PortalHost />` from `@rn-primitives/portal`) mounted at the Composition Root to render dialogs, sheets, select dropdowns, and popovers above all screens and tab bars.
 _Avoid_: Modal root, overlay container, window host
+
+**Overlay Scrim**:
+A mode-invariant dark translucent backdrop token rendered behind modals, sheets, and floating overlays to dim underlying content without inverting to a light haze in dark mode.
+_Avoid_: Dark backdrop, modal fog, overlay tint
 
 **Form Scroll View**:
 A specialized scroll container (`src/shared/ui/form-scroll-view.tsx`) combining React Native `KeyboardAvoidingView` and `ScrollView` (`keyboardShouldPersistTaps="handled"`, `keyboardDismissMode="on-drag"`) for zero-extra-linking keyboard avoidance on iOS, Android, and web.

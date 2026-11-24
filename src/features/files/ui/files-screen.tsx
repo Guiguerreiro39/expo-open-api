@@ -1,9 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertCircle } from "lucide-react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { decodeApiError } from "@/shared/api/contracts";
 import { useObservability } from "@/shared/observability/observability-context";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
+import { Badge } from "@/shared/ui/badge";
 import { Can } from "@/shared/ui/can";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
 import { downloadFileDirect, openFilePreviewUrl, pruneExpiredTransferCache } from "../api/download";
 import { createExpoFileTransferAdapter } from "../api/expo-file-transfer-adapter";
@@ -21,15 +36,37 @@ export interface FilesScreenProps {
   readonly pickerAdapter?: MobileFilePickerAdapter;
 }
 
+interface ActionFeedback {
+  readonly title: string;
+  readonly message: string;
+}
+
+function addIdToSet(prev: ReadonlySet<string>, id: string): ReadonlySet<string> {
+  if (prev.has(id)) return prev;
+  const next = new Set(prev);
+  next.add(id);
+  return next;
+}
+
+function removeIdFromSet(prev: ReadonlySet<string>, id: string): ReadonlySet<string> {
+  if (!prev.has(id)) return prev;
+  const next = new Set(prev);
+  next.delete(id);
+  return next;
+}
+
 export function FilesScreen({ transferPort: providedPort, pickerAdapter }: FilesScreenProps = {}) {
   const observability = useObservability();
   const defaultPort = useMemo(() => createExpoFileTransferAdapter(), []);
   const transferPort = providedPort ?? defaultPort;
 
   const [strategy, setStrategy] = useState<UploadStrategy>("auto");
-  const [busyFileId, setBusyFileId] = useState<string | null>(null);
-  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
-  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [busyFileIds, setBusyFileIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [deletingFileIds, setDeletingFileIds] = useState<ReadonlySet<string>>(() => new Set());
+  const inFlightBusyIdsRef = useRef<Set<string>>(new Set());
+  const inFlightDeleteIdsRef = useRef<Set<string>>(new Set());
+  const [filePendingDelete, setFilePendingDelete] = useState<FileRecord | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
   const filesQuery = useFilesInfiniteQuery({ limit: 25 });
   const deleteMutation = useDeleteFileMutation();
@@ -72,7 +109,11 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handleDownloadShare = useCallback(
     async (file: FileRecord) => {
-      setBusyFileId(file.id);
+      if (inFlightBusyIdsRef.current.has(file.id) || inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightBusyIdsRef.current.add(file.id);
+      setBusyFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await downloadFileDirect(file.id, {
@@ -82,10 +123,14 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           observability,
         });
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Download failed";
-        setActionFeedback(message);
+        const decoded = decodeApiError(err);
+        setActionFeedback({
+          title: decoded._tag === "ForbiddenError" ? "Access denied" : "Download failed",
+          message: decoded.message || "Download failed",
+        });
       } finally {
-        setBusyFileId(null);
+        inFlightBusyIdsRef.current.delete(file.id);
+        setBusyFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [observability, transferPort],
@@ -93,7 +138,11 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handlePreviewUrl = useCallback(
     async (file: FileRecord) => {
-      setBusyFileId(file.id);
+      if (inFlightBusyIdsRef.current.has(file.id) || inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightBusyIdsRef.current.add(file.id);
+      setBusyFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await openFilePreviewUrl(file.id, {
@@ -101,10 +150,14 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           observability,
         });
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Preview failed";
-        setActionFeedback(message);
+        const decoded = decodeApiError(err);
+        setActionFeedback({
+          title: decoded._tag === "ForbiddenError" ? "Access denied" : "Preview failed",
+          message: decoded.message || "Preview failed",
+        });
       } finally {
-        setBusyFileId(null);
+        inFlightBusyIdsRef.current.delete(file.id);
+        setBusyFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [observability, transferPort],
@@ -112,19 +165,34 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handleDelete = useCallback(
     async (file: FileRecord) => {
-      setDeletingFileId(file.id);
+      if (inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightDeleteIdsRef.current.add(file.id);
+      setDeletingFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await deleteMutation.mutateAsync(file.id);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Delete failed";
-        setActionFeedback(message);
+        const decoded = decodeApiError(err);
+        setActionFeedback({
+          title: decoded._tag === "ForbiddenError" ? "Access denied" : "Delete failed",
+          message: decoded.message || "Delete failed",
+        });
       } finally {
-        setDeletingFileId(null);
+        inFlightDeleteIdsRef.current.delete(file.id);
+        setDeletingFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [deleteMutation],
   );
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!filePendingDelete) return;
+    const target = filePendingDelete;
+    setFilePendingDelete(null);
+    void handleDelete(target);
+  }, [filePendingDelete, handleDelete]);
 
   const errorMessage =
     filesQuery.error instanceof Error
@@ -134,12 +202,17 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
         : null;
 
   const header = (
-    <View className="gap-4 pb-2">
-      <View className="gap-1">
-        <Text variant="h2">Files</Text>
-        <Text variant="muted">
+    <View className="gap-6 pb-2">
+      <View
+        testID="files-status-header"
+        className="flex-row flex-wrap items-center justify-between gap-3"
+      >
+        <Text variant="muted" className="min-w-0 flex-1">
           Stream multipart or presigned uploads, track transfer progress, and share files natively.
         </Text>
+        <Badge variant="secondary" className="shrink-0">
+          {`${files.length} file${files.length === 1 ? "" : "s"}`}
+        </Badge>
       </View>
 
       <Can
@@ -181,16 +254,22 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
       />
 
       {actionFeedback ? (
-        <Card>
-          <CardContent className="py-3">
-            <Text variant="caption" className="text-destructive">
-              {actionFeedback}
-            </Text>
-          </CardContent>
-        </Card>
+        <Alert testID="files-action-alert" variant="destructive">
+          <View className="flex-row items-start gap-2.5">
+            <Icon
+              as={AlertCircle}
+              size={18}
+              className="text-on-destructive-container mt-0.5 shrink-0"
+            />
+            <View className="min-w-0 flex-1 gap-0.5">
+              <AlertTitle>{actionFeedback.title}</AlertTitle>
+              <AlertDescription>{actionFeedback.message}</AlertDescription>
+            </View>
+          </View>
+        </Alert>
       ) : null}
 
-      <View className="flex-row items-center justify-between pt-1">
+      <View className="flex-row flex-wrap items-center justify-between gap-2 pt-2">
         <Text variant="h4">Stored Files</Text>
         <Text variant="caption">{`${files.length} file${files.length === 1 ? "" : "s"}`}</Text>
       </View>
@@ -198,14 +277,14 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
   );
 
   return (
-    <SafeAreaView className="bg-background flex-1" edges={["top"]}>
+    <SafeAreaView className="bg-background flex-1" edges={["left", "right"]}>
       <FileList
         files={files}
         isLoading={filesQuery.isPending}
         isRefreshing={filesQuery.isRefetching && !filesQuery.isFetchingNextPage}
         errorMessage={errorMessage}
-        busyFileId={busyFileId}
-        deletingFileId={deletingFileId}
+        busyFileIds={busyFileIds}
+        deletingFileIds={deletingFileIds}
         hasNextPage={filesQuery.hasNextPage}
         isFetchingNextPage={filesQuery.isFetchingNextPage}
         header={header}
@@ -222,9 +301,42 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           void handlePreviewUrl(file);
         }}
         onDelete={(file) => {
-          void handleDelete(file);
+          if (
+            inFlightDeleteIdsRef.current.has(file.id) ||
+            inFlightBusyIdsRef.current.has(file.id)
+          ) {
+            return;
+          }
+          setFilePendingDelete(file);
         }}
       />
+
+      <AlertDialog
+        open={filePendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setFilePendingDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete file?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to delete "${filePendingDelete?.originalName ?? ""}"? This action cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onPress={() => setFilePendingDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              accessibilityLabel="Confirm delete file"
+              onPress={handleConfirmDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SafeAreaView>
   );
 }

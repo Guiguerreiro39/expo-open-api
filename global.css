@@ -37,7 +37,7 @@
 
     --primary: 17 99% 33%;
     --primary-foreground: 0 0% 100%;
-    --primary-container: 16 77% 45%;
+    --primary-container: 16 77% 44%;
     --on-primary-container: 300 100% 99%;
     --primary-fixed: 14 100% 91%;
     --primary-fixed-dim: 14 100% 81%;
@@ -72,6 +72,8 @@
     --info-foreground: 0 0% 100%;
     --info-container: 210 100% 93%;
     --on-info-container: 207 76% 22%;
+
+    --scrim: 0 0% 0%;
   }
 
   .dark {
@@ -80,24 +82,24 @@
 
     --surface: 20 18% 6%;
     --surface-dim: 19 27% 4%;
-    --surface-bright: 20 14% 15%;
+    --surface-bright: 20 14% 16%;
     --surface-container-lowest: 18 23% 3%;
-    --surface-container-low: 20 17% 9%;
-    --surface-container: 20 17% 11%;
-    --surface-container-high: 20 16% 15%;
-    --surface-container-highest: 20 15% 18%;
+    --surface-container-low: 20 17% 8%;
+    --surface-container: 20 16% 12%;
+    --surface-container-high: 20 16% 16%;
+    --surface-container-highest: 20 15% 19%;
     --on-surface: 24 37% 94%;
     --on-surface-variant: 14 26% 75%;
     --inverse-surface: 24 27% 91%;
     --inverse-on-surface: 24 9% 11%;
 
-    --card: 20 17% 9%;
+    --card: 20 17% 10%;
     --card-foreground: 24 37% 94%;
-    --popover: 20 17% 11%;
+    --popover: 20 16% 14%;
     --popover-foreground: 24 37% 94%;
-    --muted: 20 17% 11%;
+    --muted: 20 16% 12%;
     --muted-foreground: 14 26% 75%;
-    --accent: 20 16% 15%;
+    --accent: 20 16% 16%;
     --accent-foreground: 24 37% 94%;
 
     --outline: 13 16% 54%;
@@ -143,5 +145,7 @@
     --info-foreground: 206 72% 10%;
     --info-container: 206 58% 22%;
     --on-info-container: 208 96% 90%;
+
+    --scrim: 0 0% 0%;
   }
 }

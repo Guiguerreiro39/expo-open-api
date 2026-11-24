@@ -82,11 +82,18 @@ const config: Config = {
         "info-foreground": "hsl(var(--info-foreground) / <alpha-value>)",
         "info-container": "hsl(var(--info-container) / <alpha-value>)",
         "on-info-container": "hsl(var(--on-info-container) / <alpha-value>)",
+
+        // Mode-invariant Overlay Scrim
+        scrim: "hsl(var(--scrim) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["Quicksand-Regular", "Quicksand", "System"],
+        "sans-medium": ["Quicksand-Medium", "Quicksand", "System"],
+        "sans-semibold": ["Quicksand-SemiBold", "Quicksand", "System"],
+        "sans-bold": ["Quicksand-Bold", "Quicksand", "System"],
         display: ["Quicksand-Bold", "Quicksand", "System"],
         mono: ["JetBrainsMono-Regular", "JetBrains Mono", "monospace"],
+        "mono-bold": ["JetBrainsMono-Bold", "JetBrains Mono", "monospace"],
       },
       fontSize: {
         "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.96px", fontWeight: "700" }],

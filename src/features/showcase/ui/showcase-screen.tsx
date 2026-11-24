@@ -11,8 +11,8 @@ import {
   Sparkles,
   Type,
 } from "lucide-react-native";
-import { useState } from "react";
-import { View } from "react-native";
+import { type ComponentRef, type ReactNode, useRef, useState } from "react";
+import { type TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   SHOWCASE_CATEGORIES,
@@ -20,7 +20,9 @@ import {
   ShowcaseFeedbackSchema,
   type ShowcaseFeedbackValues,
 } from "@/features/showcase/model/schemas";
-import { getThemeElevation, THEME_PRESETS } from "@/shared/lib/theme/presets";
+import { decodeApiError, ValidationError } from "@/shared/api/contracts";
+import { getThemeElevation, THEME_PRESETS, type ThemePreset } from "@/shared/lib/theme/presets";
+import { cn } from "@/shared/lib/utils";
 import {
   Accordion,
   AccordionContent,
@@ -63,6 +65,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import {
+  applyServerValidationErrors,
   FormControl,
   FormDescription,
   FormField,
@@ -70,15 +73,23 @@ import {
   FormLabel,
   FormMessage,
   useAppForm,
+  useFormItem,
 } from "@/shared/ui/form";
 import { FormScrollView } from "@/shared/ui/form-scroll-view";
 import { Icon } from "@/shared/ui/icon";
 import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
+import { Label, type LabelProps } from "@/shared/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { Progress } from "@/shared/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  type SelectOption,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Separator } from "@/shared/ui/separator";
 import {
   Sheet,
@@ -103,6 +114,12 @@ import { useToast } from "@/shared/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
 type ShowcaseTab = "tokens" | "primitives" | "overlays" | "form";
+
+const PRESET_TILE_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-xl",
+  "editorial-slate": "rounded-lg",
+  "neo-brutalist": "rounded-sm",
+};
 
 export interface ShowcaseScreenProps {
   onSubmitFeedback?: (values: ShowcaseFeedbackValues) => Promise<void> | void;
@@ -174,22 +191,95 @@ const STATUS_SWATCHES = [
   },
 ] as const;
 
+const SHOWCASE_ROLES = [
+  { value: "admin", label: "Admin" },
+  { value: "member", label: "Member" },
+  { value: "viewer", label: "Viewer" },
+] as const;
+
+const BUTTON_DEMO_VARIANTS = [
+  { variant: "default", label: "Primary" },
+  { variant: "secondary", label: "Secondary" },
+  { variant: "outline", label: "Outline" },
+  { variant: "destructive", label: "Destructive" },
+  { variant: "ghost", label: "Ghost" },
+  { variant: "link", label: "Link" },
+] as const;
+
+const FEEDBACK_FIELD_NAMES = new Set<keyof ShowcaseFeedbackValues>([
+  "title",
+  "category",
+  "priority",
+  "description",
+  "agreeTerms",
+]);
+
+function FormSelect({
+  value,
+  onValueChange,
+  children,
+}: {
+  value: SelectOption;
+  onValueChange: (option: SelectOption | undefined) => void;
+  children: ReactNode;
+}) {
+  const { clearSubmitError } = useFormItem();
+
+  return (
+    <Select
+      value={value}
+      onValueChange={(option) => {
+        clearSubmitError?.();
+        onValueChange(option);
+      }}
+    >
+      {children}
+    </Select>
+  );
+}
+
+function FormPressLabel({
+  onPress,
+  text,
+  ...props
+}: Omit<LabelProps, "children" | "onPress"> & { onPress: () => void; text: string }) {
+  const { clearSubmitError } = useFormItem();
+
+  return (
+    <Label
+      {...props}
+      onPress={() => {
+        clearSubmitError?.();
+        onPress();
+      }}
+    >
+      {text}
+    </Label>
+  );
+}
+
 export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
   const { preset, resolvedColorScheme } = useTheme();
   const toast = useToast();
+  const descriptionInputRef = useRef<ComponentRef<typeof TextInput>>(null);
 
   const [activeTab, setActiveTab] = useState<ShowcaseTab>("tokens");
   const [pressCount, setPressCount] = useState(0);
+  const [lastButtonVariant, setLastButtonVariant] = useState<string | null>(null);
   const [switchChecked, setSwitchChecked] = useState(true);
   const [checkboxChecked, setCheckboxChecked] = useState(true);
   const [radioValue, setRadioValue] = useState("tactile");
   const [sliderValue, setSliderValue] = useState(65);
-  const [selectedRole, setSelectedRole] = useState({ value: "member", label: "Member" });
+  const [selectedRole, setSelectedRole] = useState<{ value: string; label: string }>(
+    SHOWCASE_ROLES[1],
+  );
   const [lastDropdownAction, setLastDropdownAction] = useState("None");
   const [submittedValues, setSubmittedValues] = useState<ShowcaseFeedbackValues | null>(null);
 
   const presetDef = THEME_PRESETS[preset];
   const elevation = getThemeElevation(preset, resolvedColorScheme);
+  const tileRadiusClass = PRESET_TILE_RADIUS[preset];
+  const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
 
   const form = useAppForm({
     defaultValues: {
@@ -200,15 +290,47 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
       agreeTerms: false,
     },
     onSubmit: async ({ value }) => {
-      await onSubmitFeedback?.(value);
+      try {
+        await onSubmitFeedback?.(value);
+      } catch (error) {
+        const decoded = error instanceof ValidationError ? error : decodeApiError(error);
+        if (decoded._tag === "ValidationError") {
+          const serverFieldErrors: Record<string, string> = {};
+          for (const issue of decoded.issues) {
+            const key = issue.path?.[0];
+            if (
+              typeof key === "string" &&
+              FEEDBACK_FIELD_NAMES.has(key as keyof ShowcaseFeedbackValues) &&
+              issue.message
+            ) {
+              serverFieldErrors[key] = issue.message;
+            }
+          }
+          if (Object.keys(serverFieldErrors).length > 0) {
+            applyServerValidationErrors(form, serverFieldErrors);
+            return;
+          }
+        }
+        throw error;
+      }
+
       setSubmittedValues(value);
       toast.success("Feedback submitted", `"${value.title}" validated via Effect Schema.`);
     },
   });
 
+  const handleResetFeedbackForm = () => {
+    form.reset();
+    setSubmittedValues(null);
+  };
+
   return (
-    <SafeAreaView className="bg-background flex-1">
-      <FormScrollView contentContainerClassName="px-4 py-6 pb-16">
+    <SafeAreaView
+      testID="showcase-safe-area"
+      edges={["left", "right"]}
+      className="bg-background flex-1"
+    >
+      <FormScrollView contentContainerClassName="px-4 py-4 pb-12">
         <View className="mx-auto w-full max-w-2xl gap-6">
           {/* Hero Header */}
           <View className="gap-2">
@@ -259,11 +381,12 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
               <Card>
                 <CardHeader>
                   <View className="flex-row items-center gap-2">
-                    <Icon as={Palette} size={18} className="text-primary" />
-                    <CardTitle>Runtime Theme Switcher</CardTitle>
+                    <Icon as={Palette} size={18} className="text-primary shrink-0" />
+                    <CardTitle className="min-w-0 flex-1">Runtime Theme Switcher</CardTitle>
                   </View>
                   <CardDescription>
-                    Switches NativeWind CSS variable maps and persists selection to KV storage.
+                    Switches NativeWind CSS variables, React Navigation chrome, and Web root tokens
+                    while persisting selection to KV storage.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -283,12 +406,21 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     {BRAND_SWATCHES.map((swatch) => (
                       <View
                         key={swatch.token}
-                        className={`min-w-36 flex-1 justify-between rounded-xl p-3 ${swatch.bgClass}`}
+                        testID={`showcase-swatch-${swatch.token}`}
+                        className={cn(
+                          "min-w-28 flex-1 basis-[45%] justify-between gap-1 p-3",
+                          tileRadiusClass,
+                          swatch.bgClass,
+                        )}
                       >
-                        <Text variant="label" className={swatch.textClass}>
+                        <Text variant="label" numberOfLines={1} className={swatch.textClass}>
                           {swatch.label}
                         </Text>
-                        <Text variant="caption" className={`font-mono ${swatch.textClass}`}>
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className={cn("font-mono", swatch.textClass)}
+                        >
                           {swatch.token}
                         </Text>
                       </View>
@@ -301,10 +433,19 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     {STATUS_SWATCHES.map((status) => (
                       <View
                         key={status.label}
-                        className={`min-w-32 flex-1 flex-row items-center gap-2 rounded-xl px-3 py-2.5 ${status.bgClass}`}
+                        testID={`showcase-status-${status.label.toLowerCase()}`}
+                        className={cn(
+                          "min-w-28 flex-1 basis-[45%] flex-row items-center gap-2 px-3 py-2.5",
+                          tileRadiusClass,
+                          status.bgClass,
+                        )}
                       >
-                        <Icon as={status.icon} size={15} className={status.textClass} />
-                        <Text variant="label" className={status.textClass}>
+                        <Icon
+                          as={status.icon}
+                          size={15}
+                          className={cn("shrink-0", status.textClass)}
+                        />
+                        <Text variant="label" numberOfLines={1} className={status.textClass}>
                           {status.label}
                         </Text>
                       </View>
@@ -316,8 +457,8 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
               <Card>
                 <CardHeader>
                   <View className="flex-row items-center gap-2">
-                    <Icon as={Type} size={18} className="text-primary" />
-                    <CardTitle>Typography Scale</CardTitle>
+                    <Icon as={Type} size={18} className="text-primary shrink-0" />
+                    <CardTitle className="min-w-0 flex-1">Typography Scale</CardTitle>
                   </View>
                   <CardDescription>
                     Quicksand display & body rhythm paired with JetBrains Mono.
@@ -344,7 +485,7 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                       High-contrast reading hierarchy with semantic surface containers.
                     </Text>
                   </View>
-                  <View className="bg-surface-container rounded-xl p-3">
+                  <View className={cn("bg-surface-container p-3", tileRadiusClass)}>
                     <Text variant="mono">traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-01</Text>
                   </View>
                 </CardContent>
@@ -353,15 +494,21 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
               <Card>
                 <CardHeader>
                   <View className="flex-row items-center gap-2">
-                    <Icon as={Layers} size={18} className="text-primary" />
-                    <CardTitle>Tactile Elevation Physics</CardTitle>
+                    <Icon as={Layers} size={18} className="text-primary shrink-0" />
+                    <CardTitle className="min-w-0 flex-1">Tactile Elevation Physics</CardTitle>
                   </View>
                   <CardDescription>
-                    Zero-blur offset shadows and Reanimated spring depression tuned per preset.
+                    Zero-blur offset shadows compress smoothly under Reanimated spring depression.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="gap-3">
-                  <View className="bg-surface-container-low border-outline-variant gap-1 rounded-xl border p-3">
+                  <View
+                    className={cn(
+                      "bg-surface-container-low border-outline-variant gap-1 p-3",
+                      tileRadiusClass,
+                      borderClass,
+                    )}
+                  >
                     <Text variant="caption" className="font-mono">
                       pressTranslate: ({presetDef.pressTranslate.x}px, {presetDef.pressTranslate.y}
                       px)
@@ -374,9 +521,16 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     accessibilityRole="button"
                     accessibilityLabel="Test tactile spring press"
                     onPress={() => setPressCount((count) => count + 1)}
-                    className="border-primary bg-primary-fixed/40 flex-row items-center justify-between rounded-xl px-4 py-3.5"
+                    className={cn(
+                      "border-primary bg-primary-container flex-row items-center justify-between gap-3 px-4 py-3.5",
+                      tileRadiusClass,
+                      borderClass,
+                    )}
                   >
-                    <Text variant="label" className="text-foreground">
+                    <Text
+                      variant="label"
+                      className="text-on-primary-container min-w-0 flex-1 font-bold"
+                    >
                       Tap to test tactile spring press
                     </Text>
                     <Badge variant="default">{pressCount}</Badge>
@@ -394,25 +548,29 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                 </CardHeader>
                 <CardContent className="gap-4">
                   <View className="flex-row flex-wrap gap-2.5">
-                    <Button variant="default" size="sm">
-                      Primary
-                    </Button>
-                    <Button variant="secondary" size="sm">
-                      Secondary
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Outline
-                    </Button>
-                    <Button variant="destructive" size="sm">
-                      Destructive
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      Ghost
-                    </Button>
-                    <Button variant="link" size="sm">
-                      Link
-                    </Button>
+                    {BUTTON_DEMO_VARIANTS.map((item) => (
+                      <Button
+                        key={item.variant}
+                        variant={item.variant}
+                        size="sm"
+                        onPress={() => {
+                          setLastButtonVariant(item.label);
+                          toast.info(
+                            `${item.label} button pressed`,
+                            `Active preset: ${presetDef.label} (${resolvedColorScheme}).`,
+                          );
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
                   </View>
+
+                  <Text testID="showcase-button-feedback" variant="caption">
+                    {lastButtonVariant
+                      ? `Last pressed: ${lastButtonVariant}`
+                      : "Tap any button variant to test interactive feedback."}
+                  </Text>
 
                   <Separator />
 
@@ -431,8 +589,8 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
               <Card>
                 <CardHeader>
                   <View className="flex-row items-center gap-2">
-                    <Icon as={SlidersHorizontal} size={18} className="text-primary" />
-                    <CardTitle>Selection & Form Controls</CardTitle>
+                    <Icon as={SlidersHorizontal} size={18} className="text-primary shrink-0" />
+                    <CardTitle className="min-w-0 flex-1">Selection & Form Controls</CardTitle>
                   </View>
                   <CardDescription>
                     Owned Reusables inputs, switches, checkboxes, radio groups, select, and menus.
@@ -455,7 +613,10 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     />
                   </View>
 
-                  <View className="flex-row items-center justify-between gap-4">
+                  <View
+                    testID="showcase-toggle-row"
+                    className="flex-row flex-wrap items-center justify-between gap-3"
+                  >
                     <View className="flex-row items-center gap-2.5">
                       <Switch
                         accessibilityLabel="Enable live sync"
@@ -498,21 +659,29 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     <Select
                       value={selectedRole}
                       onValueChange={(option) => {
-                        if (option) setSelectedRole(option);
+                        if (option) {
+                          const matched = SHOWCASE_ROLES.find(
+                            (role) => role.value === option.value,
+                          );
+                          setSelectedRole(matched ?? option);
+                        }
                       }}
                     >
                       <SelectTrigger accessibilityLabel="Role selector">
                         <SelectValue placeholder="Choose a role" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin" label="Admin" />
-                        <SelectItem value="member" label="Member" />
-                        <SelectItem value="viewer" label="Viewer" />
+                        {SHOWCASE_ROLES.map((role) => (
+                          <SelectItem key={role.value} value={role.value} label={role.label} />
+                        ))}
                       </SelectContent>
                     </Select>
                   </View>
 
-                  <View className="flex-row items-center justify-between gap-3">
+                  <View
+                    testID="showcase-dropdown-row"
+                    className="flex-row flex-wrap items-center justify-between gap-3"
+                  >
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -531,17 +700,25 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <Text variant="caption">Last action: {lastDropdownAction}</Text>
+                    <Text
+                      testID="showcase-dropdown-status"
+                      variant="caption"
+                      numberOfLines={1}
+                      className="min-w-0 shrink"
+                    >
+                      Last action: {lastDropdownAction}
+                    </Text>
                   </View>
 
                   <View className="gap-2">
-                    <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center justify-between gap-2">
                       <Text variant="label">Slider & Progress</Text>
-                      <Text variant="caption" className="font-mono">
+                      <Text testID="showcase-slider-value" variant="caption" className="font-mono">
                         {sliderValue}%
                       </Text>
                     </View>
                     <Slider
+                      testID="showcase-slider"
                       accessibilityLabel="Completion slider"
                       value={sliderValue}
                       onValueChange={setSliderValue}
@@ -571,9 +748,9 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                         <Text>SK</Text>
                       </AvatarFallback>
                     </Avatar>
-                    <View className="flex-1 gap-2">
-                      <Skeleton className="h-3.5 w-3/4" animate={false} />
-                      <Skeleton className="h-3 w-1/2" animate={false} />
+                    <View className="min-w-0 flex-1 gap-2">
+                      <Skeleton testID="showcase-skeleton-primary" className="h-3.5 w-3/4" />
+                      <Skeleton testID="showcase-skeleton-secondary" className="h-3 w-1/2" />
                     </View>
                   </View>
 
@@ -617,8 +794,9 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                       </AccordionTrigger>
                       <AccordionContent>
                         <Text>
-                          Dialogs, AlertDialogs, Sheets, Selects, Popovers, and Toasts render into a
-                          single root PortalHost inside ThemeProvider.
+                          Dialogs, AlertDialogs, Sheets, Selects, Popovers, and Tooltips mount into
+                          the root PortalHost while Toasts render in a dedicated top safe-area
+                          portal above overlays.
                         </Text>
                       </AccordionContent>
                     </AccordionItem>
@@ -700,7 +878,7 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                           coupling.
                         </SheetDescription>
                       </SheetHeader>
-                      <View className="bg-surface-container rounded-xl p-4">
+                      <View className={cn("bg-surface-container p-4", tileRadiusClass)}>
                         <Text variant="default">
                           Active preset: {presetDef.label} ({resolvedColorScheme})
                         </Text>
@@ -715,31 +893,35 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                     </SheetContent>
                   </Sheet>
 
-                  <View className="flex-row gap-2.5">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Open Popover
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <Text variant="label">Anchored Popover</Text>
-                        <Text variant="caption">
-                          Renders floating contextual metadata cleanly through PortalHost.
-                        </Text>
-                      </PopoverContent>
-                    </Popover>
+                  <View testID="showcase-floating-triggers" className="flex-row flex-wrap gap-2.5">
+                    <View className="min-w-32 flex-1">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="w-full">
+                            Open Popover
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <Text variant="label">Anchored Popover</Text>
+                          <Text variant="caption">
+                            Renders floating contextual metadata cleanly through PortalHost.
+                          </Text>
+                        </PopoverContent>
+                      </Popover>
+                    </View>
 
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Show Tooltip
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <Text>Accessible semantic tooltip</Text>
-                      </TooltipContent>
-                    </Tooltip>
+                    <View className="min-w-32 flex-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" className="w-full">
+                            Show Tooltip
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <Text>Accessible semantic tooltip</Text>
+                        </TooltipContent>
+                      </Tooltip>
+                    </View>
                   </View>
 
                   <Separator />
@@ -807,9 +989,12 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                             <Input
                               accessibilityLabel="Feedback Title"
                               placeholder="e.g. Improve dark contrast"
+                              returnKeyType="next"
+                              submitBehavior="submit"
                               value={field.state.value}
                               onBlur={field.handleBlur}
                               onChangeText={(text) => field.handleChange(text)}
+                              onSubmitEditing={() => descriptionInputRef.current?.focus()}
                             />
                           </FormControl>
                           <FormDescription>
@@ -835,7 +1020,7 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                         <FormField field={field}>
                           <FormItem>
                             <FormLabel>Category</FormLabel>
-                            <Select
+                            <FormSelect
                               value={activeOption}
                               onValueChange={(option) => {
                                 if (option) {
@@ -859,7 +1044,7 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                                   />
                                 ))}
                               </SelectContent>
-                            </Select>
+                            </FormSelect>
                             <FormMessage />
                           </FormItem>
                         </FormField>
@@ -877,28 +1062,29 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                       <FormField field={field}>
                         <FormItem>
                           <FormLabel>Priority</FormLabel>
-                          <RadioGroup
-                            value={field.state.value}
-                            onValueChange={(val) =>
-                              field.handleChange(val as ShowcaseFeedbackValues["priority"])
-                            }
-                            className="flex-row flex-wrap gap-3"
-                          >
-                            {SHOWCASE_PRIORITIES.map((priority) => (
-                              <View key={priority.value} className="flex-row items-center gap-2">
-                                <RadioGroupItem
-                                  value={priority.value}
-                                  aria-labelledby={`priority-${priority.value}`}
-                                />
-                                <Label
-                                  nativeID={`priority-${priority.value}`}
-                                  onPress={() => field.handleChange(priority.value)}
-                                >
-                                  {priority.label}
-                                </Label>
-                              </View>
-                            ))}
-                          </RadioGroup>
+                          <FormControl>
+                            <RadioGroup
+                              value={field.state.value}
+                              onValueChange={(val) =>
+                                field.handleChange(val as ShowcaseFeedbackValues["priority"])
+                              }
+                              className="flex-row flex-wrap gap-3"
+                            >
+                              {SHOWCASE_PRIORITIES.map((priority) => (
+                                <View key={priority.value} className="flex-row items-center gap-2">
+                                  <RadioGroupItem
+                                    value={priority.value}
+                                    aria-labelledby={`priority-${priority.value}`}
+                                  />
+                                  <FormPressLabel
+                                    nativeID={`priority-${priority.value}`}
+                                    onPress={() => field.handleChange(priority.value)}
+                                    text={priority.label}
+                                  />
+                                </View>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       </FormField>
@@ -918,6 +1104,7 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                           <FormLabel>Description</FormLabel>
                           <FormControl>
                             <Textarea
+                              ref={descriptionInputRef}
                               accessibilityLabel="Description"
                               placeholder="Describe reproduction steps or design notes (min 10 chars)..."
                               value={field.state.value}
@@ -948,12 +1135,11 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
                                 onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
                               />
                             </FormControl>
-                            <Label
+                            <FormPressLabel
                               onPress={() => field.handleChange(!field.state.value)}
                               className="flex-1"
-                            >
-                              I agree to share this feedback for design QA
-                            </Label>
+                              text="I agree to share this feedback for design QA"
+                            />
                           </View>
                           <FormMessage />
                         </FormItem>
@@ -963,20 +1149,34 @@ export function ShowcaseScreen({ onSubmitFeedback }: ShowcaseScreenProps) {
 
                   <form.Subscribe selector={(state) => state.isSubmitting}>
                     {(isSubmitting) => (
-                      <Button
-                        disabled={isSubmitting}
-                        onPress={() => void form.handleSubmit()}
-                        className="mt-1"
-                      >
-                        {isSubmitting ? "Submitting..." : "Submit Feedback"}
-                      </Button>
+                      <View className="mt-1 flex-row flex-wrap gap-2.5">
+                        <Button
+                          disabled={isSubmitting}
+                          onPress={() => void form.handleSubmit()}
+                          className="min-w-36 flex-1"
+                        >
+                          {isSubmitting ? "Submitting..." : "Submit Feedback"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={isSubmitting}
+                          onPress={handleResetFeedbackForm}
+                          className="min-w-28"
+                        >
+                          Reset
+                        </Button>
+                      </View>
                     )}
                   </form.Subscribe>
 
                   {submittedValues ? (
                     <View
                       testID="showcase-submitted-summary"
-                      className="border-success bg-success-container gap-1 rounded-xl border p-3.5"
+                      className={cn(
+                        "border-success bg-success-container gap-1 p-3.5",
+                        tileRadiusClass,
+                        borderClass,
+                      )}
                     >
                       <Text variant="label" className="text-on-success-container font-bold">
                         Last Validated Payload

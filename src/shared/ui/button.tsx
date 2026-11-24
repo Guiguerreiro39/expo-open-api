@@ -1,9 +1,12 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ReactNode } from "react";
-import type { View } from "react-native";
-import { DEFAULT_THEME_PRESET, type ThemePreset } from "@/shared/lib/theme/presets";
-import { cn } from "@/shared/lib/utils";
-import { TactilePressable, type TactilePressableProps } from "@/shared/ui/tactile-pressable";
+import { type ComponentRef, forwardRef, type ReactNode } from "react";
+import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from "react-native";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
+import { cn, resolvePresetBorderOverride } from "@/shared/lib/utils";
 import { Text, TextClassContext } from "@/shared/ui/text";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 
@@ -18,7 +21,7 @@ export const buttonVariants = cva("flex-row items-center justify-center gap-2", 
     variant: {
       default: "border-primary-container bg-primary",
       secondary: "border-outline-variant bg-secondary-container",
-      outline: "border-outline-variant bg-surface-container-lowest",
+      outline: "border-outline-variant bg-surface-container-lowest border",
       destructive: "border-destructive bg-destructive",
       ghost: "bg-transparent",
       link: "bg-transparent",
@@ -39,12 +42,12 @@ export const buttonVariants = cva("flex-row items-center justify-center gap-2", 
 export const buttonTextVariants = cva("text-body-sm text-center", {
   variants: {
     variant: {
-      default: "text-primary-foreground font-bold",
-      secondary: "text-on-secondary-container font-semibold",
-      outline: "text-foreground font-semibold",
-      destructive: "text-destructive-foreground font-bold",
-      ghost: "text-foreground font-semibold",
-      link: "text-primary font-semibold underline",
+      default: "text-primary-foreground font-sans-bold",
+      secondary: "text-on-secondary-container font-sans-semibold",
+      outline: "text-foreground font-sans-semibold",
+      destructive: "text-destructive-foreground font-sans-bold",
+      ghost: "text-foreground font-sans-semibold",
+      link: "text-primary font-sans-semibold underline",
     },
     size: {
       default: "text-body-md",
@@ -60,13 +63,17 @@ export const buttonTextVariants = cva("text-body-sm text-center", {
 });
 
 export interface ButtonProps
-  extends Omit<TactilePressableProps, "children">,
+  extends Omit<PressableProps, "children" | "style">,
     VariantProps<typeof buttonVariants> {
   children?: ReactNode;
+  className?: string;
+  style?: StyleProp<ViewStyle>;
   textClassName?: string;
+  elevated?: boolean;
+  hapticFeedback?: boolean;
 }
 
-export const Button = forwardRef<View, ButtonProps>(
+export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(
   (
     {
       className,
@@ -74,6 +81,8 @@ export const Button = forwardRef<View, ButtonProps>(
       variant = "default",
       size = "default",
       elevated,
+      hapticFeedback: _hapticFeedback,
+      disabled,
       children,
       ...props
     },
@@ -81,8 +90,18 @@ export const Button = forwardRef<View, ButtonProps>(
   ) => {
     const theme = useOptionalTheme();
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const scheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, scheme);
     const isElevated = elevated ?? (variant !== "ghost" && variant !== "link");
     const resolvedTextClass = cn(buttonTextVariants({ variant, size }), textClassName);
+    const baseClassName = cn(
+      PRESET_BUTTON_RADIUS[preset],
+      buttonVariants({ variant, size }),
+      className,
+    );
+    const enforcedBorderClass = resolvePresetBorderOverride(baseClassName, elevation.borderWidth, {
+      applyDefault: isElevated,
+    });
 
     const renderedChildren =
       typeof children === "string" || typeof children === "number" ? (
@@ -93,15 +112,20 @@ export const Button = forwardRef<View, ButtonProps>(
 
     return (
       <TextClassContext.Provider value={resolvedTextClass}>
-        <TactilePressable
+        <Pressable
           ref={ref}
           accessibilityRole="button"
-          elevated={isElevated}
-          className={cn(PRESET_BUTTON_RADIUS[preset], buttonVariants({ variant, size }), className)}
+          disabled={disabled}
+          className={cn(
+            baseClassName,
+            enforcedBorderClass,
+            "active:opacity-80",
+            disabled && "opacity-50",
+          )}
           {...props}
         >
           {renderedChildren}
-        </TactilePressable>
+        </Pressable>
       </TextClassContext.Provider>
     );
   },

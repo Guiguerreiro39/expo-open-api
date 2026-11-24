@@ -1,18 +1,17 @@
 import * as Haptics from "expo-haptics";
 import { cssInterop } from "nativewind";
-import { forwardRef, useCallback } from "react";
+import { type ComponentRef, forwardRef, useCallback } from "react";
 import {
   type GestureResponderEvent,
   Platform,
   Pressable,
   type PressableProps,
   type StyleProp,
-  type View,
   type ViewStyle,
 } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { DEFAULT_THEME_PRESET, getThemeElevation, THEME_PRESETS } from "@/shared/lib/theme/presets";
-import { cn } from "@/shared/lib/utils";
+import { cn, resolvePresetBorderOverride } from "@/shared/lib/utils";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,6 +22,26 @@ const TACTILE_SPRING_CONFIG = {
   stiffness: 300,
 } as const;
 
+const BOX_SHADOW_OFFSET_REGEX = /^(-?\d+(?:\.\d+)?)px\s+(-?\d+(?:\.\d+)?)px\s+(.+)$/;
+
+interface ParsedBoxShadow {
+  readonly offsetX: number;
+  readonly offsetY: number;
+  readonly tail: string;
+}
+
+function parseBoxShadow(boxShadow: string): ParsedBoxShadow | null {
+  const match = boxShadow.trim().match(BOX_SHADOW_OFFSET_REGEX);
+  if (!match?.[1] || !match[2] || !match[3]) {
+    return null;
+  }
+  return {
+    offsetX: Number(match[1]),
+    offsetY: Number(match[2]),
+    tail: match[3],
+  };
+}
+
 export interface TactilePressableProps extends Omit<PressableProps, "style"> {
   className?: string;
   style?: StyleProp<ViewStyle>;
@@ -30,7 +49,7 @@ export interface TactilePressableProps extends Omit<PressableProps, "style"> {
   hapticFeedback?: boolean;
 }
 
-export const TactilePressable = forwardRef<View, TactilePressableProps>(
+export const TactilePressable = forwardRef<ComponentRef<typeof Pressable>, TactilePressableProps>(
   (
     {
       className,
@@ -49,19 +68,55 @@ export const TactilePressable = forwardRef<View, TactilePressableProps>(
     const resolvedScheme = theme?.resolvedColorScheme ?? "light";
     const presetDef = THEME_PRESETS[presetId];
     const elevation = getThemeElevation(presetId, resolvedScheme);
+    const parsedShadow = parseBoxShadow(elevation.boxShadow);
+    const pressX = presetDef.pressTranslate.x;
+    const pressY = presetDef.pressTranslate.y;
+    const shadowOffsetX = parsedShadow?.offsetX ?? 0;
+    const shadowOffsetY = parsedShadow?.offsetY ?? 0;
+    const shadowTail = parsedShadow?.tail ?? "";
+    const fallbackBoxShadow = elevation.boxShadow;
+    const hasParsedShadow = parsedShadow !== null;
 
-    const translateX = useSharedValue(0);
-    const translateY = useSharedValue(0);
+    const pressProgress = useSharedValue(0);
 
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [{ translateX: translateX.value }, { translateY: translateY.value }],
-    }));
+    const animatedStyle = useAnimatedStyle(() => {
+      const progress = pressProgress.value;
+      const transform = [{ translateX: progress * pressX }, { translateY: progress * pressY }];
+
+      if (!elevated) {
+        return { transform };
+      }
+
+      if (!hasParsedShadow) {
+        return {
+          transform,
+          boxShadow: fallbackBoxShadow,
+        };
+      }
+
+      const shadowFactor = Math.max(0, 1 - progress);
+      const currentX = Math.round(shadowOffsetX * shadowFactor * 100) / 100;
+      const currentY = Math.round(shadowOffsetY * shadowFactor * 100) / 100;
+
+      return {
+        transform,
+        boxShadow: `${currentX}px ${currentY}px ${shadowTail}`,
+      };
+    }, [
+      elevated,
+      fallbackBoxShadow,
+      hasParsedShadow,
+      pressX,
+      pressY,
+      shadowOffsetX,
+      shadowOffsetY,
+      shadowTail,
+    ]);
 
     const handlePressIn = useCallback(
       (event: GestureResponderEvent) => {
         if (!disabled) {
-          translateX.value = withSpring(presetDef.pressTranslate.x, TACTILE_SPRING_CONFIG);
-          translateY.value = withSpring(presetDef.pressTranslate.y, TACTILE_SPRING_CONFIG);
+          pressProgress.value = withSpring(1, TACTILE_SPRING_CONFIG);
 
           if (
             hapticFeedback &&
@@ -73,33 +128,20 @@ export const TactilePressable = forwardRef<View, TactilePressableProps>(
         }
         onPressIn?.(event);
       },
-      [
-        disabled,
-        hapticFeedback,
-        onPressIn,
-        presetDef.pressTranslate.x,
-        presetDef.pressTranslate.y,
-        translateX,
-        translateY,
-      ],
+      [disabled, hapticFeedback, onPressIn, pressProgress],
     );
 
     const handlePressOut = useCallback(
       (event: GestureResponderEvent) => {
-        translateX.value = withSpring(0, TACTILE_SPRING_CONFIG);
-        translateY.value = withSpring(0, TACTILE_SPRING_CONFIG);
+        pressProgress.value = withSpring(0, TACTILE_SPRING_CONFIG);
         onPressOut?.(event);
       },
-      [onPressOut, translateX, translateY],
+      [onPressOut, pressProgress],
     );
 
-    const elevationStyle: ViewStyle | undefined = elevated
-      ? {
-          boxShadow: elevation.boxShadow,
-        }
-      : undefined;
-
-    const borderClass = elevated ? (elevation.borderWidth >= 2 ? "border-2" : "border") : undefined;
+    const enforcedBorderClass = resolvePresetBorderOverride(className, elevation.borderWidth, {
+      applyDefault: elevated,
+    });
 
     return (
       <AnimatedPressable
@@ -107,8 +149,8 @@ export const TactilePressable = forwardRef<View, TactilePressableProps>(
         disabled={disabled}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        className={cn(borderClass, disabled && "opacity-50", className)}
-        style={[elevationStyle, animatedStyle, style]}
+        className={cn(className, enforcedBorderClass, disabled && "opacity-50")}
+        style={[animatedStyle, style]}
         {...props}
       />
     );
