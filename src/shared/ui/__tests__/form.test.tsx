@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
   useAppForm,
+  useFormItem,
 } from "@/shared/ui/form";
 import { FormScrollView } from "@/shared/ui/form-scroll-view";
 import { Input } from "@/shared/ui/input";
@@ -73,7 +74,7 @@ function TestFormHarness({
                   />
                 </FormControl>
                 <FormDescription>Provide a descriptive title.</FormDescription>
-                <FormMessage />
+                <FormMessage testID="title-message" />
               </FormItem>
             </FormField>
           )}
@@ -210,6 +211,38 @@ function AccessibilityControlsHarness() {
         )}
       </form.Field>
     </View>
+  );
+}
+
+function ErrorsObserver({ onCapture }: { onCapture: (errors: string[]) => void }) {
+  const { errors } = useFormItem();
+  onCapture(errors);
+  return null;
+}
+
+function MemoErrorsHarness({ onCapture }: { onCapture: (errors: string[]) => void }) {
+  const form = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async () => {},
+  });
+
+  return (
+    <form.Field name="title">
+      {(field) => (
+        <FormField field={field}>
+          <FormItem>
+            <FormControl>
+              <Input
+                testID="memo-input"
+                value={field.state.value}
+                onChangeText={(text) => field.handleChange(text)}
+              />
+            </FormControl>
+            <ErrorsObserver onCapture={onCapture} />
+          </FormItem>
+        </FormField>
+      )}
+    </form.Field>
   );
 }
 
@@ -372,5 +405,39 @@ describe("Mobile TanStack Form Primitives", () => {
         invalid: false,
       });
     });
+  });
+
+  it("reserves stable min-h-5 layout height on FormMessage when empty without exposing an alert role", async () => {
+    renderWithProviders(<TestFormHarness onSubmit={vi.fn()} />);
+
+    const emptyMessage = screen.getByTestId("title-message", { includeHiddenElements: true });
+    expect(String(emptyMessage.props.className ?? "")).toContain("min-h-5");
+    expect(emptyMessage.props.accessibilityRole).toBeUndefined();
+    expect(emptyMessage.props.accessibilityElementsHidden).toBe(true);
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    fireEvent.press(screen.getByRole("button", { name: "Submit" }));
+
+    const activeMessage = await screen.findByRole("alert");
+    expect(activeMessage).toHaveTextContent("Title is required");
+    expect(String(activeMessage.props.className ?? "")).toContain("min-h-5");
+  });
+
+  it("keeps FormField errors array reference stable across keystrokes when errors have not changed", () => {
+    const capturedErrorRefs: Array<string[]> = [];
+
+    renderWithProviders(
+      <MemoErrorsHarness onCapture={(errors) => capturedErrorRefs.push(errors)} />,
+    );
+
+    fireEvent.changeText(screen.getByTestId("memo-input"), "a");
+    fireEvent.changeText(screen.getByTestId("memo-input"), "ab");
+    fireEvent.changeText(screen.getByTestId("memo-input"), "abc");
+
+    expect(capturedErrorRefs.length).toBeGreaterThanOrEqual(4);
+    const firstErrorsRef = capturedErrorRefs[0];
+    for (const ref of capturedErrorRefs) {
+      expect(ref).toBe(firstErrorsRef);
+    }
   });
 });
