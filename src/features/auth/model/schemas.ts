@@ -39,29 +39,36 @@ export type AuthUser = Schema.Schema.Type<typeof AuthUserSchema>;
 export type AuthSessionData = Schema.Schema.Type<typeof AuthSessionDataSchema>;
 export type AuthEnvelope = Schema.Schema.Type<typeof AuthEnvelopeSchema>;
 
+const EmailFieldSchema = Schema.Trim.pipe(
+  Schema.nonEmptyString({ message: () => "Email is required" }),
+  Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
+    message: () => "Please enter a valid email address",
+  }),
+);
+
+const NameFieldSchema = Schema.Trim.pipe(
+  Schema.nonEmptyString({ message: () => "Name is required" }),
+  Schema.minLength(2, { message: () => "Name must be at least 2 characters" }),
+);
+
+const PasswordFieldSchema = Schema.String.annotations({
+  message: () => "Password is required",
+}).pipe(
+  Schema.filter((value) => value.trim().length > 0, {
+    message: () => "Password is required",
+  }),
+  Schema.minLength(6, { message: () => "Password must be at least 6 characters" }),
+);
+
 export const SignInSchema = Schema.Struct({
-  email: Schema.NonEmptyTrimmedString.pipe(
-    Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
-      message: () => "Please enter a valid email address",
-    }),
-  ),
-  password: Schema.NonEmptyTrimmedString.pipe(
-    Schema.minLength(6, { message: () => "Password must be at least 6 characters" }),
-  ),
+  email: EmailFieldSchema,
+  password: PasswordFieldSchema,
 });
 
 export const SignUpSchema = Schema.Struct({
-  name: Schema.NonEmptyTrimmedString.pipe(
-    Schema.minLength(2, { message: () => "Name must be at least 2 characters" }),
-  ),
-  email: Schema.NonEmptyTrimmedString.pipe(
-    Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {
-      message: () => "Please enter a valid email address",
-    }),
-  ),
-  password: Schema.NonEmptyTrimmedString.pipe(
-    Schema.minLength(6, { message: () => "Password must be at least 6 characters" }),
-  ),
+  name: NameFieldSchema,
+  email: EmailFieldSchema,
+  password: PasswordFieldSchema,
 });
 
 export type SignInInput = Schema.Schema.Type<typeof SignInSchema>;

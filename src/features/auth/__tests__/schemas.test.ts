@@ -75,6 +75,42 @@ describe("auth schemas and sanitizeRedirect", () => {
     ).toThrow();
   });
 
+  it("trims autofilled email/name whitespace, allows password edge spaces, and never echoes passwords in validation errors", () => {
+    const trimmedSignIn = Schema.decodeUnknownSync(SignInSchema)({
+      email: "  ada@example.com ",
+      password: " SuperSecret99! ",
+    });
+    expect(trimmedSignIn).toEqual({
+      email: "ada@example.com",
+      password: " SuperSecret99! ",
+    });
+
+    const trimmedSignUp = Schema.decodeUnknownSync(SignUpSchema)({
+      name: "  Grace Hopper ",
+      email: "grace@example.com ",
+      password: " TopSecret42! ",
+    });
+    expect(trimmedSignUp).toEqual({
+      name: "Grace Hopper",
+      email: "grace@example.com",
+      password: " TopSecret42! ",
+    });
+
+    const passwordValidator = Schema.standardSchemaV1(SignInSchema.fields.password);
+    const shortResult = passwordValidator["~standard"].validate(" s3c ");
+    expect("issues" in shortResult && shortResult.issues).toBeTruthy();
+    if ("issues" in shortResult && shortResult.issues) {
+      expect(shortResult.issues[0]?.message).toBe("Password must be at least 6 characters");
+      expect(shortResult.issues[0]?.message).not.toContain("s3c");
+    }
+
+    const blankResult = passwordValidator["~standard"].validate("      ");
+    expect("issues" in blankResult && blankResult.issues).toBeTruthy();
+    if ("issues" in blankResult && blankResult.issues) {
+      expect(blankResult.issues[0]?.message).toBe("Password is required");
+    }
+  });
+
   it("decodes Better Auth session envelopes with defaults", () => {
     const decoded = Schema.decodeUnknownSync(AuthEnvelopeSchema)({
       user: {

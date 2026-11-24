@@ -11,6 +11,7 @@ import { decodeApiError } from "@/shared/api/contracts";
 import { APP_INFO } from "@/shared/config/app-info";
 import { ROUTES } from "@/shared/config/routes";
 import { useObservability } from "@/shared/observability/observability-context";
+import { recordErrorOrDefect } from "@/shared/observability/port";
 import { useCredentialStore } from "@/shared/storage/credential-store-context";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
 import { Badge } from "@/shared/ui/badge";
@@ -75,6 +76,9 @@ export function LoginScreen() {
         router.replace(target as Href);
       } catch (error) {
         const decoded = decodeApiError(error);
+        recordErrorOrDefect(observability, decoded, {
+          source: "LoginScreen.onSubmit",
+        });
         if (decoded._tag === "ForbiddenError") {
           setIsForbidden(true);
           setBannerError(decoded.message);

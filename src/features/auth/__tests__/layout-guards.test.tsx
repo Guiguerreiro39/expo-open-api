@@ -5,8 +5,9 @@ import { describe, expect, it } from "vitest";
 import { AppLayoutGuard } from "@/features/auth/ui/app-layout-guard";
 import { AuthLayoutGuard } from "@/features/auth/ui/auth-layout-guard";
 import { ROUTES } from "@/shared/config/routes";
-import { resetAuthSessionCache } from "@/shared/lib/auth-session-bridge";
+import { getCachedBearerToken, resetAuthSessionCache } from "@/shared/lib/auth-session-bridge";
 import { getThemeElevation, resolveThemeColor } from "@/shared/lib/theme/presets";
+import type { CredentialStorePort } from "@/shared/storage/credential-store";
 import { mockRouterState } from "@/test/mocks/adapters/mock-expo-router";
 import { server, TEST_API_BASE } from "@/test/msw-server";
 import { renderWithProviders } from "@/test/render";
@@ -181,6 +182,45 @@ describe("layout route guards", () => {
 
       expect(signOutCalls).toBe(1);
       observability.assertNoDefects();
+    });
+
+    it("completes local teardown, records 1 defect, and redirects to login when credentialStore.deleteItem throws during sign-out", async () => {
+      const unhandled: string[] = [];
+      const onUnhandled = (reason: unknown) => {
+        unhandled.push(reason instanceof Error ? reason.message : String(reason));
+      };
+      process.on("unhandledRejection", onUnhandled);
+
+      const failingStore: CredentialStorePort = {
+        getItem: async () => "token-user-1",
+        setItem: async () => {},
+        deleteItem: async () => {
+          throw new Error("Keychain locked");
+        },
+      };
+
+      try {
+        const { getByLabelText, observability } = renderWithProviders(<AppLayoutGuard />, {
+          user: { id: "user-1", name: "Ada", email: "ada@example.com", role: "member" },
+          credentialStore: failingStore,
+        });
+
+        fireEvent.press(getByLabelText("Sign out"));
+
+        await waitFor(() => {
+          expect(
+            mockRouterState.history.some(
+              (entry) => entry.type === "replace" && entry.href === ROUTES.AUTH_LOGIN,
+            ),
+          ).toBe(true);
+        });
+
+        expect(unhandled).toEqual([]);
+        expect(observability.defects).toHaveLength(1);
+        expect(getCachedBearerToken()).toBeNull();
+      } finally {
+        process.off("unhandledRejection", onUnhandled);
+      }
     });
   });
 

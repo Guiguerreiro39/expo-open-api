@@ -107,9 +107,12 @@ function TaskRow({ task, onToggle, onRequestDelete }: TaskRowProps) {
           <Pressable
             accessibilityRole="checkbox"
             accessibilityLabel={`Toggle task ${task.name}`}
-            accessibilityState={{ checked: task.done }}
+            accessibilityState={{ checked: task.done, disabled: isOptimistic }}
+            disabled={isOptimistic}
             hitSlop={4}
-            onPress={() => onToggle(task)}
+            onPress={() => {
+              if (!isOptimistic) onToggle(task);
+            }}
             className="min-h-11 min-w-11 shrink-0 items-center justify-center"
           >
             <View
@@ -146,8 +149,11 @@ function TaskRow({ task, onToggle, onRequestDelete }: TaskRowProps) {
             variant="ghost"
             size="icon"
             className="shrink-0"
+            disabled={isOptimistic}
             accessibilityLabel={`Delete task ${task.name}`}
-            onPress={() => onRequestDelete(task)}
+            onPress={() => {
+              if (!isOptimistic) onRequestDelete(task);
+            }}
           >
             <Icon as={Trash2} size={18} className="text-destructive" />
           </Button>
@@ -260,6 +266,7 @@ export function TasksScreen() {
 
   const handleToggle = useCallback(
     (task: TaskItem) => {
+      if (task.id.startsWith("optimistic-")) return;
       setMutationFeedback(null);
       toggleMutation.mutate(
         { id: task.id, done: !task.done },
@@ -272,6 +279,7 @@ export function TasksScreen() {
   );
 
   const handleRequestDelete = useCallback((task: TaskItem) => {
+    if (task.id.startsWith("optimistic-")) return;
     setTaskPendingDelete(task);
   }, []);
 

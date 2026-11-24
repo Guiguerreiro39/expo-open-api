@@ -17,8 +17,8 @@ export interface FileListProps {
   readonly isLoading?: boolean;
   readonly isRefreshing?: boolean;
   readonly errorMessage?: string | null;
-  readonly busyFileId?: string | null;
-  readonly deletingFileId?: string | null;
+  readonly busyFileIds?: ReadonlySet<string>;
+  readonly deletingFileIds?: ReadonlySet<string>;
   readonly hasNextPage?: boolean;
   readonly isFetchingNextPage?: boolean;
   readonly header?: ReactElement;
@@ -34,8 +34,8 @@ export function FileList({
   isLoading = false,
   isRefreshing = false,
   errorMessage,
-  busyFileId,
-  deletingFileId,
+  busyFileIds,
+  deletingFileIds,
   hasNextPage = false,
   isFetchingNextPage = false,
   header,
@@ -151,8 +151,8 @@ export function FileList({
         ) : undefined
       }
       renderItem={({ item }) => {
-        const isBusy = busyFileId === item.id;
-        const isDeleting = deletingFileId === item.id;
+        const isBusy = busyFileIds?.has(item.id) ?? false;
+        const isDeleting = deletingFileIds?.has(item.id) ?? false;
 
         return (
           <Card>

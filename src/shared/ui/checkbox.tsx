@@ -1,7 +1,6 @@
 import * as CheckboxPrimitive from "@rn-primitives/checkbox";
 import { Check } from "lucide-react-native";
-import { forwardRef, useCallback, useRef } from "react";
-import { Platform } from "react-native";
+import { forwardRef } from "react";
 import {
   DEFAULT_THEME_PRESET,
   getThemeElevation,
@@ -10,9 +9,9 @@ import {
 import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
+import { getWebClickGuardProps, useWebToggleDedup } from "@/shared/ui/web-overlay";
 
 const CHECKBOX_HIT_SLOP = { top: 10, bottom: 10, left: 10, right: 10 } as const;
-const WEB_DOUBLE_FIRE_GUARD_MS = 80;
 
 const PRESET_CHECKBOX_RADIUS: Record<ThemePreset, string> = {
   "warm-tactile": "rounded-md",
@@ -46,21 +45,8 @@ export const Checkbox = forwardRef<CheckboxPrimitive.RootRef, CheckboxProps>(
     const resolvedScheme = theme?.resolvedColorScheme ?? "light";
     const elevation = getThemeElevation(preset, resolvedScheme);
     const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
-    const lastWebToggleAtRef = useRef(0);
-
-    const handleCheckedChange = useCallback(
-      (nextChecked: boolean) => {
-        if (Platform.OS === "web") {
-          const now = Date.now();
-          if (now - lastWebToggleAtRef.current < WEB_DOUBLE_FIRE_GUARD_MS) {
-            return;
-          }
-          lastWebToggleAtRef.current = now;
-        }
-        onCheckedChange(nextChecked);
-      },
-      [onCheckedChange],
-    );
+    const handleCheckedChange = useWebToggleDedup(onCheckedChange);
+    const webProps = getWebClickGuardProps(props);
 
     return (
       <CheckboxPrimitive.Root
@@ -84,6 +70,7 @@ export const Checkbox = forwardRef<CheckboxPrimitive.RootRef, CheckboxProps>(
           className,
         )}
         {...props}
+        {...webProps}
       >
         <CheckboxPrimitive.Indicator
           className={cn("h-full w-full items-center justify-center", indicatorClassName)}

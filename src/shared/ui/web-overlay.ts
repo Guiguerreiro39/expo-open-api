@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from "react";
 import { Platform, StyleSheet, type ViewStyle } from "react-native";
 
 /**
@@ -38,4 +39,43 @@ export function getWebClickGuardProps(props: object): { onClick: WebClickHandler
       originalOnClick?.(event);
     },
   };
+}
+
+/**
+ * Deduplicates synchronous same-turn Web toggle emissions (e.g. RNW `onPress` + Radix
+ * `onClick`/`onPointerUp` firing inside the same event) without time-based debouncing, so rapid
+ * sequential clicks and epoch `Date.now() === 0` clicks are never dropped.
+ */
+export function useWebToggleDedup(
+  onCheckedChange?: (checked: boolean) => void,
+): (checked: boolean) => void {
+  const lockedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      lockedRef.current = false;
+    };
+  }, []);
+
+  return useCallback(
+    (nextChecked: boolean) => {
+      if (Platform.OS === "web") {
+        if (lockedRef.current) {
+          return;
+        }
+        lockedRef.current = true;
+        timerRef.current = setTimeout(() => {
+          lockedRef.current = false;
+          timerRef.current = null;
+        }, 0);
+      }
+      onCheckedChange?.(nextChecked);
+    },
+    [onCheckedChange],
+  );
 }

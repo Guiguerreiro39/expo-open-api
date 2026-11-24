@@ -139,7 +139,7 @@ export const DialogTitle = forwardRef<DialogPrimitive.TitleRef, DialogTitleProps
   ({ className, ...props }, ref) => (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn("text-title-md text-card-foreground font-sans font-bold", className)}
+      className={cn("text-title-md text-card-foreground font-sans-bold", className)}
       {...props}
     />
   ),

@@ -290,4 +290,124 @@ describe("LoginScreen and RegisterScreen", () => {
     });
     observability.assertNoDefects();
   });
+
+  it("trims autofilled email whitespace and accepts passwords with spaces without leaking plaintext on LoginScreen", async () => {
+    const { getByLabelText, getByText, queryAllByRole, observability } = renderWithProviders(
+      <LoginScreen />,
+      { user: null },
+    );
+
+    fireEvent.changeText(getByLabelText("Email"), "ada@example.com ");
+    fireEvent.changeText(getByLabelText("Password"), " SuperSecret99! ");
+    fireEvent.press(getByText("Sign In"));
+
+    await waitFor(() => {
+      expect(getCachedBearerToken()).toBe("token-user-1");
+    });
+    expect(queryAllByRole("alert")).toEqual([]);
+    observability.assertNoDefects();
+  });
+
+  it("trims autofilled name/email whitespace and accepts passwords with spaces without leaking plaintext on RegisterScreen", async () => {
+    const { getByLabelText, getByText, queryAllByRole, observability } = renderWithProviders(
+      <RegisterScreen />,
+      { user: null },
+    );
+
+    fireEvent.changeText(getByLabelText("Full name"), "Grace Hopper ");
+    fireEvent.changeText(getByLabelText("Email"), "grace@example.com ");
+    fireEvent.changeText(getByLabelText("Password"), " TopSecret42! ");
+    fireEvent.press(getByText("Create Account"));
+
+    await waitFor(() => {
+      expect(getCachedBearerToken()).toBe("token-user-new");
+    });
+    expect(queryAllByRole("alert")).toEqual([]);
+    observability.assertNoDefects();
+  });
+
+  it("clears stale onBlur email error on change so Sign In press succeeds without re-blurring", async () => {
+    const { getByLabelText, getByText, queryAllByRole, observability } = renderWithProviders(
+      <LoginScreen />,
+      { user: null },
+    );
+
+    fireEvent.changeText(getByLabelText("Email"), "bad");
+    fireEvent(getByLabelText("Email"), "blur");
+    await waitFor(() => {
+      expect(getByText("Please enter a valid email address")).toBeTruthy();
+    });
+
+    fireEvent.changeText(getByLabelText("Email"), "ada@example.com");
+    fireEvent.changeText(getByLabelText("Password"), "password123");
+    fireEvent.press(getByText("Sign In"));
+
+    await waitFor(() => {
+      expect(getCachedBearerToken()).toBe("token-user-1");
+    });
+    expect(queryAllByRole("alert")).toEqual([]);
+    observability.assertNoDefects();
+  });
+
+  it("clears stale onBlur password error on change so keyboard Done (submitEditing) succeeds", async () => {
+    const { getByLabelText, getByText, queryAllByRole, observability } = renderWithProviders(
+      <LoginScreen />,
+      { user: null },
+    );
+
+    fireEvent.changeText(getByLabelText("Email"), "ada@example.com");
+    fireEvent.changeText(getByLabelText("Password"), "123");
+    fireEvent(getByLabelText("Password"), "blur");
+    await waitFor(() => {
+      expect(getByText("Password must be at least 6 characters")).toBeTruthy();
+    });
+
+    fireEvent.changeText(getByLabelText("Password"), "password123");
+    fireEvent(getByLabelText("Password"), "submitEditing");
+
+    await waitFor(() => {
+      expect(getCachedBearerToken()).toBe("token-user-1");
+    });
+    expect(queryAllByRole("alert")).toEqual([]);
+    observability.assertNoDefects();
+  });
+
+  it("records observability defect on HTTP 500 failure on LoginScreen", async () => {
+    server.use(
+      http.post(`${TEST_API_BASE}/api/auth/sign-in/email`, () =>
+        honoErrorResponse(500, "INTERNAL_SERVER_ERROR", "Auth DB crashed"),
+      ),
+    );
+
+    const { getByLabelText, getByText, observability } = renderWithProviders(<LoginScreen />, {
+      user: null,
+    });
+    fireEvent.changeText(getByLabelText("Email"), "ada@example.com");
+    fireEvent.changeText(getByLabelText("Password"), "password123");
+    fireEvent.press(getByText("Sign In"));
+    await waitFor(() => {
+      expect(getByText("Auth DB crashed")).toBeTruthy();
+    });
+    expect(observability.defects).toHaveLength(1);
+  });
+
+  it("records observability defect on HTTP 500 failure on RegisterScreen", async () => {
+    server.use(
+      http.post(`${TEST_API_BASE}/api/auth/sign-up/email`, () =>
+        honoErrorResponse(500, "INTERNAL_SERVER_ERROR", "Signup DB crashed"),
+      ),
+    );
+
+    const { getByLabelText, getByText, observability } = renderWithProviders(<RegisterScreen />, {
+      user: null,
+    });
+    fireEvent.changeText(getByLabelText("Full name"), "Grace Hopper");
+    fireEvent.changeText(getByLabelText("Email"), "grace@example.com");
+    fireEvent.changeText(getByLabelText("Password"), "password123");
+    fireEvent.press(getByText("Create Account"));
+    await waitFor(() => {
+      expect(getByText("Signup DB crashed")).toBeTruthy();
+    });
+    expect(observability.defects).toHaveLength(1);
+  });
 });

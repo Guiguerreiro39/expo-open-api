@@ -82,15 +82,25 @@ export async function hydrateBearerToken(
 
 export async function purgePersistedCredentials(
   credentialStore?: CredentialStorePort,
+  observability: ObservabilityService | null = activeDependencies.observability ?? null,
 ): Promise<void> {
   clearCachedBearerToken();
   if (!credentialStore) return;
 
-  await Promise.all([
+  const results = await Promise.allSettled([
     credentialStore.deleteItem(BEARER_TOKEN_STORAGE_KEY),
     credentialStore.deleteItem(`${EXPO_AUTH_STORAGE_PREFIX}_cookie`),
     credentialStore.deleteItem(`${EXPO_AUTH_STORAGE_PREFIX}_session_data`),
   ]);
+
+  const firstFailure = results.find(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  if (firstFailure && observability) {
+    observability.captureDefect(firstFailure.reason, {
+      source: "purgePersistedCredentials",
+    });
+  }
 }
 
 function decodeAuthEnvelopePayload(raw: unknown, fallbackToken?: string | null): AuthEnvelope {
@@ -213,7 +223,7 @@ export async function fetchAuthSession(
     return envelope;
   } catch (error) {
     if (error instanceof FetchError && error.status === 401) {
-      await purgePersistedCredentials(credentialStore);
+      await purgePersistedCredentials(credentialStore, observability);
       resetAuthSessionCache();
       syncObservabilityUser(null, observability);
       return null;
@@ -288,7 +298,7 @@ export async function signOut(deps: AuthActionDependencies): Promise<void> {
     // Always complete local credential purge even when offline or token is already revoked
   }
 
-  await purgePersistedCredentials(deps.credentialStore);
+  await purgePersistedCredentials(deps.credentialStore, deps.observability ?? null);
   deps.queryClient.setQueryData(AUTH_QUERY_KEYS.session(), null);
   deps.queryClient.clear();
   deps.kvStore?.delete(QUERY_CACHE_STORAGE_KEY);
@@ -296,8 +306,11 @@ export async function signOut(deps: AuthActionDependencies): Promise<void> {
   syncObservabilityUser(null, deps.observability ?? null);
 }
 
-export function useAuthSession() {
-  const query = useQuery(authSessionQueryOptions);
+export function useAuthSession(options?: { readonly enabled?: boolean }) {
+  const query = useQuery({
+    ...authSessionQueryOptions,
+    enabled: options?.enabled ?? true,
+  });
 
   return {
     session: query.data?.session ?? null,

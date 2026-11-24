@@ -246,6 +246,49 @@ function MemoErrorsHarness({ onCapture }: { onCapture: (errors: string[]) => voi
   );
 }
 
+function BlurRecoveryHarness({
+  onSubmit,
+}: {
+  readonly onSubmit: (value: { title: string }) => void;
+}) {
+  const form = useAppForm({
+    defaultValues: { title: "" },
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
+  });
+
+  return (
+    <View>
+      <form.Field
+        name="title"
+        validators={{
+          onBlur: Schema.standardSchemaV1(TitleFieldSchema),
+          onSubmit: Schema.standardSchemaV1(TitleFieldSchema),
+        }}
+      >
+        {(field) => (
+          <FormField field={field}>
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input
+                  testID="blur-title-input"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={(text) => field.handleChange(text)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        )}
+      </form.Field>
+      <Button onPress={() => void form.handleSubmit()}>Submit Blur Form</Button>
+    </View>
+  );
+}
+
 describe("Mobile TanStack Form Primitives", () => {
   it("validates fields via Effect Schema.standardSchemaV1 and sets accessibility invalid state", async () => {
     const onSubmit = vi.fn();
@@ -439,5 +482,24 @@ describe("Mobile TanStack Form Primitives", () => {
     for (const ref of capturedErrorRefs) {
       expect(ref).toBe(firstErrorsRef);
     }
+  });
+
+  it("clears stale onBlur errors on change and never deadlocks submission when a previously invalid field becomes valid", async () => {
+    const onSubmit = vi.fn();
+
+    renderWithProviders(<BlurRecoveryHarness onSubmit={onSubmit} />);
+
+    fireEvent.changeText(screen.getByTestId("blur-title-input"), "ab");
+    fireEvent(screen.getByTestId("blur-title-input"), "blur");
+    expect(await screen.findByText("Title must be at least 3 characters")).toBeTruthy();
+
+    // Fix text without firing blur (simulating keyboardShouldPersistTaps="handled" or keyboard Done)
+    fireEvent.changeText(screen.getByTestId("blur-title-input"), "Valid Title");
+    fireEvent.press(screen.getByRole("button", { name: "Submit Blur Form" }));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ title: "Valid Title" });
+    });
+    expect(screen.queryAllByRole("alert")).toEqual([]);
   });
 });

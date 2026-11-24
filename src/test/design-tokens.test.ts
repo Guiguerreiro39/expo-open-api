@@ -67,4 +67,45 @@ describe("Design System Single-Source Token Contract (Shared Verifier)", () => {
       ),
     ).toEqual([]);
   });
+
+  it("detects embedded hex/RGB/HSL literals, directional Tailwind palette borders, and arbitrary outline/from colors", () => {
+    expect(
+      findColorHygieneViolationsInContent(
+        'const style = { boxShadow: "4px 4px 0px #000000" };',
+        "sample.tsx",
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      findColorHygieneViolationsInContent(
+        'const style = { backgroundColor: "RGB(255, 0, 0)", borderColor: "HSL(120, 50%, 50%)" };',
+        "sample.tsx",
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
+    expect(
+      findColorHygieneViolationsInContent(
+        '<View className="border-t-red-500 border-b-white" />',
+        "sample.tsx",
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      findColorHygieneViolationsInContent(
+        '<View className="outline-[rgb(10,20,30)] from-[rgba(0,0,0,0.5)]" />',
+        "sample.tsx",
+      ).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("fails WCAG verification when Switch unchecked thumb or Select/DropdownMenu active surface pairs lose contrast", () => {
+    const brokenThumb = structuredClone(tokensModule.THEME_PRESETS);
+    brokenThumb["warm-tactile"].light["--surface-container-high"] =
+      brokenThumb["warm-tactile"].light["--on-surface-variant"];
+    expect(verifyWcagContrastAndSurfaces({ THEME_PRESETS: brokenThumb }).length).toBeGreaterThan(0);
+
+    const brokenMenuHover = structuredClone(tokensModule.THEME_PRESETS);
+    brokenMenuHover["neo-brutalist"].dark["--surface-container-high"] =
+      brokenMenuHover["neo-brutalist"].dark["--popover-foreground"];
+    expect(
+      verifyWcagContrastAndSurfaces({ THEME_PRESETS: brokenMenuHover }).length,
+    ).toBeGreaterThan(0);
+  });
 });

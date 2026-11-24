@@ -1,5 +1,5 @@
 import * as SwitchPrimitive from "@rn-primitives/switch";
-import { forwardRef, useCallback, useRef } from "react";
+import { forwardRef, useCallback } from "react";
 import { Platform } from "react-native";
 import {
   DEFAULT_THEME_PRESET,
@@ -8,9 +8,9 @@ import {
 } from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
+import { getWebClickGuardProps, useWebToggleDedup } from "@/shared/ui/web-overlay";
 
 const SWITCH_HIT_SLOP = { top: 8, bottom: 8, left: 0, right: 0 } as const;
-const WEB_DOUBLE_FIRE_GUARD_MS = 80;
 
 type SwitchKeyDownEvent = Parameters<NonNullable<SwitchPrimitive.RootProps["onKeyDown"]>>[0];
 
@@ -53,21 +53,8 @@ export const Switch = forwardRef<SwitchPrimitive.RootRef, SwitchProps>(
     const elevation = getThemeElevation(preset, resolvedScheme);
     const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
     const radiusClass = PRESET_SWITCH_RADIUS[preset];
-    const lastWebToggleAtRef = useRef(0);
-
-    const handleCheckedChange = useCallback(
-      (nextChecked: boolean) => {
-        if (Platform.OS === "web") {
-          const now = Date.now();
-          if (now - lastWebToggleAtRef.current < WEB_DOUBLE_FIRE_GUARD_MS) {
-            return;
-          }
-          lastWebToggleAtRef.current = now;
-        }
-        onCheckedChange(nextChecked);
-      },
-      [onCheckedChange],
-    );
+    const handleCheckedChange = useWebToggleDedup(onCheckedChange);
+    const webProps = getWebClickGuardProps(props);
 
     const handleKeyDown = useCallback(
       (event: WebKeyEventLike) => {
@@ -104,6 +91,7 @@ export const Switch = forwardRef<SwitchPrimitive.RootRef, SwitchProps>(
           className,
         )}
         {...props}
+        {...webProps}
       >
         <SwitchPrimitive.Thumb
           className={cn(
