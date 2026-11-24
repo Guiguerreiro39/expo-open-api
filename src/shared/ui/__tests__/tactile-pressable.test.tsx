@@ -2,6 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 import { useState } from "react";
 import { StyleSheet, type ViewStyle } from "react-native";
 import { describe, expect, it } from "vitest";
+import { Button } from "@/shared/ui/button";
 import { TactilePressable } from "@/shared/ui/tactile-pressable";
 import { Text } from "@/shared/ui/text";
 import { mockHaptics } from "@/test/mocks/adapters/mock-haptics";
@@ -159,6 +160,45 @@ describe("TactilePressable", () => {
     const ghostClasses = String(screen.getByTestId("ghost-pressable").props.className).split(/\s+/);
     expect(ghostClasses).not.toContain("border");
     expect(ghostClasses).not.toContain("border-2");
+    observability.assertNoDefects();
+  });
+
+  it("keeps outline Button border width in neo-brutalist when elevated={false}", () => {
+    const { observability } = renderWithProviders(
+      <Button testID="flat-outline-btn" variant="outline" elevated={false}>
+        Flat Outline
+      </Button>,
+      { initialPreset: "neo-brutalist" },
+    );
+
+    const flatOutlineTokens = String(screen.getByTestId("flat-outline-btn").props.className)
+      .trim()
+      .split(/\s+/);
+    expect(flatOutlineTokens).toContain("border-2");
+    observability.assertNoDefects();
+  });
+
+  it("keeps outline Button border width in warm-tactile and respects explicit caller border-4/border-0 on TactilePressable", () => {
+    const { observability } = renderWithProviders(
+      <>
+        <Button testID="warm-flat-outline" variant="outline" elevated={false}>
+          Warm Outline
+        </Button>
+        <TactilePressable testID="thick-border" className="border-primary border-4">
+          <Text>Thick</Text>
+        </TactilePressable>
+        <TactilePressable testID="zero-border" className="border-0">
+          <Text>Zero</Text>
+        </TactilePressable>
+      </>,
+      { initialPreset: "warm-tactile" },
+    );
+
+    expect(
+      String(screen.getByTestId("warm-flat-outline").props.className).trim().split(/\s+/),
+    ).toContain("border");
+    expect(String(screen.getByTestId("thick-border").props.className)).toContain("border-4");
+    expect(String(screen.getByTestId("zero-border").props.className)).toContain("border-0");
     observability.assertNoDefects();
   });
 });

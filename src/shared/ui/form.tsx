@@ -72,6 +72,19 @@ export const useAppForm: typeof baseUseAppForm = ((opts?: Record<string, unknown
         return;
       }
       try {
+        // Re-validate any field with a lingering onBlur error so a valid field updated
+        // programmatically or without triggering blur cannot deadlock submission.
+        const fieldMeta = form.state.fieldMeta as Record<
+          string,
+          { errorMap?: { onBlur?: unknown } } | undefined
+        >;
+        for (const [fieldName, meta] of Object.entries(fieldMeta)) {
+          if (meta?.errorMap?.onBlur !== undefined) {
+            await (
+              form.validateField as (field: string, cause: "blur") => Promise<unknown> | unknown
+            )(fieldName, "blur");
+          }
+        }
         return await originalHandleSubmit.call(form, submitMeta);
       } catch (error) {
         // Already captured in wrappedOptions.onSubmit (deduplicated by recordErrorOrDefect).
@@ -139,12 +152,14 @@ export function FormField({ field, children }: FormFieldProps) {
   const isInvalid = errors.length > 0;
 
   const clearSubmitError = React.useCallback(() => {
-    if (field.state.meta.errorMap?.onSubmit) {
+    const errorMap = field.state.meta.errorMap;
+    if (errorMap?.onSubmit !== undefined || errorMap?.onBlur !== undefined) {
       field.setMeta((prev) => ({
         ...prev,
         errorMap: {
           ...prev.errorMap,
           onSubmit: undefined,
+          onBlur: undefined,
         },
       }));
     }

@@ -69,7 +69,7 @@ export const AccordionTrigger = forwardRef<AccordionPrimitive.TriggerRef, Accord
     const { isExpanded } = AccordionPrimitive.useItemContext();
 
     return (
-      <TextClassContext.Provider value="text-body-md text-foreground font-semibold">
+      <TextClassContext.Provider value="text-body-md text-foreground font-sans-semibold">
         <AccordionPrimitive.Header className="flex">
           <AccordionPrimitive.Trigger
             ref={ref}

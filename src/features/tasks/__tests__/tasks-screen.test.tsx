@@ -436,6 +436,87 @@ describe("TasksScreen", () => {
     unmount();
   });
 
+  it("disables toggle and delete controls on optimistic tasks until server creation settles", async () => {
+    const patchIds: string[] = [];
+    const deleteIds: string[] = [];
+    let initialGetSettled = false;
+    let releasePost!: () => void;
+    const postGate = new Promise<void>((resolve) => {
+      releasePost = resolve;
+    });
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/tasks`, () => {
+        initialGetSettled = true;
+        return HttpResponse.json({ data: [], meta: { nextCursor: null, hasMore: false } });
+      }),
+      http.get(`${TEST_API_BASE}/api/v1/tasks/live`, () => createInitSseResponse([])),
+      http.post(`${TEST_API_BASE}/api/v1/tasks`, async ({ request }) => {
+        const body = (await request.json()) as { name: string };
+        await postGate;
+        const now = new Date().toISOString();
+        return HttpResponse.json(
+          {
+            id: "44444444-4444-4444-8444-444444444444",
+            name: body.name,
+            done: false,
+            userId: "member-1",
+            createdAt: now,
+            updatedAt: now,
+          },
+          { status: 201 },
+        );
+      }),
+      http.patch(`${TEST_API_BASE}/api/v1/tasks/:id`, ({ params }) => {
+        patchIds.push(String(params.id));
+        return honoErrorResponse(404, "NOT_FOUND", "Task not found");
+      }),
+      http.delete(`${TEST_API_BASE}/api/v1/tasks/:id`, ({ params }) => {
+        deleteIds.push(String(params.id));
+        return honoErrorResponse(404, "NOT_FOUND", "Task not found");
+      }),
+    );
+
+    const { getByPlaceholderText, getByLabelText, getByText, queryByText, queryClient, unmount } =
+      renderWithProviders(<TasksScreen />, {
+        user: { id: "member-1", name: "Alice", email: "alice@example.com", role: "member" },
+      });
+
+    await waitFor(() => {
+      expect(initialGetSettled).toBe(true);
+      expect(queryClient.isFetching()).toBe(0);
+      expect(getByText("No tasks to show")).toBeTruthy();
+      expect(getByText("Live Connected")).toBeTruthy();
+    });
+
+    fireEvent.changeText(getByPlaceholderText("Add a new task..."), "Brand new task");
+    fireEvent.press(getByLabelText("Add task"));
+
+    const toggleOpt = await waitFor(() => getByLabelText("Toggle task Brand new task"));
+    const deleteOpt = getByLabelText("Delete task Brand new task");
+
+    expect(toggleOpt.props.accessibilityState?.disabled).toBe(true);
+    expect(deleteOpt.props.accessibilityState?.disabled).toBe(true);
+
+    fireEvent.press(toggleOpt);
+    fireEvent.press(deleteOpt);
+    expect(queryByText("Delete task?")).toBeNull();
+
+    await act(async () => {
+      releasePost();
+    });
+
+    await waitFor(() => {
+      expect(getByLabelText("Toggle task Brand new task").props.accessibilityState?.disabled).toBe(
+        false,
+      );
+    });
+
+    expect(patchIds).toEqual([]);
+    expect(deleteIds).toEqual([]);
+    unmount();
+  });
+
   it("enforces RBAC <Can /> guards across viewer, member (ownership), and admin roles", async () => {
     server.use(
       http.get(`${TEST_API_BASE}/api/v1/tasks`, () =>

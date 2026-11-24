@@ -96,7 +96,9 @@ export const TabsTrigger = forwardRef<TabsPrimitive.TriggerRef, TabsTriggerProps
       <TextClassContext.Provider
         value={cn(
           "text-label-md text-center whitespace-nowrap",
-          isActive ? "text-primary-foreground font-bold" : "text-on-surface-variant font-semibold",
+          isActive
+            ? "text-primary-foreground font-sans-bold"
+            : "text-on-surface-variant font-sans-semibold",
         )}
       >
         <TabsPrimitive.Trigger

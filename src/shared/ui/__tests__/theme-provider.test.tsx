@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import * as SystemUI from "expo-system-ui";
 import { Platform, Pressable, View } from "react-native";
 import { afterEach, describe, expect, it } from "vitest";
@@ -233,5 +233,63 @@ describe("ThemeProvider tri-layer theme mirroring", () => {
         getThemeTokenMap("neo-brutalist", "light")["--background"],
       );
     });
+  });
+
+  it("handles undefined Web matchMedia results gracefully without throwing", () => {
+    Object.defineProperty(Platform, "OS", { value: "web", configurable: true });
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      writable: true,
+      value: {
+        matchMedia: () => undefined,
+      },
+    });
+
+    renderWithProviders(<ThemeControls />, {
+      initialColorScheme: "system",
+    });
+    expect(screen.getByTestId("probe-scheme")).toHaveTextContent("light");
+  });
+
+  it("supports legacy MediaQueryList addListener/removeListener fallback on Web", async () => {
+    Object.defineProperty(Platform, "OS", { value: "web", configurable: true });
+
+    const legacyListeners = new Set<(event: { matches: boolean }) => void>();
+    let removedCount = 0;
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      writable: true,
+      value: {
+        matchMedia: () => ({
+          matches: false,
+          addListener(listener: (event: { matches: boolean }) => void) {
+            legacyListeners.add(listener);
+          },
+          removeListener(listener: (event: { matches: boolean }) => void) {
+            if (legacyListeners.delete(listener)) {
+              removedCount += 1;
+            }
+          },
+        }),
+      },
+    });
+
+    const { unmount } = renderWithProviders(<ThemeControls />, {
+      initialColorScheme: "system",
+    });
+    expect(screen.getByTestId("probe-scheme")).toHaveTextContent("light");
+
+    await act(async () => {
+      for (const listener of legacyListeners) {
+        listener({ matches: true });
+      }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("probe-scheme")).toHaveTextContent("dark");
+    });
+
+    unmount();
+    expect(removedCount).toBe(1);
   });
 });

@@ -39,6 +39,7 @@ export const TEXT_CONTRAST_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ["card-foreground", "card"],
   ["popover-foreground", "popover"],
   ["popover-foreground", "accent"],
+  ["popover-foreground", "surface-container-high"],
   ["muted-foreground", "muted"],
   ["muted-foreground", "card"],
   ["accent-foreground", "accent"],
@@ -62,6 +63,7 @@ export const UI_BORDER_CONTRAST_PAIRS: ReadonlyArray<readonly [string, string]> 
   ["outline", "background"],
   ["outline", "card"],
   ["outline", "surface-container-lowest"],
+  ["on-surface-variant", "surface-container-high"],
 ];
 
 export const DARK_SURFACE_STEP_TOKENS = [
@@ -82,28 +84,31 @@ export interface HygieneRule {
 export const FORBIDDEN_COLOR_PATTERNS: readonly HygieneRule[] = [
   {
     name: "arbitrary hex Tailwind class",
-    regex: /\b(?:bg|text|border|ring|fill|stroke|outline|divide|from|via|to)-\[#[0-9a-fA-F]{3,8}\]/,
+    regex:
+      /\b(?:bg|text|border(?:-[trblxyse])?|ring|fill|stroke|outline|divide|from|via|to)-\[#[0-9a-fA-F]{3,8}\]/,
   },
   {
     name: "arbitrary rgb/hsl Tailwind class",
-    regex: /\b(?:bg|text|border|ring|fill|stroke)-\[(?:rgb|rgba|hsl|hsla)\(/,
+    regex:
+      /\b(?:bg|text|border(?:-[trblxyse])?|ring|fill|stroke|outline|divide|from|via|to)-\[(?:rgb|rgba|hsl|hsla)\(/i,
   },
   {
     name: "hardcoded hex color literal",
-    regex: /["'`]#[0-9a-fA-F]{3,8}["'`]/,
+    regex:
+      /(?:"(?:[^"\n]*[\s,:(])?#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b[^"\n]*"|'(?:[^'\n]*[\s,:(])?#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b[^'\n]*'|`(?:[^`\n]*[\s,:(])?#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b[^`\n]*`)/,
   },
   {
     name: "hardcoded rgb/rgba color literal",
-    regex: /["'`]rgba?\(\s*\d+/,
+    regex: /(?:"[^"\n]*\brgba?\(\s*\d+|'[^'\n]*\brgba?\(\s*\d+|`[^`\n]*\brgba?\(\s*\d+)/i,
   },
   {
     name: "hardcoded hsl/hsla color literal",
-    regex: /["'`]hsla?\(\s*\d+/,
+    regex: /(?:"[^"\n]*\bhsla?\(\s*\d+|'[^'\n]*\bhsla?\(\s*\d+|`[^`\n]*\bhsla?\(\s*\d+)/i,
   },
   {
     name: "raw Tailwind palette color class",
     regex:
-      /\b(?:bg|text|border|ring|fill|stroke|outline|divide|from|via|to)-(?:white|black|(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3})(?:\/\d{1,3})?\b/,
+      /\b(?:bg|text|border(?:-[trblxyse])?|ring|fill|stroke|outline|divide|from|via|to)-(?:white|black|(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3})(?:\/\d{1,3})?\b/,
   },
 ];
 

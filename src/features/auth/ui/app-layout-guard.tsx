@@ -14,6 +14,7 @@ import {
 } from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { useObservability } from "@/shared/observability/observability-context";
+import { recordErrorOrDefect } from "@/shared/observability/port";
 import { useCredentialStore } from "@/shared/storage/credential-store-context";
 import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
@@ -32,16 +33,18 @@ function buildLoginRedirectHref(pathname: string): Href {
 
 export function AppLayoutGuard() {
   const isBootstrapping = useIsAuthBootstrapping();
-  const { isAuthenticated, isLoading } = useAuthSession();
+  const signingOutRef = useRef(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [hasSignedOut, setHasSignedOut] = useState(false);
+  const { isAuthenticated, isLoading } = useAuthSession({
+    enabled: !isSigningOut && !hasSignedOut,
+  });
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
   const credentialStore = useCredentialStore();
   const observability = useObservability();
   const theme = useOptionalTheme();
-
-  const signingOutRef = useRef(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
   const scheme = theme?.resolvedColorScheme ?? "light";
@@ -62,8 +65,14 @@ export function AppLayoutGuard() {
         queryClient,
         observability,
       });
-      router.replace(ROUTES.AUTH_LOGIN as Href);
+    } catch (error) {
+      recordErrorOrDefect(observability, error, {
+        source: "AppLayoutGuard.handleSignOut",
+      });
+      queryClient.clear();
     } finally {
+      setHasSignedOut(true);
+      router.replace(ROUTES.AUTH_LOGIN as Href);
       signingOutRef.current = false;
       setIsSigningOut(false);
     }

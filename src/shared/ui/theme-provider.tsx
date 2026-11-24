@@ -81,7 +81,11 @@ function readWebSystemPrefersDark(): boolean | null {
   ) {
     return null;
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  if (!mediaQuery || typeof mediaQuery.matches !== "boolean") {
+    return null;
+  }
+  return mediaQuery.matches;
 }
 
 function syncWebDocumentTheme(preset: ThemePreset, resolvedColorScheme: ResolvedColorScheme): void {
@@ -150,7 +154,12 @@ export function ThemeProvider({
     }
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setWebPrefersDark(mediaQuery.matches);
+    if (!mediaQuery) {
+      return undefined;
+    }
+    if (typeof mediaQuery.matches === "boolean") {
+      setWebPrefersDark(mediaQuery.matches);
+    }
 
     const handleChange = (event: MediaQueryListEvent) => {
       setWebPrefersDark(event.matches);
@@ -159,7 +168,14 @@ export function ThemeProvider({
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", handleChange);
       return () => {
-        mediaQuery.removeEventListener("change", handleChange);
+        mediaQuery.removeEventListener?.("change", handleChange);
+      };
+    }
+
+    if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleChange);
+      return () => {
+        mediaQuery.removeListener?.(handleChange);
       };
     }
     return undefined;

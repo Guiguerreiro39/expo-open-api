@@ -1,7 +1,7 @@
 import * as DropdownMenuPrimitive from "@rn-primitives/dropdown-menu";
 import { Check } from "lucide-react-native";
-import { forwardRef, type ReactNode, useCallback, useRef } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { forwardRef, type ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   DEFAULT_THEME_PRESET,
@@ -12,9 +12,11 @@ import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
 import { Text, TextClassContext } from "@/shared/ui/text";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
-import { getOverlayFillStyle, getWebClickGuardProps } from "@/shared/ui/web-overlay";
-
-const WEB_DOUBLE_FIRE_GUARD_MS = 80;
+import {
+  getOverlayFillStyle,
+  getWebClickGuardProps,
+  useWebToggleDedup,
+} from "@/shared/ui/web-overlay";
 
 const PRESET_MENU_RADIUS: Record<ThemePreset, string> = {
   "warm-tactile": "rounded-xl",
@@ -144,21 +146,8 @@ export const DropdownMenuCheckboxItem = forwardRef<
 >(({ className, children, disabled, onCheckedChange, ...props }, ref) => {
   const theme = useOptionalTheme();
   const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
-  const lastToggleAtRef = useRef(0);
-
-  const handleCheckedChange = useCallback(
-    (nextChecked: boolean) => {
-      if (Platform.OS === "web") {
-        const now = Date.now();
-        if (now - lastToggleAtRef.current < WEB_DOUBLE_FIRE_GUARD_MS) {
-          return;
-        }
-        lastToggleAtRef.current = now;
-      }
-      onCheckedChange?.(nextChecked);
-    },
-    [onCheckedChange],
-  );
+  const handleCheckedChange = useWebToggleDedup(onCheckedChange);
+  const webProps = getWebClickGuardProps(props);
 
   return (
     <TextClassContext.Provider value="text-body-sm text-popover-foreground">
@@ -173,6 +162,7 @@ export const DropdownMenuCheckboxItem = forwardRef<
           className,
         )}
         {...props}
+        {...webProps}
       >
         <View className="flex-1">
           {typeof children === "string" || typeof children === "number" ? (

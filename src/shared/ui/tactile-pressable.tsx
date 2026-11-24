@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { DEFAULT_THEME_PRESET, getThemeElevation, THEME_PRESETS } from "@/shared/lib/theme/presets";
-import { cn } from "@/shared/lib/utils";
+import { cn, resolvePresetBorderOverride } from "@/shared/lib/utils";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,7 +23,6 @@ const TACTILE_SPRING_CONFIG = {
 } as const;
 
 const BOX_SHADOW_OFFSET_REGEX = /^(-?\d+(?:\.\d+)?)px\s+(-?\d+(?:\.\d+)?)px\s+(.+)$/;
-const STANDALONE_BORDER_CLASS_REGEX = /(?:^|\s)border(?:\s|$)/;
 
 interface ParsedBoxShadow {
   readonly offsetX: number;
@@ -140,16 +139,9 @@ export const TactilePressable = forwardRef<ComponentRef<typeof Pressable>, Tacti
       [onPressOut, pressProgress],
     );
 
-    const hasCallerBorder =
-      typeof className === "string" && STANDALONE_BORDER_CLASS_REGEX.test(className);
-    const enforcedBorderClass =
-      elevation.borderWidth >= 2
-        ? elevated || hasCallerBorder
-          ? "border-2"
-          : undefined
-        : elevated
-          ? "border"
-          : undefined;
+    const enforcedBorderClass = resolvePresetBorderOverride(className, elevation.borderWidth, {
+      applyDefault: elevated,
+    });
 
     return (
       <AnimatedPressable

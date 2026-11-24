@@ -1,6 +1,6 @@
 import * as DialogPrimitive from "@rn-primitives/dialog";
 import { X } from "lucide-react-native";
-import { forwardRef, type ReactNode, useEffect, useMemo, useRef } from "react";
+import { forwardRef, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, View, type ViewProps } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -89,6 +89,7 @@ export const SheetContent = forwardRef<DialogPrimitive.ContentRef, SheetContentP
     onOpenChangeRef.current = onOpenChange;
 
     const dragY = useSharedValue(0);
+    const [pendingSwipeDismiss, setPendingSwipeDismiss] = useState(false);
 
     useEffect(() => {
       if (open) {
@@ -98,6 +99,13 @@ export const SheetContent = forwardRef<DialogPrimitive.ContentRef, SheetContentP
         cancelAnimation(dragY);
       };
     }, [open, dragY]);
+
+    useEffect(() => {
+      if (open && pendingSwipeDismiss) {
+        dragY.value = withSpring(0, { damping: 20, stiffness: 260 });
+        setPendingSwipeDismiss(false);
+      }
+    }, [open, pendingSwipeDismiss, dragY]);
 
     const animatedDragStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: dragY.value }],
@@ -118,6 +126,7 @@ export const SheetContent = forwardRef<DialogPrimitive.ContentRef, SheetContentP
             ) {
               dragY.value = withTiming(SHEET_DISMISS_DISTANCE, { duration: 180 });
               onOpenChangeRef.current(false);
+              setPendingSwipeDismiss(true);
             } else {
               dragY.value = withSpring(0, { damping: 20, stiffness: 260 });
             }
@@ -204,7 +213,7 @@ export const SheetTitle = forwardRef<DialogPrimitive.TitleRef, SheetTitleProps>(
   ({ className, ...props }, ref) => (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn("text-title-md text-foreground font-sans font-bold", className)}
+      className={cn("text-title-md text-foreground font-sans-bold", className)}
       {...props}
     />
   ),

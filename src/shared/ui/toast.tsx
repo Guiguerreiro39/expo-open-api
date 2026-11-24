@@ -142,7 +142,7 @@ export function ToastProvider({ children, portalHost = TOAST_PORTAL_HOST }: Toas
       };
 
       const duration = input.durationMs ?? DEFAULT_DURATION_MS;
-      if (duration > 0) {
+      if (Number.isFinite(duration) && duration > 0) {
         const timer = setTimeout(() => {
           dismiss(id);
         }, duration);
@@ -227,9 +227,11 @@ export function ToastViewport({ portalHost = TOAST_PORTAL_HOST }: { portalHost?:
       ? ({
           position: "fixed",
           top: topOffset,
+          zIndex: 100,
         } as unknown as ViewStyle)
       : {
           top: topOffset,
+          zIndex: 100,
         };
 
   return (
@@ -237,7 +239,7 @@ export function ToastViewport({ portalHost = TOAST_PORTAL_HOST }: { portalHost?:
       <View
         testID="toast-viewport"
         pointerEvents="box-none"
-        className="web:mx-auto web:max-w-md absolute right-4 left-4 z-50 gap-2"
+        className="web:mx-auto web:max-w-md absolute right-4 left-4 z-[100] gap-2"
         style={viewportStyle}
         accessibilityLiveRegion="polite"
       >
@@ -257,7 +259,7 @@ export function ToastViewport({ portalHost = TOAST_PORTAL_HOST }: { portalHost?:
               <ToastIcon variant={item.variant} />
             </View>
             <View className="flex-1 gap-0.5">
-              <Text variant="label" className={cn("font-bold", TOAST_TEXT_STYLES[item.variant])}>
+              <Text variant="label" className={TOAST_TEXT_STYLES[item.variant]}>
                 {item.title}
               </Text>
               {item.description ? (

@@ -365,4 +365,30 @@ describe("ShowcaseScreen Feature Slice", () => {
 
     observability.assertNoDefects();
   });
+
+  it("clears stale onBlur validation errors on Feedback Title and allows submitting without re-blurring", async () => {
+    const onSubmitFeedback = vi.fn();
+    const { observability } = renderWithProviders(
+      <ShowcaseScreen onSubmitFeedback={onSubmitFeedback} />,
+    );
+
+    fireEvent.press(screen.getByRole("tab", { name: "Form Demo" }));
+    fireEvent.changeText(screen.getByLabelText("Feedback Title"), "ab");
+    fireEvent(screen.getByLabelText("Feedback Title"), "blur");
+    expect(await screen.findByText("Title must be at least 3 characters")).toBeTruthy();
+
+    fireEvent.changeText(screen.getByLabelText("Feedback Title"), "Valid Title Now");
+    fireEvent.changeText(
+      screen.getByLabelText("Description"),
+      "Valid description with plenty of characters.",
+    );
+    fireEvent.press(screen.getByRole("checkbox", { name: /Agree to feedback policy/i }));
+    fireEvent.press(screen.getByRole("button", { name: /Submit Feedback/i }));
+
+    await waitFor(() => {
+      expect(onSubmitFeedback).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.queryByText("Title must be at least 3 characters")).toBeNull();
+    observability.assertNoDefects();
+  });
 });

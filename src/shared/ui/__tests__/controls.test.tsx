@@ -2,7 +2,7 @@ import { fireEvent, screen } from "@testing-library/react-native";
 import { Check } from "lucide-react-native";
 import { useState } from "react";
 import { Platform, ScrollView } from "react-native";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { THEME_PRESETS } from "@/shared/lib/theme/presets";
 import {
   Accordion,
@@ -11,13 +11,22 @@ import {
   AccordionTrigger,
 } from "@/shared/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
+import { AlertDialog, AlertDialogContent, AlertDialogTitle } from "@/shared/ui/alert-dialog";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { Icon } from "@/shared/ui/icon";
 import { Label } from "@/shared/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
+import { Sheet, SheetContent, SheetTitle } from "@/shared/ui/sheet";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Switch } from "@/shared/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
@@ -289,6 +298,100 @@ describe("Checkbox, RadioGroup, and Switch controls", () => {
       Object.defineProperty(Platform, "OS", { value: originalOS, configurable: true });
     }
   });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("fires the very first Web click when Date.now() === 0 on Checkbox and DropdownMenuCheckboxItem", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { value: "web", configurable: true });
+    vi.useFakeTimers();
+
+    try {
+      vi.setSystemTime(0);
+      const firstCheckboxSpy = vi.fn();
+      const firstMenuCheckSpy = vi.fn();
+
+      const { observability } = renderWithProviders(
+        <>
+          <Checkbox testID="epoch-checkbox" checked={false} onCheckedChange={firstCheckboxSpy} />
+          <DropdownMenu>
+            <DropdownMenuTrigger testID="epoch-menu-trigger">
+              <Text>Open Menu</Text>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuCheckboxItem
+                testID="epoch-menu-check"
+                checked={false}
+                onCheckedChange={firstMenuCheckSpy}
+              >
+                <Text>Show completed</Text>
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>,
+        {
+          createNodeMock: () => ({
+            measure: (
+              cb: (x: number, y: number, w: number, h: number, px: number, py: number) => void,
+            ) => {
+              cb(16, 120, 180, 44, 16, 120);
+            },
+          }),
+        },
+      );
+
+      fireEvent.press(screen.getByTestId("epoch-checkbox"));
+      expect(firstCheckboxSpy).toHaveBeenCalledTimes(1);
+
+      fireEvent.press(screen.getByTestId("epoch-menu-trigger"));
+      fireEvent.press(screen.getByTestId("epoch-menu-check"));
+      expect(firstMenuCheckSpy).toHaveBeenCalledTimes(1);
+      observability.assertNoDefects();
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(Platform, "OS", { value: originalOS, configurable: true });
+    }
+  });
+
+  it("allows rapid sequential Web clicks (50ms apart) on Switch and Checkbox and guards Web onClick default", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { value: "web", configurable: true });
+    vi.useFakeTimers();
+
+    try {
+      vi.setSystemTime(10_000);
+      const rapidSwitchCalls: boolean[] = [];
+      const rapidCheckboxCalls: boolean[] = [];
+      const { observability } = renderWithProviders(
+        <ToggleControlsHarness
+          onSwitchChange={(next) => rapidSwitchCalls.push(next)}
+          onCheckboxChange={(next) => rapidCheckboxCalls.push(next)}
+        />,
+      );
+
+      const toggleSwitch = screen.getByTestId("toggle-switch");
+      fireEvent.press(toggleSwitch);
+      vi.advanceTimersByTime(50);
+      fireEvent.press(toggleSwitch);
+      expect(rapidSwitchCalls).toEqual([true, false]);
+
+      const toggleCheckbox = screen.getByTestId("toggle-checkbox");
+      fireEvent.press(toggleCheckbox);
+      vi.advanceTimersByTime(50);
+      fireEvent.press(toggleCheckbox);
+      expect(rapidCheckboxCalls).toEqual([true, false]);
+
+      const preventDefault = vi.fn();
+      toggleSwitch.props.onClick?.({ preventDefault });
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      observability.assertNoDefects();
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(Platform, "OS", { value: originalOS, configurable: true });
+    }
+  });
 });
 
 describe("Label, Tabs, Skeleton, and Icon primitives", () => {
@@ -430,6 +533,76 @@ describe("Label, Tabs, Skeleton, and Icon primitives", () => {
     const defaultClasses = classTokens(screen.getByTestId("default-icon").props.className);
     expect(defaultClasses).toContain("text-foreground");
 
+    observability.assertNoDefects();
+  });
+
+  it("emits explicit static weight font families across Button, Label, DialogTitle, AlertDialogTitle, SheetTitle, AccordionTrigger, and TabsTrigger", () => {
+    const { observability } = renderWithProviders(
+      <>
+        <Button>Primary CTA</Button>
+        <Label>Field Label</Label>
+        <Dialog open>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Modal Heading</DialogTitle>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+        <AlertDialog open>
+          <AlertDialogContent>
+            <AlertDialogTitle>Alert Heading</AlertDialogTitle>
+          </AlertDialogContent>
+        </AlertDialog>
+        <Sheet open>
+          <SheetContent>
+            <SheetTitle>Sheet Heading</SheetTitle>
+          </SheetContent>
+        </Sheet>
+        <Accordion type="single" collapsible value="a" onValueChange={() => {}}>
+          <AccordionItem value="a">
+            <AccordionTrigger>
+              <Text>Accordion Heading</Text>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Text>Body</Text>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        <Tabs value="one" onValueChange={() => {}}>
+          <TabsList>
+            <TabsTrigger value="one">
+              <Text>Active Tab</Text>
+            </TabsTrigger>
+            <TabsTrigger value="two">
+              <Text>Inactive Tab</Text>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </>,
+    );
+
+    expect(classTokens(screen.getByText("Primary CTA").props.className)).toContain(
+      "font-sans-bold",
+    );
+    expect(classTokens(screen.getByText("Field Label").props.className)).toContain(
+      "font-sans-bold",
+    );
+    expect(classTokens(screen.getByText("Modal Heading").props.className)).toContain(
+      "font-sans-bold",
+    );
+    expect(classTokens(screen.getByText("Alert Heading").props.className)).toContain(
+      "font-sans-bold",
+    );
+    expect(classTokens(screen.getByText("Sheet Heading").props.className)).toContain(
+      "font-sans-bold",
+    );
+    expect(classTokens(screen.getByText("Accordion Heading").props.className)).toContain(
+      "font-sans-semibold",
+    );
+    expect(classTokens(screen.getByText("Active Tab").props.className)).toContain("font-sans-bold");
+    expect(classTokens(screen.getByText("Inactive Tab").props.className)).toContain(
+      "font-sans-semibold",
+    );
     observability.assertNoDefects();
   });
 });

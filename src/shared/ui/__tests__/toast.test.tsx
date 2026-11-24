@@ -1,6 +1,7 @@
 import { act, fireEvent, screen } from "@testing-library/react-native";
 import { Platform, Pressable, Text, View } from "react-native";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { TOAST_PORTAL_HOST, useToast } from "@/shared/ui/toast";
 import { renderWithProviders, TEST_SAFE_AREA_METRICS } from "@/test/render";
 
@@ -29,6 +30,25 @@ function ToastHarness() {
         <Text>Show Four Toasts</Text>
       </Pressable>
     </View>
+  );
+}
+
+function PinnedAndStackedHarness() {
+  const toast = useToast();
+  return (
+    <>
+      <Pressable
+        testID="show-inf-toast"
+        onPress={() => toast.show({ title: "Pinned", durationMs: Number.POSITIVE_INFINITY })}
+      >
+        <Text>Show Pinned</Text>
+      </Pressable>
+      <Dialog open>
+        <DialogContent>
+          <DialogTitle>Open Modal</DialogTitle>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -123,6 +143,35 @@ describe("ToastViewport and ToastProvider", () => {
       observability.assertNoDefects();
     } finally {
       clearTimeoutSpy.mockRestore();
+    }
+  });
+
+  it("keeps toasts pinned when durationMs is Number.POSITIVE_INFINITY and stacks ToastViewport above Web Radix overlays", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    vi.useFakeTimers();
+
+    try {
+      const { observability } = renderWithProviders(<PinnedAndStackedHarness />);
+      fireEvent.press(screen.getByTestId("show-inf-toast"));
+      expect(screen.getByText("Pinned")).toBeTruthy();
+
+      act(() => {
+        vi.advanceTimersByTime(60_000);
+      });
+      expect(screen.getByText("Pinned")).toBeTruthy();
+
+      const toastViewport = screen.getByTestId("toast-viewport");
+      const dialogOverlay = screen.getByTestId("dialog-overlay");
+      const toastZ = String(toastViewport.props.className).match(/\bz-(\[?\d+\]?)\b/)?.[1];
+      const dialogZ = String(dialogOverlay.props.className).match(/\bz-(\[?\d+\]?)\b/)?.[1];
+      expect(Number(toastZ?.replace(/\D/g, ""))).toBeGreaterThan(
+        Number(dialogZ?.replace(/\D/g, "")),
+      );
+      observability.assertNoDefects();
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
     }
   });
 });

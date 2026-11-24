@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
 import { useState } from "react";
 import { Platform, StyleSheet, type ViewStyle } from "react-native";
 import { describe, expect, it, vi } from "vitest";
@@ -56,6 +56,23 @@ function HapticsSliderHarness() {
         onValueChange={setV2}
       />
     </>
+  );
+}
+
+function NonDivisibleHarness({ onEmit }: { readonly onEmit: (next: number) => void }) {
+  const [val, setVal] = useState(0);
+  return (
+    <Slider
+      testID="step-slider"
+      value={val}
+      min={0}
+      max={10}
+      step={3}
+      onValueChange={(next) => {
+        onEmit(next);
+        setVal(next);
+      }}
+    />
   );
 }
 
@@ -345,5 +362,204 @@ describe("Slider", () => {
     expect(mockHaptics.events).toHaveLength(0);
 
     observability.assertNoDefects();
+  });
+
+  it("waits for async measureInWindow without emitting a wrong intermediate jump or double haptic", () => {
+    mockHaptics.reset();
+    const onValueChange = vi.fn();
+    let pendingMeasureCallback: ((x: number, y: number, w: number, h: number) => void) | null =
+      null;
+
+    const { observability } = renderWithProviders(
+      <Slider testID="async-slider" value={0} min={0} max={100} onValueChange={onValueChange} />,
+      {
+        createNodeMock: (element) => {
+          if ((element.props as { testID?: string })?.testID === "async-slider") {
+            return {
+              measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => {
+                pendingMeasureCallback = cb;
+              },
+            };
+          }
+          return null;
+        },
+      },
+    );
+
+    const slider = screen.getByTestId("async-slider");
+    fireEvent(slider, "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width: 220, height: 44 } },
+    });
+
+    act(() => {
+      slider.props.onResponderGrant?.(
+        { nativeEvent: { pageX: 210, locationX: Number.NaN } },
+        { moveX: 210, dx: 0, dy: 0 },
+      );
+    });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(mockHaptics.events).toHaveLength(0);
+
+    act(() => {
+      pendingMeasureCallback?.(100, 0, 220, 44);
+    });
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith(50);
+    expect(mockHaptics.events).toHaveLength(1);
+    observability.assertNoDefects();
+  });
+
+  it("handles degenerate min===max and max<min ranges without fabricating safeMax or emitting out-of-bounds values", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    try {
+      const onEqualChange = vi.fn();
+      const onInvertedChange = vi.fn();
+      const { observability } = renderWithProviders(
+        <>
+          <Slider
+            testID="equal-slider"
+            value={50}
+            min={50}
+            max={50}
+            onValueChange={onEqualChange}
+          />
+          <Slider
+            testID="inverted-slider"
+            value={50}
+            min={50}
+            max={10}
+            onValueChange={onInvertedChange}
+          />
+        </>,
+      );
+
+      const equalSlider = screen.getByTestId("equal-slider");
+      expect(equalSlider.props.accessibilityValue).toEqual({ min: 50, max: 50, now: 50 });
+      fireEvent(equalSlider, "keyDown", { key: "ArrowRight", preventDefault: vi.fn() });
+      fireEvent(equalSlider, "keyDown", { key: "End", preventDefault: vi.fn() });
+      expect(onEqualChange).not.toHaveBeenCalled();
+
+      const invertedSlider = screen.getByTestId("inverted-slider");
+      expect(invertedSlider.props.accessibilityValue).toEqual({ min: 50, max: 50, now: 50 });
+      fireEvent(invertedSlider, "keyDown", { key: "ArrowRight", preventDefault: vi.fn() });
+      expect(onInvertedChange).not.toHaveBeenCalled();
+
+      observability.assertNoDefects();
+    } finally {
+      Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
+    }
+  });
+
+  it("reaches max consistently on non-divisible step ranges and steps cleanly back from max", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    try {
+      const emitted: number[] = [];
+
+      const { observability } = renderWithProviders(
+        <NonDivisibleHarness onEmit={(next) => emitted.push(next)} />,
+      );
+      const slider = screen.getByTestId("step-slider");
+
+      fireEvent(slider, "keyDown", { key: "End", preventDefault: vi.fn() });
+      fireEvent(slider, "keyDown", { key: "ArrowRight", preventDefault: vi.fn() });
+      fireEvent(slider, "keyDown", { key: "ArrowLeft", preventDefault: vi.fn() });
+      fireEvent(slider, "keyDown", { key: "ArrowLeft", preventDefault: vi.fn() });
+
+      expect(emitted).toEqual([10, 9, 6]);
+      observability.assertNoDefects();
+    } finally {
+      Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
+    }
+  });
+
+  it("preserves mantissa precision on scientific-notation steps (1.5e-7) and avoids RangeError on tiny steps (1e-101)", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    try {
+      const onSciChange = vi.fn();
+      const onTinyChange = vi.fn();
+      const { observability } = renderWithProviders(
+        <>
+          <Slider
+            testID="sci-slider"
+            value={0}
+            min={0}
+            max={1e-6}
+            step={1.5e-7}
+            onValueChange={onSciChange}
+          />
+          <Slider
+            testID="tiny-slider"
+            value={0}
+            min={0}
+            max={1e-100}
+            step={1e-101}
+            onValueChange={onTinyChange}
+          />
+        </>,
+      );
+
+      fireEvent(screen.getByTestId("sci-slider"), "keyDown", {
+        key: "ArrowRight",
+        preventDefault: vi.fn(),
+      });
+      expect(onSciChange).toHaveBeenCalledWith(1.5e-7);
+
+      expect(() =>
+        fireEvent(screen.getByTestId("tiny-slider"), "keyDown", {
+          key: "ArrowRight",
+          preventDefault: vi.fn(),
+        }),
+      ).not.toThrow();
+      expect(onTinyChange).toHaveBeenCalledWith(1e-101);
+      observability.assertNoDefects();
+    } finally {
+      Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
+    }
+  });
+
+  it("terminates Web pointer dragging safely when releasePointerCapture throws and wires onLostPointerCapture", () => {
+    const originalOS = Platform.OS;
+    Object.defineProperty(Platform, "OS", { configurable: true, value: "web" });
+    try {
+      const onValueChange = vi.fn();
+      const { observability } = renderWithProviders(
+        <Slider testID="ptr-slider" value={50} min={0} max={100} onValueChange={onValueChange} />,
+      );
+
+      const slider = screen.getByTestId("ptr-slider");
+      expect(typeof slider.props.onLostPointerCapture).toBe("function");
+
+      const target = {
+        getBoundingClientRect: () => ({ left: 0, width: 220 }),
+        setPointerCapture: vi.fn(),
+        hasPointerCapture: vi.fn(() => true),
+        releasePointerCapture: vi.fn(() => {
+          throw new DOMException("No active pointer with the given id is found.", "NotFoundError");
+        }),
+      };
+
+      fireEvent(slider, "pointerDown", { pointerId: 1, clientX: 110, currentTarget: target });
+      expect(() =>
+        fireEvent(slider, "pointerUp", { pointerId: 1, clientX: 110, currentTarget: target }),
+      ).not.toThrow();
+
+      onValueChange.mockClear();
+      fireEvent(slider, "pointerMove", { pointerId: 1, clientX: 210, currentTarget: target });
+      expect(onValueChange).not.toHaveBeenCalled();
+
+      // Lost pointer capture also ends dragging cleanly
+      fireEvent(slider, "pointerDown", { pointerId: 2, clientX: 60, currentTarget: target });
+      onValueChange.mockClear();
+      fireEvent(slider, "lostPointerCapture", { pointerId: 2, currentTarget: target });
+      fireEvent(slider, "pointerMove", { pointerId: 2, clientX: 200, currentTarget: target });
+      expect(onValueChange).not.toHaveBeenCalled();
+
+      observability.assertNoDefects();
+    } finally {
+      Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
+    }
   });
 });

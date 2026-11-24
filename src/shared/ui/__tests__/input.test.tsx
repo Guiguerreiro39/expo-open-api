@@ -134,4 +134,21 @@ describe("Input and Textarea zero-jump styling and preset geometry", () => {
     expect(onBlur).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("notes-textarea").props.className).toBe(initialClassName);
   });
+
+  it("prevents caller border utility from downgrading neo-brutalist border-2 while preserving explicit border width overrides", () => {
+    renderWithProviders(
+      <>
+        <Input testID="neo-in-plain" className="border" />
+        <Textarea testID="neo-ta-plain" className="border" />
+        <Input testID="neo-in-thick" className="border-4" />
+        <Textarea testID="neo-ta-none" className="border-0" />
+      </>,
+      { initialPreset: "neo-brutalist" },
+    );
+
+    expect(String(screen.getByTestId("neo-in-plain").props.className)).toContain("border-2");
+    expect(String(screen.getByTestId("neo-ta-plain").props.className)).toContain("border-2");
+    expect(String(screen.getByTestId("neo-in-thick").props.className)).toContain("border-4");
+    expect(String(screen.getByTestId("neo-ta-none").props.className)).toContain("border-0");
+  });
 });

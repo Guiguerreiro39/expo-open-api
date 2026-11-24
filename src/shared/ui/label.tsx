@@ -67,7 +67,7 @@ export const Label = forwardRef<LabelPrimitive.TextRef, LabelProps>(
       >
         <LabelPrimitive.Text
           ref={ref}
-          className={cn("text-foreground text-label-lg font-sans", textClasses.join(" "))}
+          className={cn("text-foreground text-label-lg font-sans-bold", textClasses.join(" "))}
           {...props}
         />
       </LabelPrimitive.Root>

@@ -1,5 +1,5 @@
 import { AlertCircle } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { decodeApiError } from "@/shared/api/contracts";
@@ -41,14 +41,30 @@ interface ActionFeedback {
   readonly message: string;
 }
 
+function addIdToSet(prev: ReadonlySet<string>, id: string): ReadonlySet<string> {
+  if (prev.has(id)) return prev;
+  const next = new Set(prev);
+  next.add(id);
+  return next;
+}
+
+function removeIdFromSet(prev: ReadonlySet<string>, id: string): ReadonlySet<string> {
+  if (!prev.has(id)) return prev;
+  const next = new Set(prev);
+  next.delete(id);
+  return next;
+}
+
 export function FilesScreen({ transferPort: providedPort, pickerAdapter }: FilesScreenProps = {}) {
   const observability = useObservability();
   const defaultPort = useMemo(() => createExpoFileTransferAdapter(), []);
   const transferPort = providedPort ?? defaultPort;
 
   const [strategy, setStrategy] = useState<UploadStrategy>("auto");
-  const [busyFileId, setBusyFileId] = useState<string | null>(null);
-  const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+  const [busyFileIds, setBusyFileIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [deletingFileIds, setDeletingFileIds] = useState<ReadonlySet<string>>(() => new Set());
+  const inFlightBusyIdsRef = useRef<Set<string>>(new Set());
+  const inFlightDeleteIdsRef = useRef<Set<string>>(new Set());
   const [filePendingDelete, setFilePendingDelete] = useState<FileRecord | null>(null);
   const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
@@ -93,7 +109,11 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handleDownloadShare = useCallback(
     async (file: FileRecord) => {
-      setBusyFileId(file.id);
+      if (inFlightBusyIdsRef.current.has(file.id) || inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightBusyIdsRef.current.add(file.id);
+      setBusyFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await downloadFileDirect(file.id, {
@@ -109,7 +129,8 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           message: decoded.message || "Download failed",
         });
       } finally {
-        setBusyFileId(null);
+        inFlightBusyIdsRef.current.delete(file.id);
+        setBusyFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [observability, transferPort],
@@ -117,7 +138,11 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handlePreviewUrl = useCallback(
     async (file: FileRecord) => {
-      setBusyFileId(file.id);
+      if (inFlightBusyIdsRef.current.has(file.id) || inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightBusyIdsRef.current.add(file.id);
+      setBusyFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await openFilePreviewUrl(file.id, {
@@ -131,7 +156,8 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           message: decoded.message || "Preview failed",
         });
       } finally {
-        setBusyFileId(null);
+        inFlightBusyIdsRef.current.delete(file.id);
+        setBusyFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [observability, transferPort],
@@ -139,7 +165,11 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
 
   const handleDelete = useCallback(
     async (file: FileRecord) => {
-      setDeletingFileId(file.id);
+      if (inFlightDeleteIdsRef.current.has(file.id)) {
+        return;
+      }
+      inFlightDeleteIdsRef.current.add(file.id);
+      setDeletingFileIds((prev) => addIdToSet(prev, file.id));
       setActionFeedback(null);
       try {
         await deleteMutation.mutateAsync(file.id);
@@ -150,7 +180,8 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           message: decoded.message || "Delete failed",
         });
       } finally {
-        setDeletingFileId(null);
+        inFlightDeleteIdsRef.current.delete(file.id);
+        setDeletingFileIds((prev) => removeIdFromSet(prev, file.id));
       }
     },
     [deleteMutation],
@@ -252,8 +283,8 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
         isLoading={filesQuery.isPending}
         isRefreshing={filesQuery.isRefetching && !filesQuery.isFetchingNextPage}
         errorMessage={errorMessage}
-        busyFileId={busyFileId}
-        deletingFileId={deletingFileId}
+        busyFileIds={busyFileIds}
+        deletingFileIds={deletingFileIds}
         hasNextPage={filesQuery.hasNextPage}
         isFetchingNextPage={filesQuery.isFetchingNextPage}
         header={header}
@@ -270,6 +301,12 @@ export function FilesScreen({ transferPort: providedPort, pickerAdapter }: Files
           void handlePreviewUrl(file);
         }}
         onDelete={(file) => {
+          if (
+            inFlightDeleteIdsRef.current.has(file.id) ||
+            inFlightBusyIdsRef.current.has(file.id)
+          ) {
+            return;
+          }
           setFilePendingDelete(file);
         }}
       />

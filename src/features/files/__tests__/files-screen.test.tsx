@@ -569,4 +569,74 @@ describe("FilesScreen integration", () => {
 
     screen.observability.assertNoDefects();
   });
+
+  it("tracks per-file delete locks independently so deleting File B never unlocks in-flight File A", async () => {
+    let releaseDeleteA!: () => void;
+    let releaseDeleteB!: () => void;
+    let deleteACalls = 0;
+
+    const port = createInMemoryFileTransferPort();
+    const fileA = makeFileRecord({
+      id: OWN_FILE_ID,
+      originalName: "alpha.pdf",
+    });
+    const fileB = makeFileRecord({
+      id: OTHER_FILE_ID,
+      originalName: "beta.pdf",
+    });
+
+    server.use(
+      http.get(`${TEST_API_BASE}/api/v1/files`, () =>
+        HttpResponse.json({ data: [fileA, fileB], meta: { nextCursor: null, hasMore: false } }),
+      ),
+      http.delete(`${TEST_API_BASE}/api/v1/files/:id`, async ({ params }) => {
+        if (params.id === fileA.id) {
+          deleteACalls += 1;
+          await new Promise<void>((resolve) => {
+            releaseDeleteA = resolve;
+          });
+          return new HttpResponse(null, { status: 204 });
+        }
+        await new Promise<void>((resolve) => {
+          releaseDeleteB = resolve;
+        });
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    const view = renderWithProviders(
+      <FilesScreen transferPort={port} pickerAdapter={makePickerAdapter()} />,
+      { user: { id: "user-member-1", name: "Alex", email: "alex@example.com", role: "member" } },
+    );
+
+    await waitFor(() => {
+      expect(view.getByText("alpha.pdf")).toBeTruthy();
+      expect(view.getByText("beta.pdf")).toBeTruthy();
+    });
+
+    fireEvent.press(view.getByLabelText("Delete alpha.pdf"));
+    fireEvent.press(await waitFor(() => view.getByLabelText("Confirm delete file")));
+    await waitFor(() => {
+      expect(view.getByLabelText("Delete alpha.pdf").props.accessibilityState?.disabled).toBe(true);
+    });
+
+    fireEvent.press(view.getByLabelText("Delete beta.pdf"));
+    fireEvent.press(await waitFor(() => view.getByLabelText("Confirm delete file")));
+    await waitFor(() => {
+      expect(view.getByLabelText("Delete beta.pdf").props.accessibilityState?.disabled).toBe(true);
+    });
+
+    // File A MUST remain locked while both deletes are in flight
+    expect(view.getByLabelText("Delete alpha.pdf").props.accessibilityState?.disabled).toBe(true);
+    fireEvent.press(view.getByLabelText("Delete alpha.pdf"));
+    expect(view.queryByLabelText("Confirm delete file")).toBeNull();
+
+    await act(async () => {
+      releaseDeleteA();
+      releaseDeleteB();
+    });
+
+    expect(deleteACalls).toBe(1);
+    view.observability.assertNoDefects();
+  });
 });

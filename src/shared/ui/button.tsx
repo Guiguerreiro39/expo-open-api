@@ -17,7 +17,7 @@ export const buttonVariants = cva("flex-row items-center justify-center gap-2", 
     variant: {
       default: "border-primary-container bg-primary",
       secondary: "border-outline-variant bg-secondary-container",
-      outline: "border-outline-variant bg-surface-container-lowest",
+      outline: "border-outline-variant bg-surface-container-lowest border",
       destructive: "border-destructive bg-destructive",
       ghost: "bg-transparent",
       link: "bg-transparent",
@@ -38,12 +38,12 @@ export const buttonVariants = cva("flex-row items-center justify-center gap-2", 
 export const buttonTextVariants = cva("text-body-sm text-center", {
   variants: {
     variant: {
-      default: "text-primary-foreground font-bold",
-      secondary: "text-on-secondary-container font-semibold",
-      outline: "text-foreground font-semibold",
-      destructive: "text-destructive-foreground font-bold",
-      ghost: "text-foreground font-semibold",
-      link: "text-primary font-semibold underline",
+      default: "text-primary-foreground font-sans-bold",
+      secondary: "text-on-secondary-container font-sans-semibold",
+      outline: "text-foreground font-sans-semibold",
+      destructive: "text-destructive-foreground font-sans-bold",
+      ghost: "text-foreground font-sans-semibold",
+      link: "text-primary font-sans-semibold underline",
     },
     size: {
       default: "text-body-md",

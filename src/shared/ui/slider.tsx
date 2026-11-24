@@ -33,6 +33,7 @@ interface WebPointerEventLike {
     getBoundingClientRect?: () => { readonly left: number; readonly width: number };
     setPointerCapture?: (pointerId: number) => void;
     releasePointerCapture?: (pointerId: number) => void;
+    hasPointerCapture?: (pointerId: number) => boolean;
   };
 }
 
@@ -42,13 +43,25 @@ interface WebKeyDownEventLike {
 }
 
 function getStepPrecision(step: number): number {
-  const stepText = String(step);
+  const stepText = String(step).toLowerCase();
   if (stepText.includes("e-")) {
-    const [, exp] = stepText.split("e-");
-    return Number(exp) || 0;
+    const [mantissa = "", exp = "0"] = stepText.split("e-");
+    const dotIndex = mantissa.indexOf(".");
+    const mantissaDecimals = dotIndex >= 0 ? mantissa.length - dotIndex - 1 : 0;
+    return mantissaDecimals + (Number(exp) || 0);
   }
   const dotIndex = stepText.indexOf(".");
   return dotIndex >= 0 ? stepText.length - dotIndex - 1 : 0;
+}
+
+function roundToStepPrecision(value: number, precision: number): number {
+  if (precision <= 0 || !Number.isFinite(value)) {
+    return value;
+  }
+  if (precision <= 100) {
+    return Number(value.toFixed(precision));
+  }
+  return Number(value.toPrecision(15));
 }
 
 function snapSliderValue(
@@ -61,10 +74,34 @@ function snapSliderValue(
   if (!Number.isFinite(raw)) {
     return fallback;
   }
+  if (max <= min) {
+    return min;
+  }
+  if (raw <= min) {
+    return min;
+  }
+  if (raw >= max) {
+    return max;
+  }
   const stepped = Math.round((raw - min) / step) * step + min;
-  const precision = getStepPrecision(step);
-  const rounded = precision > 0 ? Number(stepped.toFixed(precision)) : stepped;
+  const rounded = roundToStepPrecision(stepped, getStepPrecision(step));
   return Math.min(max, Math.max(min, rounded));
+}
+
+function stepSliderUp(current: number, min: number, max: number, step: number): number {
+  if (max <= min) {
+    return min;
+  }
+  const nextIndex = Math.floor((current - min) / step + 1e-9) + 1;
+  return snapSliderValue(min + nextIndex * step, min, max, step, current);
+}
+
+function stepSliderDown(current: number, min: number, max: number, step: number): number {
+  if (max <= min) {
+    return min;
+  }
+  const prevIndex = Math.ceil((current - min) / step - 1e-9) - 1;
+  return snapSliderValue(min + prevIndex * step, min, max, step, current);
 }
 
 function projectRelativeX(
@@ -130,13 +167,14 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
     const trackBorderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
 
     const safeMin = Number.isFinite(min) ? min : 0;
-    const safeMax = Number.isFinite(max) && max > safeMin ? max : safeMin + 1;
+    const safeMax = Number.isFinite(max) ? Math.max(safeMin, max) : safeMin;
     const safeRange = safeMax - safeMin;
     const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
     const clampedValue = Number.isFinite(value)
       ? Math.min(safeMax, Math.max(safeMin, value))
       : safeMin;
-    const ratio = Math.min(1, Math.max(0, (clampedValue - safeMin) / safeRange));
+    const ratio =
+      safeRange > 0 ? Math.min(1, Math.max(0, (clampedValue - safeMin) / safeRange)) : 0;
 
     const [trackWidth, setTrackWidth] = useState(0);
     const trackNodeRef = useRef<ComponentRef<typeof View> | null>(null);
@@ -247,7 +285,11 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
 
           if (trackPageX !== null && Number.isFinite(pageX)) {
             updateFromRelativeX(pageX - trackPageX, width);
-          } else if (Number.isFinite(pageX) && !Number.isFinite(locationX)) {
+          } else if (
+            typeof trackNodeRef.current?.measureInWindow !== "function" &&
+            Number.isFinite(pageX) &&
+            !Number.isFinite(locationX)
+          ) {
             updateFromRelativeX(pageX, width);
           } else if (Number.isFinite(locationX)) {
             updateFromRelativeX(locationX, width);
@@ -255,7 +297,6 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
         };
 
         if (measureFirst && typeof trackNodeRef.current?.measureInWindow === "function") {
-          let handledSynchronously = false;
           trackNodeRef.current.measureInWindow((x, _y, measuredWidth) => {
             if (Number.isFinite(measuredWidth) && measuredWidth > 0) {
               const resolvedPageX = Number.isFinite(x) ? x : 0;
@@ -263,15 +304,15 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
                 pageX: resolvedPageX,
                 width: measuredWidth,
               };
-              handledSynchronously = true;
-              if (gestureSeqRef.current === capturedSeq && Number.isFinite(pageX)) {
-                updateFromRelativeX(pageX - resolvedPageX, measuredWidth);
+              if (gestureSeqRef.current === capturedSeq) {
+                if (Number.isFinite(pageX)) {
+                  updateFromRelativeX(pageX - resolvedPageX, measuredWidth);
+                } else if (Number.isFinite(locationX)) {
+                  updateFromRelativeX(locationX, measuredWidth);
+                }
               }
             }
           });
-          if (!handledSynchronously) {
-            projectWithCurrentMetrics();
-          }
           return;
         }
 
@@ -337,22 +378,15 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
         if (current.disabled) return;
         if (event.nativeEvent.actionName === "increment") {
           commitValue(
-            snapSliderValue(
-              current.clampedValue + current.safeStep,
-              current.safeMin,
-              current.safeMax,
-              current.safeStep,
-              current.clampedValue,
-            ),
+            stepSliderUp(current.clampedValue, current.safeMin, current.safeMax, current.safeStep),
           );
         } else if (event.nativeEvent.actionName === "decrement") {
           commitValue(
-            snapSliderValue(
-              current.clampedValue - current.safeStep,
+            stepSliderDown(
+              current.clampedValue,
               current.safeMin,
               current.safeMax,
               current.safeStep,
-              current.clampedValue,
             ),
           );
         }
@@ -368,7 +402,11 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
           trackLayoutRef.current = { pageX: rect.left, width: rect.width };
         }
         if (typeof event.pointerId === "number") {
-          event.currentTarget?.setPointerCapture?.(event.pointerId);
+          try {
+            event.currentTarget?.setPointerCapture?.(event.pointerId);
+          } catch {
+            // Ignore synthetic or detached pointer capture errors
+          }
         }
         isWebDraggingRef.current = true;
         if (typeof event.clientX === "number" && Number.isFinite(event.clientX)) {
@@ -397,9 +435,21 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
     );
 
     const handleWebPointerUp = useCallback((event: WebPointerEventLike) => {
-      if (isWebDraggingRef.current && typeof event.pointerId === "number") {
-        event.currentTarget?.releasePointerCapture?.(event.pointerId);
+      const wasDragging = isWebDraggingRef.current;
+      isWebDraggingRef.current = false;
+      if (wasDragging && typeof event.pointerId === "number") {
+        try {
+          const target = event.currentTarget;
+          if (!target?.hasPointerCapture || target.hasPointerCapture(event.pointerId)) {
+            target?.releasePointerCapture?.(event.pointerId);
+          }
+        } catch {
+          // Ignore NotFoundError if pointer capture was already released
+        }
       }
+    }, []);
+
+    const handleWebLostPointerCapture = useCallback(() => {
       isWebDraggingRef.current = false;
     }, []);
 
@@ -420,32 +470,46 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
           Math.round(rawPageStep / current.safeStep) * current.safeStep,
         );
 
-        let target: number | null = null;
+        let nextValue: number | null = null;
         if (key === "ArrowRight" || key === "ArrowUp") {
-          target = current.clampedValue + current.safeStep;
+          nextValue = stepSliderUp(
+            current.clampedValue,
+            current.safeMin,
+            current.safeMax,
+            current.safeStep,
+          );
         } else if (key === "ArrowLeft" || key === "ArrowDown") {
-          target = current.clampedValue - current.safeStep;
+          nextValue = stepSliderDown(
+            current.clampedValue,
+            current.safeMin,
+            current.safeMax,
+            current.safeStep,
+          );
         } else if (key === "PageUp") {
-          target = current.clampedValue + pageStep;
+          nextValue = snapSliderValue(
+            current.clampedValue + pageStep,
+            current.safeMin,
+            current.safeMax,
+            current.safeStep,
+            current.clampedValue,
+          );
         } else if (key === "PageDown") {
-          target = current.clampedValue - pageStep;
+          nextValue = snapSliderValue(
+            current.clampedValue - pageStep,
+            current.safeMin,
+            current.safeMax,
+            current.safeStep,
+            current.clampedValue,
+          );
         } else if (key === "Home") {
-          target = current.safeMin;
+          nextValue = current.safeMin;
         } else if (key === "End") {
-          target = current.safeMax;
+          nextValue = current.safeMax;
         }
 
-        if (target !== null) {
+        if (nextValue !== null) {
           event.preventDefault?.();
-          commitValue(
-            snapSliderValue(
-              target,
-              current.safeMin,
-              current.safeMax,
-              current.safeStep,
-              current.clampedValue,
-            ),
-          );
+          commitValue(nextValue);
         }
       },
       [commitValue],
@@ -474,6 +538,7 @@ export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
             onPointerMove: handleWebPointerMove,
             onPointerUp: handleWebPointerUp,
             onPointerCancel: handleWebPointerUp,
+            onLostPointerCapture: handleWebLostPointerCapture,
             onKeyDown: handleWebKeyDown,
           } as Record<string, unknown>)
         : panResponder.panHandlers;

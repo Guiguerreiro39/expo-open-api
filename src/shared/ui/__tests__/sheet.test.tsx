@@ -1,4 +1,5 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { useState } from "react";
 import { Platform, Pressable, Text } from "react-native";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -28,6 +29,24 @@ function SheetHarness() {
         <SheetFooter>
           <Text>Footer Action</Text>
         </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function GuardedSheetHarness() {
+  const [blockedCount, setBlockedCount] = useState(0);
+  return (
+    <Sheet
+      open
+      onOpenChange={(next) => {
+        if (!next) {
+          setBlockedCount((count) => count + 1);
+        }
+      }}
+    >
+      <SheetContent testID="controlled-sheet">
+        <SheetTitle>{`Unsaved Draft (${blockedCount})`}</SheetTitle>
       </SheetContent>
     </Sheet>
   );
@@ -133,5 +152,23 @@ describe("Sheet primitive", () => {
     } finally {
       Object.defineProperty(Platform, "OS", { configurable: true, value: originalOS });
     }
+  });
+
+  it("springs translateY back to 0 when a controlled parent blocks swipe-down dismissal", () => {
+    const { observability } = renderWithProviders(<GuardedSheetHarness />);
+    const handle = screen.getByTestId("sheet-grab-handle");
+
+    act(() => {
+      handle.props.onResponderGrant?.({}, { dx: 0, dy: 0, vx: 0, vy: 0 });
+      handle.props.onResponderMove?.({}, { dx: 0, dy: 140, vx: 0, vy: 0.4 });
+      handle.props.onResponderRelease?.({}, { dx: 0, dy: 140, vx: 0, vy: 0.4 });
+    });
+
+    const updatedOverlay = screen.getByTestId("sheet-overlay");
+    const updatedAnimatedWrapper = updatedOverlay.children[0] as { props?: { style?: unknown } };
+    const serializedStyle = JSON.stringify(updatedAnimatedWrapper?.props?.style);
+    expect(serializedStyle).not.toContain('"translateY":360');
+    expect(serializedStyle).toContain('"translateY":0');
+    observability.assertNoDefects();
   });
 });

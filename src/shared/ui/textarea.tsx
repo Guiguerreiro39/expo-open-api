@@ -6,7 +6,7 @@ import {
   resolveThemeColor,
   type ThemePreset,
 } from "@/shared/lib/theme/presets";
-import { cn } from "@/shared/lib/utils";
+import { cn, resolvePresetBorderOverride } from "@/shared/lib/utils";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
 
 const PRESET_TEXTAREA_RADIUS: Record<ThemePreset, string> = {
@@ -44,7 +44,9 @@ export const Textarea = forwardRef<ComponentRef<typeof TextInput>, TextareaProps
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
     const resolvedScheme = theme?.resolvedColorScheme ?? "light";
     const elevation = getThemeElevation(preset, resolvedScheme);
-    const borderWidthClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+    const enforcedBorderClass = resolvePresetBorderOverride(className, elevation.borderWidth, {
+      applyDefault: true,
+    });
 
     const resolvedPlaceholderColor =
       placeholderTextColor ?? resolveThemeColor(preset, resolvedScheme, "on-surface-variant");
@@ -62,13 +64,13 @@ export const Textarea = forwardRef<ComponentRef<typeof TextInput>, TextareaProps
         style={platformStyle ? [platformStyle, style] : style}
         className={cn(
           PRESET_TEXTAREA_RADIUS[preset],
-          borderWidthClass,
           "bg-surface-container-lowest text-body-md text-foreground min-h-24 px-4 py-3 font-sans outline-none",
           invalid
             ? "border-destructive focus:border-destructive"
             : "border-outline focus:border-primary",
           !editable && "opacity-50",
           className,
+          enforcedBorderClass,
         )}
         {...props}
       />
