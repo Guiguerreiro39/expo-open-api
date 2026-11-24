@@ -1,5 +1,6 @@
 import { fireEvent, waitFor } from "@testing-library/react-native";
 import { http } from "msw";
+import { ScrollView } from "react-native";
 import { describe, expect, it } from "vitest";
 import { LoginScreen } from "@/features/auth/ui/login-screen";
 import { RegisterScreen } from "@/features/auth/ui/register-screen";
@@ -143,5 +144,150 @@ describe("LoginScreen and RegisterScreen", () => {
     await waitFor(() => {
       expect(getByText("Email is already registered")).toBeTruthy();
     });
+
+    // Editing email clears the 422 server validation error via FormControl
+    fireEvent.changeText(getByLabelText("Email"), "fresh@example.com");
+    await waitFor(() => {
+      expect(getByLabelText("Email").props.accessibilityState).toMatchObject({
+        invalid: false,
+      });
+    });
+  });
+
+  it("uses top-anchored FormScrollView with keyboardDismissMode='on-drag' and accessible password toggle on LoginScreen", () => {
+    const { getByLabelText, getByRole, UNSAFE_getByType } = renderWithProviders(<LoginScreen />, {
+      user: null,
+    });
+
+    const scrollView = UNSAFE_getByType(ScrollView);
+    expect(scrollView.props.keyboardDismissMode).toBe("on-drag");
+    expect(scrollView.props.keyboardShouldPersistTaps).toBe("handled");
+    expect(String(scrollView.props.contentContainerClassName ?? "")).not.toContain(
+      "justify-center",
+    );
+
+    const passwordInput = getByLabelText("Password");
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+
+    const showButton = getByRole("button", { name: "Show password" });
+    expect(String(showButton.props.className ?? "")).toContain("min-h-11");
+    expect(String(showButton.props.className ?? "")).toContain("min-w-11");
+
+    fireEvent.press(showButton);
+    expect(getByLabelText("Password").props.secureTextEntry).toBe(false);
+
+    const hideButton = getByRole("button", { name: "Hide password" });
+    fireEvent.press(hideButton);
+    expect(getByLabelText("Password").props.secureTextEntry).toBe(true);
+  });
+
+  it("chains keyboard return keys from Email to Password and submits on Password done on LoginScreen", async () => {
+    const { getByLabelText, credentialStore, observability } = renderWithProviders(
+      <LoginScreen />,
+      { user: null },
+    );
+
+    const emailInput = getByLabelText("Email");
+    const passwordInput = getByLabelText("Password");
+
+    expect(emailInput.props.returnKeyType).toBe("next");
+    expect(passwordInput.props.returnKeyType).toBe("done");
+
+    const passwordRef = passwordInput.props.ref as { current: { focus: unknown } };
+    expect(passwordRef.current).toBeTruthy();
+
+    fireEvent.changeText(emailInput, "ada@example.com");
+    fireEvent(emailInput, "submitEditing");
+    expect(passwordRef.current.focus).toHaveBeenCalledTimes(1);
+
+    fireEvent.changeText(passwordInput, "password123");
+    fireEvent(passwordInput, "submitEditing");
+
+    await waitFor(async () => {
+      expect(await credentialStore.getItem(BEARER_TOKEN_STORAGE_KEY)).toBe("token-user-1");
+    });
+    observability.assertNoDefects();
+  });
+
+  it("prevents concurrent double submissions on LoginScreen while request is in flight", async () => {
+    let requestCount = 0;
+    let releaseRequest!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseRequest = resolve;
+    });
+
+    server.use(
+      http.post(`${TEST_API_BASE}/api/auth/sign-in/email`, async () => {
+        requestCount += 1;
+        await gate;
+        return honoErrorResponse(401, "UNAUTHORIZED", "Invalid email or password");
+      }),
+    );
+
+    const { getByLabelText, getByText, observability } = renderWithProviders(<LoginScreen />, {
+      user: null,
+    });
+
+    fireEvent.changeText(getByLabelText("Email"), "ada@example.com");
+    fireEvent.changeText(getByLabelText("Password"), "password123");
+
+    const submitBtn = getByText("Sign In");
+    fireEvent.press(submitBtn);
+    fireEvent.press(submitBtn);
+
+    await waitFor(() => {
+      expect(requestCount).toBe(1);
+    });
+
+    releaseRequest();
+    await waitFor(() => {
+      expect(getByText("Invalid email or password")).toBeTruthy();
+    });
+    observability.assertNoDefects();
+  });
+
+  it("uses top-anchored FormScrollView, chains Name -> Email -> Password -> submit, and toggles password visibility on RegisterScreen", async () => {
+    const { getByLabelText, getByRole, UNSAFE_getByType, credentialStore, observability } =
+      renderWithProviders(<RegisterScreen />, { user: null });
+
+    const scrollView = UNSAFE_getByType(ScrollView);
+    expect(scrollView.props.keyboardDismissMode).toBe("on-drag");
+    expect(scrollView.props.keyboardShouldPersistTaps).toBe("handled");
+    expect(String(scrollView.props.contentContainerClassName ?? "")).not.toContain(
+      "justify-center",
+    );
+
+    const nameInput = getByLabelText("Full name");
+    const emailInput = getByLabelText("Email");
+    const passwordInput = getByLabelText("Password");
+
+    expect(nameInput.props.returnKeyType).toBe("next");
+    expect(emailInput.props.returnKeyType).toBe("next");
+    expect(passwordInput.props.returnKeyType).toBe("done");
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+
+    fireEvent.press(getByRole("button", { name: "Show password" }));
+    expect(getByLabelText("Password").props.secureTextEntry).toBe(false);
+
+    const emailRef = emailInput.props.ref as { current: { focus: unknown } };
+    const passwordRef = passwordInput.props.ref as { current: { focus: unknown } };
+    expect(emailRef.current).toBeTruthy();
+    expect(passwordRef.current).toBeTruthy();
+
+    fireEvent.changeText(nameInput, "Grace Hopper");
+    fireEvent(nameInput, "submitEditing");
+    expect(emailRef.current.focus).toHaveBeenCalledTimes(1);
+
+    fireEvent.changeText(emailInput, "grace@example.com");
+    fireEvent(emailInput, "submitEditing");
+    expect(passwordRef.current.focus).toHaveBeenCalledTimes(1);
+
+    fireEvent.changeText(passwordInput, "password123");
+    fireEvent(passwordInput, "submitEditing");
+
+    await waitFor(async () => {
+      expect(await credentialStore.getItem(BEARER_TOKEN_STORAGE_KEY)).toBe("token-user-new");
+    });
+    observability.assertNoDefects();
   });
 });

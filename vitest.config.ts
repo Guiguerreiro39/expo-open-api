@@ -134,6 +134,13 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-web-browser.ts"),
       },
       {
+        find: "expo-router/react-navigation",
+        replacement: path.resolve(
+          __dirname,
+          "src/test/mocks/adapters/mock-expo-router-react-navigation.ts",
+        ),
+      },
+      {
         find: "expo-router",
         replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-router.tsx"),
       },
