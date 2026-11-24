@@ -1,6 +1,6 @@
 {
   "name": "expo-open-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "main": "expo-router/entry",
   "packageManager": "pnpm@11.17.0",
