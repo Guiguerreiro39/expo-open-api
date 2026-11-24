@@ -1,6 +1,6 @@
 import * as AlertDialogPrimitive from "@rn-primitives/alert-dialog";
 import { forwardRef, type ReactNode } from "react";
-import { StyleSheet, View, type ViewProps } from "react-native";
+import { View, type ViewProps } from "react-native";
 import {
   DEFAULT_THEME_PRESET,
   getThemeElevation,
@@ -10,6 +10,7 @@ import { cn } from "@/shared/lib/utils";
 import { buttonTextVariants, buttonVariants } from "@/shared/ui/button";
 import { Text, TextClassContext } from "@/shared/ui/text";
 import { useOptionalTheme } from "@/shared/ui/theme-provider";
+import { getOverlayFillStyle, getWebClickGuardProps } from "@/shared/ui/web-overlay";
 
 const PRESET_ALERT_DIALOG_RADIUS: Record<ThemePreset, string> = {
   "warm-tactile": "rounded-2xl",
@@ -17,9 +18,25 @@ const PRESET_ALERT_DIALOG_RADIUS: Record<ThemePreset, string> = {
   "neo-brutalist": "rounded-sm",
 };
 
+const PRESET_ACTION_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-xl",
+  "editorial-slate": "rounded-lg",
+  "neo-brutalist": "rounded-sm",
+};
+
 export const AlertDialog = AlertDialogPrimitive.Root;
-export const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 export const AlertDialogPortal = AlertDialogPrimitive.Portal;
+
+export const AlertDialogTrigger = forwardRef<
+  AlertDialogPrimitive.TriggerRef,
+  AlertDialogPrimitive.TriggerProps
+>((props, ref) => {
+  const webProps = getWebClickGuardProps(props);
+
+  return <AlertDialogPrimitive.Trigger ref={ref} {...props} {...webProps} />;
+});
+
+AlertDialogTrigger.displayName = "AlertDialogTrigger";
 
 export interface AlertDialogOverlayProps extends AlertDialogPrimitive.OverlayProps {
   className?: string;
@@ -28,11 +45,15 @@ export interface AlertDialogOverlayProps extends AlertDialogPrimitive.OverlayPro
 export const AlertDialogOverlay = forwardRef<
   AlertDialogPrimitive.OverlayRef,
   AlertDialogOverlayProps
->(({ className, ...props }, ref) => (
+>(({ className, style, ...props }, ref) => (
   <AlertDialogPrimitive.Overlay
     ref={ref}
-    style={StyleSheet.absoluteFill}
-    className={cn("bg-foreground/50 z-50 items-center justify-center p-4", className)}
+    testID="alert-dialog-overlay"
+    style={[getOverlayFillStyle(), style]}
+    className={cn(
+      "bg-scrim/55 web:fixed web:inset-0 z-50 flex items-center justify-center p-4",
+      className,
+    )}
     {...props}
   />
 ));
@@ -62,7 +83,7 @@ export const AlertDialogContent = forwardRef<
           className={cn(
             PRESET_ALERT_DIALOG_RADIUS[preset],
             borderClass,
-            "border-outline-variant bg-card w-full max-w-md gap-4 p-6",
+            "border-outline-variant bg-card web:w-[calc(100vw-2rem)] w-full max-w-md gap-4 p-6",
             className,
           )}
           style={[{ boxShadow: elevation.boxShadow }, style]}
@@ -122,25 +143,36 @@ export interface AlertDialogActionProps extends Omit<AlertDialogPrimitive.Action
 }
 
 export const AlertDialogAction = forwardRef<AlertDialogPrimitive.ActionRef, AlertDialogActionProps>(
-  ({ className, children, ...props }, ref) => (
-    <TextClassContext.Provider value={buttonTextVariants({ variant: "destructive", size: "sm" })}>
-      <AlertDialogPrimitive.Action
-        ref={ref}
-        className={cn(
-          buttonVariants({ variant: "destructive", size: "sm" }),
-          "rounded-xl border",
-          className,
-        )}
-        {...props}
-      >
-        {typeof children === "string" || typeof children === "number" ? (
-          <Text>{children}</Text>
-        ) : (
-          children
-        )}
-      </AlertDialogPrimitive.Action>
-    </TextClassContext.Provider>
-  ),
+  ({ className, children, ...props }, ref) => {
+    const theme = useOptionalTheme();
+    const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const resolvedScheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, resolvedScheme);
+    const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+    const webProps = getWebClickGuardProps(props);
+
+    return (
+      <TextClassContext.Provider value={buttonTextVariants({ variant: "destructive", size: "sm" })}>
+        <AlertDialogPrimitive.Action
+          ref={ref}
+          className={cn(
+            buttonVariants({ variant: "destructive", size: "sm" }),
+            PRESET_ACTION_RADIUS[preset],
+            borderClass,
+            className,
+          )}
+          {...props}
+          {...webProps}
+        >
+          {typeof children === "string" || typeof children === "number" ? (
+            <Text>{children}</Text>
+          ) : (
+            children
+          )}
+        </AlertDialogPrimitive.Action>
+      </TextClassContext.Provider>
+    );
+  },
 );
 
 AlertDialogAction.displayName = "AlertDialogAction";
@@ -151,25 +183,36 @@ export interface AlertDialogCancelProps extends Omit<AlertDialogPrimitive.Cancel
 }
 
 export const AlertDialogCancel = forwardRef<AlertDialogPrimitive.CancelRef, AlertDialogCancelProps>(
-  ({ className, children, ...props }, ref) => (
-    <TextClassContext.Provider value={buttonTextVariants({ variant: "outline", size: "sm" })}>
-      <AlertDialogPrimitive.Cancel
-        ref={ref}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "rounded-xl border",
-          className,
-        )}
-        {...props}
-      >
-        {typeof children === "string" || typeof children === "number" ? (
-          <Text>{children}</Text>
-        ) : (
-          children
-        )}
-      </AlertDialogPrimitive.Cancel>
-    </TextClassContext.Provider>
-  ),
+  ({ className, children, ...props }, ref) => {
+    const theme = useOptionalTheme();
+    const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const resolvedScheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, resolvedScheme);
+    const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+    const webProps = getWebClickGuardProps(props);
+
+    return (
+      <TextClassContext.Provider value={buttonTextVariants({ variant: "outline", size: "sm" })}>
+        <AlertDialogPrimitive.Cancel
+          ref={ref}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            PRESET_ACTION_RADIUS[preset],
+            borderClass,
+            className,
+          )}
+          {...props}
+          {...webProps}
+        >
+          {typeof children === "string" || typeof children === "number" ? (
+            <Text>{children}</Text>
+          ) : (
+            children
+          )}
+        </AlertDialogPrimitive.Cancel>
+      </TextClassContext.Provider>
+    );
+  },
 );
 
 AlertDialogCancel.displayName = "AlertDialogCancel";
