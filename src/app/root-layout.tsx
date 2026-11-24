@@ -15,7 +15,7 @@ import { createSecureStoreCredentialStore } from "@/shared/storage/credential-st
 import { CredentialStoreContext } from "@/shared/storage/credential-store-context";
 import { createMmkvKvStore } from "@/shared/storage/kv-store";
 import { ThemeProvider, useTheme } from "@/shared/ui/theme-provider";
-import { ToastProvider } from "@/shared/ui/toast";
+import { TOAST_PORTAL_HOST, ToastProvider } from "@/shared/ui/toast";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -82,6 +82,7 @@ export function RootLayout() {
                 <ToastProvider>
                   <RootNavigator />
                   <PortalHost />
+                  <PortalHost name={TOAST_PORTAL_HOST} />
                 </ToastProvider>
               </ThemeProvider>
             </AuthBootstrapContext.Provider>

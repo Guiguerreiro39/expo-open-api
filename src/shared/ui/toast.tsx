@@ -10,8 +10,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { Pressable, View } from "react-native";
-import { DEFAULT_THEME_PRESET, getThemeElevation } from "@/shared/lib/theme/presets";
+import { Platform, Pressable, View, type ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
 import { Text } from "@/shared/ui/text";
@@ -42,7 +47,16 @@ export interface ToastContextValue {
   dismissAll: () => void;
 }
 
+export const TOAST_PORTAL_HOST = "toast-portal";
+
 const DEFAULT_DURATION_MS = 4000;
+const MAX_VISIBLE_TOASTS = 3;
+
+const PRESET_TOAST_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-xl",
+  "editorial-slate": "rounded-lg",
+  "neo-brutalist": "rounded-sm",
+};
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
@@ -78,7 +92,7 @@ export interface ToastProviderProps {
   portalHost?: string;
 }
 
-export function ToastProvider({ children, portalHost }: ToastProviderProps) {
+export function ToastProvider({ children, portalHost = TOAST_PORTAL_HOST }: ToastProviderProps) {
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const counterRef = useRef(0);
   const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -127,8 +141,6 @@ export function ToastProvider({ children, portalHost }: ToastProviderProps) {
         variant: input.variant ?? "default",
       };
 
-      setToasts((prev) => [...prev.slice(-2), record]);
-
       const duration = input.durationMs ?? DEFAULT_DURATION_MS;
       if (duration > 0) {
         const timer = setTimeout(() => {
@@ -137,9 +149,21 @@ export function ToastProvider({ children, portalHost }: ToastProviderProps) {
         timersRef.current.set(id, timer);
       }
 
+      setToasts((prev) => {
+        const next = [...prev, record];
+        if (next.length > MAX_VISIBLE_TOASTS) {
+          const evicted = next.slice(0, next.length - MAX_VISIBLE_TOASTS);
+          for (const item of evicted) {
+            clearTimer(item.id);
+          }
+          return next.slice(-MAX_VISIBLE_TOASTS);
+        }
+        return next;
+      });
+
       return id;
     },
-    [dismiss],
+    [clearTimer, dismiss],
   );
 
   const success = useCallback(
@@ -184,22 +208,37 @@ export function ToastProvider({ children, portalHost }: ToastProviderProps) {
   );
 }
 
-export function ToastViewport({ portalHost }: { portalHost?: string }) {
+export function ToastViewport({ portalHost = TOAST_PORTAL_HOST }: { portalHost?: string }) {
   const context = useContext(ToastContext);
+  const insets = useSafeAreaInsets();
   const theme = useOptionalTheme();
   const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
   const resolvedScheme = theme?.resolvedColorScheme ?? "light";
   const elevation = getThemeElevation(preset, resolvedScheme);
+  const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
 
   if (!context || context.toasts.length === 0) {
     return null;
   }
 
+  const topOffset = insets.top + 12;
+  const viewportStyle: ViewStyle =
+    Platform.OS === "web"
+      ? ({
+          position: "fixed",
+          top: topOffset,
+        } as unknown as ViewStyle)
+      : {
+          top: topOffset,
+        };
+
   return (
     <Portal name="toast-viewport" hostName={portalHost}>
       <View
+        testID="toast-viewport"
         pointerEvents="box-none"
-        className="absolute right-4 bottom-6 left-4 z-50 gap-2"
+        className="web:mx-auto web:max-w-md absolute right-4 left-4 z-50 gap-2"
+        style={viewportStyle}
         accessibilityLiveRegion="polite"
       >
         {context.toasts.map((item) => (
@@ -207,7 +246,9 @@ export function ToastViewport({ portalHost }: { portalHost?: string }) {
             key={item.id}
             accessibilityRole="alert"
             className={cn(
-              "flex-row items-start gap-3 rounded-xl border px-4 py-3",
+              PRESET_TOAST_RADIUS[preset],
+              borderClass,
+              "flex-row items-start gap-3 px-4 py-3",
               TOAST_CONTAINER_STYLES[item.variant],
             )}
             style={{ boxShadow: elevation.boxShadow }}
@@ -228,7 +269,7 @@ export function ToastViewport({ portalHost }: { portalHost?: string }) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Dismiss notification"
-              hitSlop={8}
+              hitSlop={12}
               onPress={() => context.dismiss(item.id)}
               className="p-0.5"
             >
