@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useState } from "react";
+import { type ComponentRef, forwardRef, useCallback, useState } from "react";
 import {
   type GestureResponderEvent,
   type LayoutChangeEvent,
@@ -22,7 +22,7 @@ export interface SliderProps extends Omit<ViewProps, "children"> {
   accessibilityLabel?: string;
 }
 
-export const Slider = forwardRef<View, SliderProps>(
+export const Slider = forwardRef<ComponentRef<typeof View>, SliderProps>(
   (
     {
       value,

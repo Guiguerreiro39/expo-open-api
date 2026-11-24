@@ -36,7 +36,7 @@ export const PopoverContent = forwardRef<PopoverPrimitive.ContentRef, PopoverCon
                   "border-outline-variant bg-popover z-50 w-72 rounded-xl border p-4",
                   className,
                 )}
-                style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style])}
+                style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style]) ?? undefined}
                 {...props}
               >
                 {typeof children === "string" || typeof children === "number" ? (

@@ -31,6 +31,18 @@ function transformRnEcosystemJsx() {
     async transform(code: string, id: string) {
       const cleanId = id.split("?")[0] ?? id;
       if (
+        cleanId.endsWith("src/shared/storage/kv-store.ts") &&
+        code.includes('require("react-native-mmkv")')
+      ) {
+        return {
+          code: `import * as __vitestMmkv from "react-native-mmkv";\n${code.replaceAll(
+            'require("react-native-mmkv")',
+            "__vitestMmkv",
+          )}`,
+          map: null,
+        };
+      }
+      if (
         cleanId.includes("node_modules/@rn-primitives/") &&
         (cleanId.endsWith(".js") || cleanId.endsWith(".mjs"))
       ) {
@@ -67,6 +79,10 @@ export default defineConfig({
       "expo-splash-screen": path.resolve(
         __dirname,
         "src/test/mocks/adapters/mock-expo-splash-screen.ts",
+      ),
+      "expo-file-system/legacy": path.resolve(
+        __dirname,
+        "src/test/mocks/adapters/mock-expo-file-system.ts",
       ),
       "expo-file-system": path.resolve(
         __dirname,

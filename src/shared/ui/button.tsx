@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ReactNode } from "react";
-import type { View } from "react-native";
+import { type ComponentRef, forwardRef, type ReactNode } from "react";
 import { DEFAULT_THEME_PRESET, type ThemePreset } from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { TactilePressable, type TactilePressableProps } from "@/shared/ui/tactile-pressable";
@@ -66,7 +65,7 @@ export interface ButtonProps
   textClassName?: string;
 }
 
-export const Button = forwardRef<View, ButtonProps>(
+export const Button = forwardRef<ComponentRef<typeof TactilePressable>, ButtonProps>(
   (
     {
       className,

@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef } from "react";
+import { type ComponentRef, forwardRef } from "react";
 import { View, type ViewProps } from "react-native";
 import { cn } from "@/shared/lib/utils";
 import { Text, TextClassContext, type TextProps } from "@/shared/ui/text";
@@ -38,7 +38,7 @@ export interface AlertProps extends ViewProps, VariantProps<typeof alertVariants
   className?: string;
 }
 
-export const Alert = forwardRef<View, AlertProps>(
+export const Alert = forwardRef<ComponentRef<typeof View>, AlertProps>(
   ({ className, variant = "default", ...props }, ref) => (
     <TextClassContext.Provider value={alertTextVariants({ variant })}>
       <View

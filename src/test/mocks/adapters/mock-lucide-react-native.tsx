@@ -1,7 +1,7 @@
-import { createElement, forwardRef } from "react";
+import { type ComponentRef, createElement, forwardRef } from "react";
 import { View } from "react-native";
 
-const MockIconBase = forwardRef<View, Record<string, unknown>>((props, ref) =>
+const MockIconBase = forwardRef<ComponentRef<typeof View>, Record<string, unknown>>((props, ref) =>
   createElement(View, { ...props, ref }),
 );
 MockIconBase.displayName = "MockLucideIcon";

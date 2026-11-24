@@ -81,11 +81,18 @@ export class MMKV {
     return this.store.has(key);
   }
 
-  delete(key: string): void {
-    this.store.delete(key);
-    for (const listener of this.listeners) {
-      listener(key);
+  remove(key: string): boolean {
+    const existed = this.store.delete(key);
+    if (existed) {
+      for (const listener of this.listeners) {
+        listener(key);
+      }
     }
+    return existed;
+  }
+
+  delete(key: string): void {
+    this.remove(key);
   }
 
   getAllKeys(): string[] {
@@ -112,4 +119,8 @@ export class MMKV {
       },
     };
   }
+}
+
+export function createMMKV(configuration?: MockMmkvConfiguration): MMKV {
+  return new MMKV(configuration);
 }

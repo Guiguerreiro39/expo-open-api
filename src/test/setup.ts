@@ -23,6 +23,11 @@ beforeAll(() => {
     configurable: true,
     value: MockEventSource,
   });
+  Object.defineProperty(globalThis, "NitroModulesProxy", {
+    writable: true,
+    configurable: true,
+    value: {},
+  });
 });
 
 afterEach(() => {

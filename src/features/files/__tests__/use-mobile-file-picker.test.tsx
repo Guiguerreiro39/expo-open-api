@@ -15,6 +15,7 @@ describe("useMobileFilePicker", () => {
           uri: "file:///cache/quarterly-report.pdf",
           name: "quarterly-report.pdf",
           size: 4096,
+          lastModified: 1_700_000_000_000,
         },
       ],
     });

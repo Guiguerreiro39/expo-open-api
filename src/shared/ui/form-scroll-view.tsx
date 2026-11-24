@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { type ComponentRef, forwardRef } from "react";
 import {
   KeyboardAvoidingView,
   type KeyboardAvoidingViewProps,
@@ -16,7 +16,7 @@ export interface FormScrollViewProps extends ScrollViewProps {
   avoidingBehavior?: KeyboardAvoidingViewProps["behavior"];
 }
 
-export const FormScrollView = forwardRef<ScrollView, FormScrollViewProps>(
+export const FormScrollView = forwardRef<ComponentRef<typeof ScrollView>, FormScrollViewProps>(
   (
     {
       className,

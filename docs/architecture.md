@@ -6,7 +6,7 @@ This document specifies the runtime composition, Mobile Feature-Sliced Design (F
 
 ## 1. System Overview & ADR Index
 
-`expo-open-api` is a React Native (Expo SDK 52, New Architecture) starter kit paired with [`hono-open-api`](https://github.com/Guiguerreiro39/hono-open-api). It delivers end-to-end OpenAPI type safety, hardware-backed mobile authentication, offline-capable TanStack Query caching, realtime Server-Sent Events, and mock-free contract testing across iOS, Android, and web.
+`expo-open-api` is a React Native (Expo SDK 58, React Native 0.88, New Architecture) starter kit paired with [`hono-open-api`](https://github.com/Guiguerreiro39/hono-open-api). It delivers end-to-end OpenAPI type safety, hardware-backed mobile authentication, offline-capable TanStack Query caching, realtime Server-Sent Events, and mock-free contract testing across iOS, Android, and web.
 
 ### Architecture Decision Records (ADRs)
 

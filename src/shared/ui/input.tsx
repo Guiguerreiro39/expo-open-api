@@ -1,8 +1,8 @@
-import { forwardRef, useCallback, useState } from "react";
+import { type ComponentRef, forwardRef, useCallback, useState } from "react";
 import {
-  type NativeSyntheticEvent,
   TextInput,
-  type TextInputFocusEventData,
+  type TextInputBlurEvent,
+  type TextInputFocusEvent,
   type TextInputProps,
 } from "react-native";
 import {
@@ -24,7 +24,7 @@ export interface InputProps extends TextInputProps {
   invalid?: boolean;
 }
 
-export const Input = forwardRef<TextInput, InputProps>(
+export const Input = forwardRef<ComponentRef<typeof TextInput>, InputProps>(
   (
     {
       className,
@@ -43,7 +43,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     const [focused, setFocused] = useState(false);
 
     const handleFocus = useCallback(
-      (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      (event: TextInputFocusEvent) => {
         setFocused(true);
         onFocus?.(event);
       },
@@ -51,7 +51,7 @@ export const Input = forwardRef<TextInput, InputProps>(
     );
 
     const handleBlur = useCallback(
-      (event: NativeSyntheticEvent<TextInputFocusEventData>) => {
+      (event: TextInputBlurEvent) => {
         setFocused(false);
         onBlur?.(event);
       },

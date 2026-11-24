@@ -91,7 +91,7 @@ export function FileList({
               {isFetchingNextPage ? "Loading more..." : "Load More"}
             </Button>
           </View>
-        ) : null
+        ) : undefined
       }
       renderItem={({ item }) => {
         const isBusy = busyFileId === item.id;

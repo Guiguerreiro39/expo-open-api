@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { forwardRef, type ReactNode } from "react";
+import { type ComponentRef, forwardRef, type ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
 import { cn } from "@/shared/lib/utils";
 import { Text, TextClassContext } from "@/shared/ui/text";
@@ -46,7 +46,7 @@ export interface BadgeProps
   children?: ReactNode;
 }
 
-export const Badge = forwardRef<View, BadgeProps>(
+export const Badge = forwardRef<ComponentRef<typeof View>, BadgeProps>(
   ({ className, textClassName, variant = "default", children, ...props }, ref) => {
     const resolvedTextClass = cn(badgeTextVariants({ variant }), textClassName);
     const renderedChildren =

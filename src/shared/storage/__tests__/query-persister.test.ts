@@ -41,6 +41,20 @@ describe("createMmkvKvStore", () => {
     kv.delete("cached");
     expect(kv.getString("cached")).toBeUndefined();
   });
+
+  it("skips loading react-native-mmkv when NitroModules is unavailable (e.g. Expo Go)", () => {
+    const runtime = globalThis as { NitroModulesProxy?: unknown };
+    const previousProxy = runtime.NitroModulesProxy;
+    runtime.NitroModulesProxy = undefined;
+    try {
+      const kv = createMmkvKvStore({ id: "expo-go-mmkv" });
+      kv.set("theme", "editorial-slate");
+      expect(kv.getString("theme")).toBe("editorial-slate");
+      expect(mockMmkv.getStore("expo-go-mmkv").get("theme")).toBeUndefined();
+    } finally {
+      runtime.NitroModulesProxy = previousProxy;
+    }
+  });
 });
 
 describe("query-persister offline cache & auth exclusion invariant", () => {

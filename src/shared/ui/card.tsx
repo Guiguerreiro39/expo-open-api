@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { type ComponentRef, forwardRef } from "react";
 import { View, type ViewProps } from "react-native";
 import {
   DEFAULT_THEME_PRESET,
@@ -20,7 +20,7 @@ export interface CardProps extends ViewProps {
   elevated?: boolean;
 }
 
-export const Card = forwardRef<View, CardProps>(
+export const Card = forwardRef<ComponentRef<typeof View>, CardProps>(
   ({ className, style, elevated = true, ...props }, ref) => {
     const theme = useOptionalTheme();
     const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
@@ -53,9 +53,11 @@ export interface CardSectionProps extends ViewProps {
   className?: string;
 }
 
-export const CardHeader = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("flex-col gap-1.5 p-5", className)} {...props} />
-));
+export const CardHeader = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("flex-col gap-1.5 p-5", className)} {...props} />
+  ),
+);
 
 CardHeader.displayName = "CardHeader";
 
@@ -85,14 +87,18 @@ export const CardDescription = forwardRef<React.ComponentRef<typeof Text>, TextP
 
 CardDescription.displayName = "CardDescription";
 
-export const CardContent = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("px-5 pb-5", className)} {...props} />
-));
+export const CardContent = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("px-5 pb-5", className)} {...props} />
+  ),
+);
 
 CardContent.displayName = "CardContent";
 
-export const CardFooter = forwardRef<View, CardSectionProps>(({ className, ...props }, ref) => (
-  <View ref={ref} className={cn("flex-row items-center gap-3 px-5 pb-5", className)} {...props} />
-));
+export const CardFooter = forwardRef<ComponentRef<typeof View>, CardSectionProps>(
+  ({ className, ...props }, ref) => (
+    <View ref={ref} className={cn("flex-row items-center gap-3 px-5 pb-5", className)} {...props} />
+  ),
+);
 
 CardFooter.displayName = "CardFooter";

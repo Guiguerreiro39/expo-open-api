@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react";
+import { type ComponentRef, forwardRef, useEffect } from "react";
 import type { StyleProp, View, ViewProps, ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -15,7 +15,7 @@ export interface SkeletonProps extends Omit<ViewProps, "style"> {
   animate?: boolean;
 }
 
-export const Skeleton = forwardRef<View, SkeletonProps>(
+export const Skeleton = forwardRef<ComponentRef<typeof View>, SkeletonProps>(
   ({ className, style, animate = true, ...props }, ref) => {
     const opacity = useSharedValue(1);
 

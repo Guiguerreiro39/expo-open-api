@@ -1,6 +1,6 @@
 import * as Slot from "@rn-primitives/slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { createContext, forwardRef, useContext } from "react";
+import { type ComponentRef, createContext, forwardRef, useContext } from "react";
 import { Text as RNText, type TextProps as RNTextProps } from "react-native";
 import { cn } from "@/shared/lib/utils";
 
@@ -33,7 +33,7 @@ export interface TextProps extends RNTextProps, VariantProps<typeof textVariants
   className?: string;
 }
 
-export const Text = forwardRef<RNText, TextProps>(
+export const Text = forwardRef<ComponentRef<typeof RNText>, TextProps>(
   ({ className, variant, asChild = false, ...props }, ref) => {
     const inheritedClass = useContext(TextClassContext);
     const Component = asChild ? Slot.Text : RNText;

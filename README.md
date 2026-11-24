@@ -4,7 +4,7 @@ Production-ready React Native (Expo) mobile starter kit built on Expo Router, Ef
 
 ## Tech Stack Highlights
 
-- **Framework & Navigation**: [Expo SDK 52](https://expo.dev) (New Architecture, CNG Prebuild) + [Expo Router v4](https://docs.expo.dev/router/introduction/) with typed routes and pathless layout guards.
+- **Framework & Navigation**: [Expo SDK 58](https://expo.dev) (React Native 0.88, New Architecture, CNG Prebuild) + [Expo Router](https://docs.expo.dev/router/introduction/) with typed routes and pathless layout guards.
 - **State, Forms & Realtime**: [TanStack Query](https://tanstack.com/query) with MMKV offline persistence + SSE live queries (`eventsource-parser`) + [TanStack Form](https://tanstack.com/form) (`Schema.standardSchemaV1`).
 - **Contracts & Errors**: [Effect](https://effect.website) typed schemas, 11 status `Data.TaggedError` classes, and dual-target [Orval](https://orval.dev) v8 generation.
 - **Authentication & RBAC**: [Better Auth](https://better-auth.com) (`@better-auth/expo`) with `expo-secure-store` Bearer token cache and declarative `<Can />` authorization.

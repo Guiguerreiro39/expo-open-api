@@ -38,7 +38,7 @@ export const DropdownMenuContent = forwardRef<
               "border-outline-variant bg-popover z-50 min-w-56 rounded-xl border p-1.5",
               className,
             )}
-            style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style])}
+            style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style]) ?? undefined}
             {...props}
           />
         </View>

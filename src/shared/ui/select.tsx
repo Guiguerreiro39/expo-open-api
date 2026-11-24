@@ -103,7 +103,7 @@ export const SelectContent = forwardRef<SelectPrimitive.ContentRef, SelectConten
                 "border-outline-variant bg-popover z-50 w-full max-w-sm rounded-xl border p-1.5",
                 className,
               )}
-              style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style])}
+              style={StyleSheet.flatten([{ boxShadow: elevation.boxShadow }, style]) ?? undefined}
               {...props}
             >
               <SelectPrimitive.Viewport className="gap-1">{children}</SelectPrimitive.Viewport>

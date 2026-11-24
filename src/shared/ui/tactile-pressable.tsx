@@ -1,13 +1,12 @@
 import * as Haptics from "expo-haptics";
 import { cssInterop } from "nativewind";
-import { forwardRef, useCallback } from "react";
+import { type ComponentRef, forwardRef, useCallback } from "react";
 import {
   type GestureResponderEvent,
   Platform,
   Pressable,
   type PressableProps,
   type StyleProp,
-  type View,
   type ViewStyle,
 } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
@@ -30,7 +29,7 @@ export interface TactilePressableProps extends Omit<PressableProps, "style"> {
   hapticFeedback?: boolean;
 }
 
-export const TactilePressable = forwardRef<View, TactilePressableProps>(
+export const TactilePressable = forwardRef<ComponentRef<typeof Pressable>, TactilePressableProps>(
   (
     {
       className,

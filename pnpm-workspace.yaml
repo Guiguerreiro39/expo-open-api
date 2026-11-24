@@ -4,8 +4,3 @@ allowBuilds:
   lefthook: true
   esbuild: true
   msw: true
-
-packageExtensions:
-  expo-router:
-    dependencies:
-      query-string: "^7.1.3"
