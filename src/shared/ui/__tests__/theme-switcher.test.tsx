@@ -72,16 +72,49 @@ describe("ThemeSwitcher Widget", () => {
     expect(kvStore.getString(THEME_MODE_STORAGE_KEY)).toBe("light");
   });
 
-  it("preserves TactilePressable neo-brutalist border-2 on elevated preset and mode buttons", () => {
-    renderWithProviders(<ThemeSwitcher />, {
+  it("preserves constant neo-brutalist border-2 and preset radius across selected and unselected preset and mode buttons", () => {
+    const { observability } = renderWithProviders(<ThemeSwitcher />, {
       initialPreset: "neo-brutalist",
-      initialColorScheme: "light",
+      initialColorScheme: "dark",
     });
 
-    const brutalistButton = screen.getByRole("button", { name: /Neo-Brutalist Studio/i });
-    expect(brutalistButton.props.className).toContain("border-2");
+    const selectedPreset = screen.getByRole("button", { name: /Neo-Brutalist Studio/i });
+    const unselectedPreset = screen.getByRole("button", { name: /Warm Tactile Studio/i });
+    const selectedMode = screen.getByRole("button", { name: /^Dark$/i });
+    const unselectedMode = screen.getByRole("button", { name: /^Light$/i });
 
-    const lightModeButton = screen.getByRole("button", { name: /^Light$/i });
-    expect(lightModeButton.props.className).toContain("border-2");
+    for (const button of [selectedPreset, unselectedPreset, selectedMode, unselectedMode]) {
+      const classes = String(button.props.className).split(/\s+/);
+      expect(classes).toContain("border-2");
+      expect(classes).not.toContain("border");
+      expect(classes).toContain("rounded-sm");
+    }
+
+    // Selected preset uses contrast-safe semantic container tokens instead of low-contrast bg-primary-fixed/40
+    const selectedPresetClass = String(selectedPreset.props.className);
+    expect(selectedPresetClass).not.toContain("bg-primary-fixed");
+    expect(selectedPresetClass).toContain("bg-primary-container");
+
+    // Selected preset title and description both use on-primary-container for >= 4.5:1 dark/light contrast
+    expect(String(screen.getByText("Neo-Brutalist Studio").props.className)).toContain(
+      "text-on-primary-container",
+    );
+    expect(
+      String(
+        screen.getByText(
+          "High-contrast graphic surfaces, bold borders, hard offset shadows, and deep press.",
+        ).props.className,
+      ),
+    ).toContain("text-on-primary-container");
+
+    // Header and color-mode rows wrap cleanly on narrow 320-375px screens
+    expect(String(screen.getByTestId("theme-switcher-header").props.className)).toContain(
+      "flex-wrap",
+    );
+    expect(String(screen.getByTestId("theme-switcher-modes").props.className)).toContain(
+      "flex-wrap",
+    );
+
+    observability.assertNoDefects();
   });
 });

@@ -2,9 +2,21 @@ import * as AccordionPrimitive from "@rn-primitives/accordion";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import { forwardRef, type ReactNode } from "react";
 import { View } from "react-native";
+import {
+  DEFAULT_THEME_PRESET,
+  getThemeElevation,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
 import { Text, TextClassContext } from "@/shared/ui/text";
+import { useOptionalTheme } from "@/shared/ui/theme-provider";
+
+const PRESET_ACCORDION_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-xl",
+  "editorial-slate": "rounded-lg",
+  "neo-brutalist": "rounded-sm",
+};
 
 export type AccordionProps = AccordionPrimitive.RootProps & {
   className?: string;
@@ -23,16 +35,26 @@ export interface AccordionItemProps extends AccordionPrimitive.ItemProps {
 }
 
 export const AccordionItem = forwardRef<AccordionPrimitive.ItemRef, AccordionItemProps>(
-  ({ className, ...props }, ref) => (
-    <AccordionPrimitive.Item
-      ref={ref}
-      className={cn(
-        "border-outline-variant bg-surface-container-lowest overflow-hidden rounded-xl border",
-        className,
-      )}
-      {...props}
-    />
-  ),
+  ({ className, ...props }, ref) => {
+    const theme = useOptionalTheme();
+    const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const resolvedScheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, resolvedScheme);
+    const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+
+    return (
+      <AccordionPrimitive.Item
+        ref={ref}
+        className={cn(
+          "border-outline-variant bg-surface-container-lowest overflow-hidden",
+          PRESET_ACCORDION_RADIUS[preset],
+          borderClass,
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
 );
 
 AccordionItem.displayName = "AccordionItem";
@@ -81,21 +103,29 @@ export interface AccordionContentProps extends Omit<AccordionPrimitive.ContentPr
 }
 
 export const AccordionContent = forwardRef<AccordionPrimitive.ContentRef, AccordionContentProps>(
-  ({ className, children, ...props }, ref) => (
-    <TextClassContext.Provider value="text-body-sm text-on-surface-variant">
-      <AccordionPrimitive.Content
-        ref={ref}
-        className={cn("border-outline-variant/60 border-t px-4 py-3", className)}
-        {...props}
-      >
-        {typeof children === "string" || typeof children === "number" ? (
-          <Text>{children}</Text>
-        ) : (
-          children
-        )}
-      </AccordionPrimitive.Content>
-    </TextClassContext.Provider>
-  ),
+  ({ className, children, ...props }, ref) => {
+    const theme = useOptionalTheme();
+    const preset = theme?.preset ?? DEFAULT_THEME_PRESET;
+    const resolvedScheme = theme?.resolvedColorScheme ?? "light";
+    const elevation = getThemeElevation(preset, resolvedScheme);
+    const dividerBorderClass = elevation.borderWidth >= 2 ? "border-t-2" : "border-t";
+
+    return (
+      <TextClassContext.Provider value="text-body-sm text-on-surface-variant">
+        <AccordionPrimitive.Content
+          ref={ref}
+          className={cn("border-outline-variant/60 px-4 py-3", dividerBorderClass, className)}
+          {...props}
+        >
+          {typeof children === "string" || typeof children === "number" ? (
+            <Text>{children}</Text>
+          ) : (
+            children
+          )}
+        </AccordionPrimitive.Content>
+      </TextClassContext.Provider>
+    );
+  },
 );
 
 AccordionContent.displayName = "AccordionContent";
