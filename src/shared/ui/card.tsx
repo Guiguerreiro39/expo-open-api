@@ -15,6 +15,8 @@ const PRESET_CARD_RADIUS: Record<ThemePreset, string> = {
   "neo-brutalist": "rounded-sm",
 };
 
+const STANDALONE_BORDER_CLASS_REGEX = /(?:^|\s)border(?:\s|$)/;
+
 export interface CardProps extends ViewProps {
   className?: string;
   elevated?: boolean;
@@ -28,6 +30,10 @@ export const Card = forwardRef<ComponentRef<typeof View>, CardProps>(
     const elevation = getThemeElevation(preset, resolvedScheme);
 
     const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+    const preserveThickBorder =
+      elevation.borderWidth >= 2 &&
+      typeof className === "string" &&
+      STANDALONE_BORDER_CLASS_REGEX.test(className);
 
     return (
       <TextClassContext.Provider value="text-card-foreground">
@@ -38,6 +44,7 @@ export const Card = forwardRef<ComponentRef<typeof View>, CardProps>(
             borderClass,
             "border-outline-variant bg-card",
             className,
+            preserveThickBorder && "border-2",
           )}
           style={[elevated ? { boxShadow: elevation.boxShadow } : undefined, style]}
           {...props}

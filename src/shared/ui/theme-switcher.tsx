@@ -1,11 +1,23 @@
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react-native";
 import { View } from "react-native";
-import { THEME_PRESET_IDS, THEME_PRESETS, type ThemeMode } from "@/shared/lib/theme/presets";
+import {
+  getThemeElevation,
+  THEME_PRESET_IDS,
+  THEME_PRESETS,
+  type ThemeMode,
+  type ThemePreset,
+} from "@/shared/lib/theme/presets";
 import { cn } from "@/shared/lib/utils";
 import { Icon } from "@/shared/ui/icon";
 import { TactilePressable } from "@/shared/ui/tactile-pressable";
 import { Text } from "@/shared/ui/text";
 import { useTheme } from "@/shared/ui/theme-provider";
+
+const PRESET_TILE_RADIUS: Record<ThemePreset, string> = {
+  "warm-tactile": "rounded-xl",
+  "editorial-slate": "rounded-lg",
+  "neo-brutalist": "rounded-sm",
+};
 
 const COLOR_SCHEME_OPTIONS: ReadonlyArray<{
   mode: ThemeMode;
@@ -23,11 +35,17 @@ export interface ThemeSwitcherProps {
 
 export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   const { preset, setPreset, colorScheme, resolvedColorScheme, setColorScheme } = useTheme();
+  const elevation = getThemeElevation(preset, resolvedColorScheme);
+  const borderClass = elevation.borderWidth >= 2 ? "border-2" : "border";
+  const tileRadiusClass = PRESET_TILE_RADIUS[preset];
 
   return (
     <View className={cn("gap-4", className)}>
       <View className="gap-2">
-        <View className="flex-row items-center justify-between">
+        <View
+          testID="theme-switcher-header"
+          className="flex-row flex-wrap items-center justify-between gap-2"
+        >
           <View className="flex-row items-center gap-2">
             <Icon as={Palette} size={16} className="text-primary" />
             <Text variant="label">Theme Preset</Text>
@@ -51,26 +69,34 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 elevated={isSelected}
                 onPress={() => setPreset(presetId)}
                 className={cn(
-                  "flex-row items-center justify-between gap-3 rounded-xl px-4 py-3",
+                  "flex-row items-center justify-between gap-3 px-4 py-3",
+                  tileRadiusClass,
+                  borderClass,
                   isSelected
-                    ? "border-primary bg-primary-fixed/40"
-                    : "border-outline-variant bg-surface-container-lowest border",
+                    ? "border-primary bg-primary-container"
+                    : "border-outline-variant bg-surface-container-lowest",
                 )}
               >
-                <View className="flex-1 gap-0.5">
+                <View className="min-w-0 flex-1 gap-0.5">
                   <Text
                     variant="label"
-                    className={isSelected ? "text-primary font-bold" : "text-foreground"}
+                    className={
+                      isSelected ? "text-on-primary-container font-bold" : "text-foreground"
+                    }
                   >
                     {definition.label}
                   </Text>
-                  <Text variant="caption" numberOfLines={2}>
+                  <Text
+                    variant="caption"
+                    numberOfLines={2}
+                    className={isSelected ? "text-on-primary-container" : undefined}
+                  >
                     {definition.description}
                   </Text>
                 </View>
                 {isSelected ? (
-                  <View className="bg-primary h-6 w-6 items-center justify-center rounded-full">
-                    <Icon as={Check} size={14} className="text-primary-foreground" />
+                  <View className="bg-on-primary-container h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                    <Icon as={Check} size={14} className="text-primary-container" />
                   </View>
                 ) : null}
               </TactilePressable>
@@ -81,7 +107,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
 
       <View className="gap-2">
         <Text variant="label">Color Mode</Text>
-        <View className="flex-row gap-2">
+        <View testID="theme-switcher-modes" className="flex-row flex-wrap gap-2">
           {COLOR_SCHEME_OPTIONS.map((option) => {
             const isSelected = colorScheme === option.mode;
 
@@ -94,10 +120,12 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 elevated={isSelected}
                 onPress={() => setColorScheme(option.mode)}
                 className={cn(
-                  "min-h-11 flex-1 flex-row items-center justify-center gap-2 rounded-xl px-3 py-2.5",
+                  "min-h-11 min-w-24 flex-1 flex-row items-center justify-center gap-1.5 px-3 py-2.5",
+                  tileRadiusClass,
+                  borderClass,
                   isSelected
                     ? "border-primary bg-primary"
-                    : "border-outline-variant bg-surface-container-lowest border",
+                    : "border-outline-variant bg-surface-container-lowest",
                 )}
               >
                 <Icon
@@ -107,6 +135,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
                 />
                 <Text
                   variant="label"
+                  numberOfLines={1}
                   className={
                     isSelected
                       ? "text-primary-foreground font-bold"
