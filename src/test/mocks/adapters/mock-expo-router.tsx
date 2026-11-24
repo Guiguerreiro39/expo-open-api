@@ -152,7 +152,21 @@ export function Tabs({
   screenOptions?: unknown;
 }) {
   mockRouterState.setTabsScreenOptions(screenOptions);
-  return <View testID="expo-router-tabs">{children}</View>;
+  const headerRight =
+    screenOptions &&
+    typeof screenOptions === "object" &&
+    "headerRight" in screenOptions &&
+    typeof (screenOptions as { headerRight?: unknown }).headerRight === "function"
+      ? (
+          screenOptions as { headerRight: (props: { tintColor?: string }) => ReactNode }
+        ).headerRight({})
+      : null;
+  return (
+    <View testID="expo-router-tabs">
+      {headerRight}
+      {children}
+    </View>
+  );
 }
 Tabs.Screen = Screen;
 
