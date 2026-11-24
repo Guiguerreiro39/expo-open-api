@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type Href, Redirect, Tabs, usePathname, useRouter } from "expo-router";
 import { CheckSquare, FolderOpen, Home, LogOut, Palette } from "lucide-react-native";
 import { useCallback, useEffect } from "react";
-import { Pressable } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { signOut, useAuthSession } from "@/features/auth/api/session";
 import { sanitizeRedirect } from "@/features/auth/model/schemas";
 import { ROUTES } from "@/shared/config/routes";
@@ -53,15 +53,24 @@ export function AppLayoutGuard() {
     router.replace(ROUTES.AUTH_LOGIN as Href);
   }, [credentialStore, observability, queryClient, router]);
 
+  const activeTint = resolveThemeColor(preset, scheme, "primary");
+  const backgroundColor = resolveThemeColor(preset, scheme, "background");
+
   if (isBootstrapping || isLoading) {
-    return null;
+    return (
+      <View
+        testID="layout-guard-loading"
+        className="bg-background flex-1 items-center justify-center"
+      >
+        <ActivityIndicator size="large" color={activeTint} accessibilityLabel="Loading" />
+      </View>
+    );
   }
 
   if (!isAuthenticated) {
     return <Redirect href={buildLoginRedirectHref(pathname)} />;
   }
 
-  const activeTint = resolveThemeColor(preset, scheme, "primary");
   const inactiveTint = resolveThemeColor(preset, scheme, "on-surface-variant");
   const surfaceBg = resolveThemeColor(preset, scheme, "surface-container-low");
   const borderColor = resolveThemeColor(preset, scheme, "outline-variant");
@@ -70,6 +79,9 @@ export function AppLayoutGuard() {
   return (
     <Tabs
       screenOptions={{
+        sceneStyle: {
+          backgroundColor,
+        },
         headerStyle: {
           backgroundColor: surfaceBg,
         },

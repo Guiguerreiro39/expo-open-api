@@ -1,5 +1,7 @@
 /// <reference types="nativewind/types" />
 
+declare module "*.css";
+
 declare module "nativewind/preset" {
   import type { Config } from "tailwindcss";
 

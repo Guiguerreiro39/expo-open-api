@@ -69,57 +69,98 @@ export default defineConfig({
   ],
   resolve: {
     tsconfigPaths: true,
-    alias: {
-      nativewind: path.resolve(__dirname, "src/test/mocks/adapters/mock-nativewind.ts"),
-      "expo-system-ui": path.resolve(__dirname, "src/test/mocks/adapters/mock-system-ui.ts"),
-      "expo-haptics": path.resolve(__dirname, "src/test/mocks/adapters/mock-haptics.ts"),
-      "expo-secure-store": path.resolve(__dirname, "src/test/mocks/adapters/mock-secure-store.ts"),
-      "expo-constants": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-constants.ts"),
-      "expo-linking": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-linking.ts"),
-      "expo-splash-screen": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-splash-screen.ts",
-      ),
-      "expo-file-system/legacy": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-file-system.ts",
-      ),
-      "expo-file-system": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-file-system.ts",
-      ),
-      "expo-document-picker": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-document-picker.ts",
-      ),
-      "expo-image-picker": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-image-picker.ts",
-      ),
-      "expo-sharing": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-sharing.ts"),
-      "expo-web-browser": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-expo-web-browser.ts",
-      ),
-      "expo-router": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-router.tsx"),
-      "react-native-svg": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-react-native-svg.tsx",
-      ),
-      "lucide-react-native": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-lucide-react-native.tsx",
-      ),
-      "react-native-mmkv": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-react-native-mmkv.ts",
-      ),
-      "@react-native-community/netinfo": path.resolve(
-        __dirname,
-        "src/test/mocks/adapters/mock-netinfo.ts",
-      ),
-      "expo/fetch": path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-fetch.ts"),
-    },
+    alias: [
+      {
+        find: "nativewind",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-nativewind.ts"),
+      },
+      {
+        find: "expo-system-ui",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-system-ui.ts"),
+      },
+      {
+        find: "expo-haptics",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-haptics.ts"),
+      },
+      {
+        find: "expo-secure-store",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-secure-store.ts"),
+      },
+      {
+        find: "expo-constants",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-constants.ts"),
+      },
+      {
+        find: "expo-linking",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-linking.ts"),
+      },
+      {
+        find: "expo-font",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-font.ts"),
+      },
+      {
+        find: /^@expo-google-fonts\/(?:quicksand|jetbrains-mono)(?:\/.*)?$/,
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-google-fonts.ts"),
+      },
+      {
+        find: "expo-splash-screen",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-splash-screen.ts"),
+      },
+      {
+        find: "expo-file-system/legacy",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-file-system.ts"),
+      },
+      {
+        find: "expo-file-system",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-file-system.ts"),
+      },
+      {
+        find: "expo-document-picker",
+        replacement: path.resolve(
+          __dirname,
+          "src/test/mocks/adapters/mock-expo-document-picker.ts",
+        ),
+      },
+      {
+        find: "expo-image-picker",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-image-picker.ts"),
+      },
+      {
+        find: "expo-sharing",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-sharing.ts"),
+      },
+      {
+        find: "expo-web-browser",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-web-browser.ts"),
+      },
+      {
+        find: "expo-router",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-router.tsx"),
+      },
+      {
+        find: "react-native-svg",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-react-native-svg.tsx"),
+      },
+      {
+        find: "lucide-react-native",
+        replacement: path.resolve(
+          __dirname,
+          "src/test/mocks/adapters/mock-lucide-react-native.tsx",
+        ),
+      },
+      {
+        find: "react-native-mmkv",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-react-native-mmkv.ts"),
+      },
+      {
+        find: "@react-native-community/netinfo",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-netinfo.ts"),
+      },
+      {
+        find: "expo/fetch",
+        replacement: path.resolve(__dirname, "src/test/mocks/adapters/mock-expo-fetch.ts"),
+      },
+    ],
   },
   test: {
     setupFiles: ["src/test/setup.ts"],
